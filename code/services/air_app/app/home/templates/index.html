@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block pagestyles %}
+{% assets "home_style_bundle" %}
+<link href="{{ ASSET_URL }}" rel="stylesheet" type="text/css" />
+{% endassets %}
+{% endblock %}
+
+{% block content %}
+    {% include "navigation.html" %}
+    <h1>This is the homepage, brosk!</h1>
+{% endblock %}
