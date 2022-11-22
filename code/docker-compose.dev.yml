@@ -4,13 +4,15 @@ services:
   api:
     container_name: air_api
     build: ./services/api
-    command: uvicorn main:app --host 0.0.0.0 --port 80
+    command: uvicorn main:app --host 0.0.0.0 --port 8100 --reload
     ports:
-      - 8100:80
+      - 8100:8100
     volumes:
       - ./services/api:/api
     env_file:
       - ./services/api/.env.dev
+    environment:
+      - TZ=America/New_York
     depends_on:
       db:
         condition: service_healthy
@@ -23,6 +25,8 @@ services:
       - 8000:5000
     volumes:
       - ./services/air_app:/air_app
+    environment:
+      - TZ=America/New_York
     env_file:
       - ./services/air_app/.env.dev
     depends_on:
@@ -35,6 +39,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=airdb
+      - TZ=America/New_York
     restart: always
     volumes:
       - db_data:/var/lib/postgresql/data
