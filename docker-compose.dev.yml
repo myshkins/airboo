@@ -3,6 +3,7 @@ version: '3.8'
 services:
   api:
     container_name: air_api
+    profiles: ["api", "dev"]
     build: ./services/api
     command: uvicorn main:app --host 0.0.0.0 --port 8100 --reload
     ports:
@@ -10,25 +11,22 @@ services:
     volumes:
       - ./services/api:/api
     env_file:
-      - ./services/api/.env.dev
-    environment:
-      - TZ=America/New_York
+      - ./.env.dev
     depends_on:
       db:
         condition: service_healthy
 
   app:
     container_name: air_app
+    profiles: ["air_app", "dev"]
     build: ./services/air_app
     command: python wsgi.py
     ports:
       - 8000:5000
     volumes:
       - ./services/air_app:/air_app
-    environment:
-      - TZ=America/New_York
     env_file:
-      - ./services/air_app/.env.dev
+      - ./.env.dev
     depends_on:
       db:
         condition: service_healthy
@@ -36,13 +34,12 @@ services:
   
   db:
     image: postgres:14.5-alpine
-    environment:
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=airdb
-      - TZ=America/New_York
+    profiles: ["api", "air_app", "dev"]
     restart: always
     volumes:
       - db_data:/var/lib/postgresql/data
+    env_file:
+      - ./.env.dev
     expose:
       - 5432
     healthcheck:
