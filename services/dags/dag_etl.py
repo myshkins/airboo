@@ -1,84 +1,67 @@
 """daang look at that dag, it ETL"""
 
+import csv
+from datetime import datetime as dt, timedelta
+import json
+import os
 
-from datetime import datetime, timedelta
-from textwrap import dedent
+import requests
+from airflow.decorators import dag, task
+from airflow.providers.postgres.operators.postgres import PostgresOperator
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 
-from airflow import DAG
+params = {
+    "API_KEY": "AA5AB45D-9E64-41DE-A918-14578B9AC816",
+    "zipCode": 11206,
+    "format": "application/json"}
+CURRENT_ZIP_BY_URL = "https://www.airnowapi.org/aq/observation/zipCode/current/"
 
-from airflow.operators.bash import BashOperator
-
-with DAG(
-    'tutorial',
-    # These args will get passed on to each operator
-    # You can override them on a per-task basis during operator initialization
-    default_args={
-        'depends_on_past': False,
-        'email': ['airflow@example.com'],
-        'email_on_failure': False,
-        'email_on_retry': False,
-        'retries': 1,
-        'retry_delay': timedelta(minutes=5),
-        # 'queue': 'bash_queue',
-        # 'pool': 'backfill',
-        # 'priority_weight': 10,
-        # 'end_date': datetime(2016, 1, 1),
-        # 'wait_for_downstream': False,
-        # 'sla': timedelta(hours=2),
-        # 'execution_timeout': timedelta(seconds=300),
-        # 'on_failure_callback': some_function,
-        # 'on_success_callback': some_other_function,
-        # 'on_retry_callback': another_function,
-        # 'sla_miss_callback': yet_another_function,
-        # 'trigger_rule': 'all_success'
-    },
-    description='A simple tutorial DAG',
-    schedule=timedelta(days=1),
-    start_date=datetime(2021, 1, 1),
+@dag(
+    dag_id="etl",
+    schedule=timedelta(hours=1),
+    start_date=dt(2022, 12, 2, 18, 50),
     catchup=False,
-    tags=['example'],
-) as dag:
-
-    # t1, t2 and t3 are examples of tasks created by instantiating operators
-    t1 = BashOperator(
-        task_id='print_date',
-        bash_command='date',
+    dagrun_timeout=timedelta(minutes=20),
+)
+def etl():
+    create_airnow_table = PostgresOperator(
+        task_id="create_AQI_table",
+        postgres_conn_id="etl_pg_conn",
+        sql="""
+            CREATE TABLE IF NOT EXISTS airnow (
+                "Datetime" DATETIME PRIMARY KEY,
+                "AQI" INTEGER,
+            );""",
     )
 
-    t2 = BashOperator(
-        task_id='sleep',
-        depends_on_past=False,
-        bash_command='sleep 5',
-        retries=3,
-    )
-    t1.doc_md = dedent(
-        """\
-    #### Task Documentation
-    You can document your task using the attributes `doc_md` (markdown),
-    `doc` (plain text), `doc_rst`, `doc_json`, `doc_yaml` which gets
-    rendered in the UI's Task Instance Details page.
-    ![img](http://montcs.bloomu.edu/~bobmon/Semesters/2012-01/491/import%20soul.png)
-    **Image Credit:** Randall Munroe, [XKCD](https://xkcd.com/license.html)
-    """
+    create_airnow_temp_table = PostgresOperator(
+        task_id="create_AQI_temp_table",
+        postgres_conn_id='etl_pg_conn',
+        sql="""
+            DROP TABLE IF EXISTS airnow_temp;
+            CREATE TABLE airnow_temp (
+                "Datetime" DATETIME PRIMARY KEY,
+                "AQI" TEXT,
+            );""",
     )
 
-    dag.doc_md = __doc__  # providing that you have a docstring at the beginning of the DAG; OR
-    dag.doc_md = """
-    This is a documentation placed anywhere
-    """  # otherwise, type it like this
-    templated_command = dedent(
-        """
-    {% for i in range(5) %}
-        echo "{{ ds }}"
-        echo "{{ macros.ds_add(ds, 7)}}"
-    {% endfor %}
-    """
-    )
+    @task
+    def extract_current_data():
+        date = dt.now()
+        data_path = "/opt/airflow/dags/files/aqi_data.csv"
+        os.makedirs(os.path.dirname(data_path), exist_ok=True)
 
-    t3 = BashOperator(
-        task_id='templated',
-        depends_on_past=False,
-        bash_command=templated_command,
-    )
-
-    t1 >> [t2, t3]
+        response = requests.get(CURRENT_ZIP_BY_URL, params=params)
+        json_data = json.loads(response.text)
+        ozone = json_data[0]["AQI"]
+        data = (date, ozone)
+        # pm2_5 = json_data[1]["AQI"]
+        # pm10 = json_data[2]["AQI"]
+        with open(data_path, 'w') as file:
+            writer = csv.writer(file)
+            writer.writerow(data)
+        
+        hook = PostgresHook(postgres_conn_id="etl_pg_conn")
+        hook.copy_expert(
+            sql="COPY airnow_temp FROM stdin WITH DELIMITER as ','",
+            filename='/opt/airflow/dags/files/aqi_data.csv')
