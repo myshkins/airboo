@@ -18,8 +18,8 @@ CURRENT_ZIP_BY_URL = "https://www.airnowapi.org/aq/observation/zipCode/current/"
 
 @dag(
     dag_id="etl",
-    schedule=timedelta(hours=1),
-    start_date=dt(2022, 12, 2, 18, 50),
+    schedule=timedelta(minutes=1),
+    start_date=dt(2022, 12, 2, 18, 39),
     catchup=False,
     dagrun_timeout=timedelta(minutes=20),
 )
@@ -29,8 +29,8 @@ def etl():
         postgres_conn_id="etl_pg_conn",
         sql="""
             CREATE TABLE IF NOT EXISTS airnow (
-                "Datetime" DATETIME PRIMARY KEY,
-                "AQI" INTEGER,
+                datetime TEXT PRIMARY KEY,
+                aqi TEXT
             );""",
     )
 
@@ -40,8 +40,8 @@ def etl():
         sql="""
             DROP TABLE IF EXISTS airnow_temp;
             CREATE TABLE airnow_temp (
-                "Datetime" DATETIME PRIMARY KEY,
-                "AQI" TEXT,
+                datetime TEXT PRIMARY KEY,
+                aqi TEXT
             );""",
     )
 
@@ -65,3 +65,7 @@ def etl():
         hook.copy_expert(
             sql="COPY airnow_temp FROM stdin WITH DELIMITER as ','",
             filename='/opt/airflow/dags/files/aqi_data.csv')
+    
+    [create_airnow_table, create_airnow_temp_table] >> extract_current_data()
+
+dag = etl()

@@ -10,7 +10,7 @@ from airflow.operators.bash import BashOperator
 # from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 with DAG(
-    'tutorial',
+    'pooporial',
     # These args will get passed on to each operator
     # You can override them on a per-task basis during operator initialization
     default_args={
