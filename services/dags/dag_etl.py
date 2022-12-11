@@ -26,7 +26,7 @@ CURRENT_ZIP_BY_URL = "https://www.airnowapi.org/aq/observation/zipCode/current/"
 def etl():
     create_airnow_table = PostgresOperator(
         task_id="create_AQI_table",
-        postgres_conn_id="etl_pg_conn",
+        postgres_conn_id="AIRFLOW_CONN_POSTGRES",
         sql="""
             CREATE TABLE IF NOT EXISTS airnow (
                 datetime TEXT PRIMARY KEY,
