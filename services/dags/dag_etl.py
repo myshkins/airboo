@@ -65,7 +65,7 @@ def etl():
         hook.copy_expert(
             sql="COPY airnow_temp FROM stdin WITH DELIMITER as ','",
             filename='/opt/airflow/dags/files/aqi_data.csv')
-    
+
     [create_airnow_table, create_airnow_temp_table] >> extract_current_data()
 
 dag = etl()
