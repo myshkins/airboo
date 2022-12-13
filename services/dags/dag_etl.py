@@ -1,71 +1,87 @@
 """daang look at that dag, it ETL"""
 
-import csv
+# import csv
 from datetime import datetime as dt, timedelta
-import json
 import os
 
 import requests
 from airflow.decorators import dag, task
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.models.connection import Connection
+
 
 params = {
+    "startDate": dt.utcnow().strftime('%Y-%m-%dT%H'),
+    "endDate": (dt.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H'),
+    "parameters": "OZONE,PM25,PM10,CO,NO2,SO2",
+    "BBOX": "-124.205070,28.716781, -75.337882,45.419415",
+    "dataType": "B",
+    "format": "text/csv",
+    "verbose": "1",
+    "monitorType": "2",
+    "includerawconcentrations": "1",
     "API_KEY": "AA5AB45D-9E64-41DE-A918-14578B9AC816",
-    "zipCode": 11206,
-    "format": "application/json"}
-CURRENT_ZIP_BY_URL = "https://www.airnowapi.org/aq/observation/zipCode/current/"
+    }
+AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
+
+
+conn = Connection(
+    conn_id="postgres_etl_conn",
+    conn_type="postgres",
+    description="connection for ingesting data to postgres",
+    host="postgres",
+    login="airflow",
+    password="airflow",
+    # extra=json.dumps(dict(this_param="some val", that_param="other val*")),
+)
+# print(f"AIRFLOW_CONN_{conn.conn_id.upper()}='{conn.get_uri()}'")
 
 @dag(
-    dag_id="etl",
-    schedule=timedelta(minutes=1),
+    dag_id="el",
+    schedule=timedelta(minutes=5),
     start_date=dt(2022, 12, 2, 18, 39),
     catchup=False,
-    dagrun_timeout=timedelta(minutes=20),
+    dagrun_timeout=timedelta(minutes=2),
 )
-def etl():
-    create_airnow_table = PostgresOperator(
+def airnow_etl():
+    """
+    First, creates temp and final tables in postgres db. Then performs ETL of
+    air quality data for all of USA for current observation."""
+    create_airnow_tables = PostgresOperator(
         task_id="create_AQI_table",
         postgres_conn_id="AIRFLOW_CONN_POSTGRES",
-        sql="""
-            CREATE TABLE IF NOT EXISTS airnow (
-                datetime TEXT PRIMARY KEY,
-                aqi TEXT
-            );""",
-    )
-
-    create_airnow_temp_table = PostgresOperator(
-        task_id="create_AQI_temp_table",
-        postgres_conn_id='etl_pg_conn',
-        sql="""
-            DROP TABLE IF EXISTS airnow_temp;
-            CREATE TABLE airnow_temp (
-                datetime TEXT PRIMARY KEY,
-                aqi TEXT
-            );""",
+        sql="create_airnow_table.sql",
     )
 
     @task
     def extract_current_data():
-        date = dt.now()
-        data_path = "/opt/airflow/dags/files/aqi_data.csv"
+        """extracts data from airnow api and stages it in csv file."""
+        data_path = "./files/aqi_data.csv"
         os.makedirs(os.path.dirname(data_path), exist_ok=True)
 
-        response = requests.get(CURRENT_ZIP_BY_URL, params=params)
-        json_data = json.loads(response.text)
-        ozone = json_data[0]["AQI"]
-        data = (date, ozone)
-        # pm2_5 = json_data[1]["AQI"]
-        # pm10 = json_data[2]["AQI"]
+        response = requests.get(AIRNOW_BY_STATION_API_URL, params=params, timeout=20)
+        csv_data = response.text
         with open(data_path, 'w') as file:
-            writer = csv.writer(file)
-            writer.writerow(data)
-        
-        hook = PostgresHook(postgres_conn_id="etl_pg_conn")
+            file.write(csv_data)
+    
+    @task
+    def load_to_temp():
+        """load any new data from csv to temp table"""
+        # use pandas to validate data here
+        # also pandas to combine pm2.5 and pm10
+        hook = PostgresHook(postgres_conn_id=conn.conn_id)
         hook.copy_expert(
             sql="COPY airnow_temp FROM stdin WITH DELIMITER as ','",
             filename='/opt/airflow/dags/files/aqi_data.csv')
+    
+    @task
+    def transform_and_load():
+        """transform(compare for new data) and load into production table"""
 
-    [create_airnow_table, create_airnow_temp_table] >> extract_current_data()
 
-dag = etl()
+    # create_airnow_tables >> extract_current_data()
+
+
+dag = airnow_etl()
+
