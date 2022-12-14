@@ -21,7 +21,7 @@ params = {
     "verbose": "1",
     "monitorType": "2",
     "includerawconcentrations": "1",
-    "API_KEY": "AA5AB45D-9E64-41DE-A918-14578B9AC816",
+    "API_KEY": os.environ.get("AIRNOW_KEY"),
     }
 AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
 
@@ -35,7 +35,6 @@ conn = Connection(
     password="airflow",
     # extra=json.dumps(dict(this_param="some val", that_param="other val*")),
 )
-# print(f"AIRFLOW_CONN_{conn.conn_id.upper()}='{conn.get_uri()}'")
 
 @dag(
     dag_id="el",
@@ -57,7 +56,7 @@ def airnow_etl():
     @task
     def extract_current_data():
         """extracts data from airnow api and stages it in csv file."""
-        data_path = "./files/aqi_data.csv"
+        data_path = "/opt/airflow/dags/files/aqi_data.csv"
         os.makedirs(os.path.dirname(data_path), exist_ok=True)
 
         response = requests.get(AIRNOW_BY_STATION_API_URL, params=params, timeout=20)
@@ -70,6 +69,7 @@ def airnow_etl():
         """load any new data from csv to temp table"""
         # use pandas to validate data here
         # also pandas to combine pm2.5 and pm10
+        
         hook = PostgresHook(postgres_conn_id=conn.conn_id)
         hook.copy_expert(
             sql="COPY airnow_temp FROM stdin WITH DELIMITER as ','",
