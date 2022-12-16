@@ -1,6 +1,4 @@
 """daang look at that dag, it ETL"""
-
-# import csv
 from datetime import datetime as dt, timedelta
 import os
 
@@ -27,30 +25,21 @@ params = {
 AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
 
 
-conn = Connection(
-    conn_id="postgres_etl_conn",
-    conn_type="postgres",
-    description="connection for ingesting data to postgres",
-    host="postgres",
-    login="airflow",
-    password="airflow",
-)
-
 @dag(
     dag_id="el",
-    schedule=timedelta(minutes=5),
+    schedule=timedelta(minutes=1),
     start_date=dt(2022, 12, 2, 18, 39),
     catchup=False,
     dagrun_timeout=timedelta(minutes=2),
 )
 def airnow_etl():
     """
-    First, creates temp and final tables in postgres db. Then performs ETL of
-    air quality data for all of USA for current observation."""
+    First, creates temp tables and final tables in postgres db. Then performs ETL of
+    air quality data for all of USA for current observations."""
     create_airnow_tables = PostgresOperator(
         task_id="create_AQI_table",
-        postgres_conn_id="AIRFLOW_CONN_POSTGRES",
-        sql="create_airnow_table.sql",
+        postgres_conn_id="postgres_etl_conn",
+        sql="sql/create_airnow_table.sql",
     )
 
     @task
@@ -59,75 +48,86 @@ def airnow_etl():
         data_path = "/opt/airflow/dags/files/aqi_data.csv"
         os.makedirs(os.path.dirname(data_path), exist_ok=True)
 
-        response = requests.get(AIRNOW_BY_STATION_API_URL, params=params, timeout=20)
+        response = requests.get(
+            AIRNOW_BY_STATION_API_URL, params=params, timeout=20
+            )
         csv_data = response.text
         with open(data_path, 'w') as file:
             file.write(csv_data)
+
+        hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
+        hook.copy_expert(
+            sql="COPY airnow_readings_temp FROM stdin WITH DELIMITER as ','",
+            filename='/opt/airflow/dags/files/aqi_data.csv')
     
     @task
     def load_to_temp():
         """load any new data from csv to temp table"""
-        column_names = [
-            "latitude",
-            "longitude",
-            "datetime",
-            "parameter",
-            "concentration",
-            "unit",
-            "AQI",
-            "AQI cat",
-            "site name",
-            "agency name",
-            "station id",
-            "full station id",]
-        df = pd.read_csv("/opt/airflow/dags/files/aqi_data.csv", names=column_names)
-        df.dropna(axis=0)
-        df = df.drop(
-            ["unit", "agency name", "station id", "full station id"], axis=1
-            )
-        pm10 = df.groupby("parameter").get_group('PM10')
-        pm10 = pm10.drop(["parameter"], axis=1)
-        pm10.rename(
-            columns={
-                "concentration": "PM10",
-                "AQI": "PM10 AQI", "AQI cat":
-                "PM10 AQI cat"},
-                inplace=True)
-        pm2_5 = df.groupby("parameter").get_group('PM2.5')
-        pm2_5 = pm2_5.drop(["parameter"], axis=1)
-        pm2_5.rename(
-            columns={
-                "concentration": "PM2_5",
-                "AQI": "PM2_5 AQI",
-                "AQI cat": "PM2_5 AQI cat"},
-                inplace=True)
-        merged_df = pd.merge(
-            pm10,
-            pm2_5,
-            how="outer",
-            on=["latitude", "longitude", "datetime", "site name"],
-        )
-        cols = merged_df.columns.tolist()
-        cols = [cols[-4]] + cols[:6] + cols[-3:]
-        merged_df = merged_df[cols]
-        merged_df.to_csv('files/aqi_data.csv', header=False, index=False)
-        merged_df.to_csv('files/aqi_data.csv', header=False, index=False)
+        pass
+        # column_names = [
+        #     "latitude",
+        #     "longitude",
+        #     "datetime",
+        #     "parameter",
+        #     "concentration",
+        #     "unit",
+        #     "AQI",
+        #     "AQI cat",
+        #     "site name",
+        #     "agency name",
+        #     "station id",
+        #     "full station id",]
+        # df = pd.read_csv(
+        #     "/opt/airflow/dags/files/aqi_data.csv", names=column_names
+        #     )
+        # df.dropna(axis=0)
+        # df = df.drop(
+        #     ["unit", "agency name", "station id", "full station id"], axis=1
+        #     )
+        # df.to_csv(
+        #     '/opt/airflow/dags/files/aqi_data.csv', header=True, index=False
+        #     )
+        # pm10 = df.groupby("parameter").get_group('PM10')
+        # pm10 = pm10.drop(["parameter"], axis=1)
+        # pm10.rename(
+        #     columns={
+        #         "concentration": "PM10",
+        #         "AQI": "PM10 AQI", "AQI cat":
+        #         "PM10 AQI cat"},
+        #         inplace=True)
+        # pm2_5 = df.groupby("parameter").get_group('PM2.5')
+        # pm2_5 = pm2_5.drop(["parameter"], axis=1)
+        # pm2_5.rename(
+        #     columns={
+        #         "concentration": "PM2_5",
+        #         "AQI": "PM2_5 AQI",
+        #         "AQI cat": "PM2_5 AQI cat"},
+        #         inplace=True)
+        # merged_df = pd.merge(
+        #     pm10,
+        #     pm2_5,
+        #     how="outer",
+        #     on=["latitude", "longitude", "datetime", "site name"],
+        # )
+        # cols = merged_df.columns.tolist()
+        # cols = [cols[-4]] + cols[:6] + cols[-3:]
+        # merged_df = merged_df[cols]
+        # merged_df.to_csv('/opt/airflow/dags/files/aqi_data.csv', header=False, index=False)
 
-        hook = PostgresHook(postgres_conn_id=conn.conn_id)
-        hook.copy_expert(
-            sql="COPY airnow_temp FROM stdin WITH DELIMITER as ','",
-            filename='/opt/airflow/dags/files/aqi_data.csv')
+        # hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
+        # hook.copy_expert(
+        #     sql="COPY airnow_temp FROM stdin WITH DELIMITER as ','",
+        #     filename='/opt/airflow/dags/files/aqi_data.csv')
     
-    @task
-    def transform_and_load():
-        """transform(compare for new data) and load into production table"""
-        hook = PostgresHook(postgres_conn_id=conn.conn_id)
-        hook.copy_expert(
-            sql="COPY airnow FROM stdin WITH DELIMITER as ','",
-            filename='/opt/airflow/dags/files/aqi_data.csv')
+    # @task
+    # def transform_and_load():
+    #     """transform(compare for new data) and load into production table"""
+    #     hook = PostgresHook(postgres_conn_id=conn.conn_id)
+    #     hook.copy_expert(
+    #         sql="COPY airnow FROM stdin WITH DELIMITER as ','",
+    #         filename='/opt/airflow/dags/files/aqi_data.csv')
 
-    # create_airnow_tables >> extract_current_data()
+    create_airnow_tables >> extract_current_data() >> load_to_temp()
 
 
 dag = airnow_etl()
-
