@@ -4,6 +4,7 @@
 from datetime import datetime as dt, timedelta
 import os
 
+import pandas as pd
 import requests
 from airflow.decorators import dag, task
 from airflow.providers.postgres.operators.postgres import PostgresOperator
@@ -67,9 +68,52 @@ def airnow_etl():
     @task
     def load_to_temp():
         """load any new data from csv to temp table"""
-        # use pandas to validate data here
-        # also pandas to combine pm2.5 and pm10
-        
+        column_names = [
+            "latitude",
+            "longitude",
+            "datetime",
+            "parameter",
+            "concentration",
+            "unit",
+            "AQI",
+            "AQI cat",
+            "site name",
+            "agency name",
+            "station id",
+            "full station id",]
+        df = pd.read_csv("./files/aqi_data.csv", names=column_names)
+        df.dropna(axis=0)
+        df = df.drop(
+            ["unit", "agency name", "station id", "full station id"], axis=1
+            )
+        pm10 = df.groupby("parameter").get_group('PM10')
+        pm10 = pm10.drop(["parameter"], axis=1)
+        pm10.rename(
+            columns={
+                "concentration": "PM10",
+                "AQI": "PM10 AQI", "AQI cat":
+                "PM10 AQI cat"},
+                inplace=True)
+        pm2_5 = df.groupby("parameter").get_group('PM2.5')
+        pm2_5 = pm2_5.drop(["parameter"], axis=1)
+        pm2_5.rename(
+            columns={
+                "concentration": "PM2_5",
+                "AQI": "PM2_5 AQI",
+                "AQI cat": "PM2_5 AQI cat"},
+                inplace=True)
+        merged_df = pd.merge(
+            pm10,
+            pm2_5,
+            how="outer",
+            on=["latitude", "longitude", "datetime", "site name"],
+        )
+        cols = merged_df.columns.tolist()
+        cols = [cols[-4]] + cols[:6] + cols[-3:]
+        merged_df = merged_df[cols]
+        merged_df.to_csv('files/aqi_data.csv', header=False, index=False)
+        merged_df.to_csv('files/aqi_data.csv', header=False, index=False)
+
         hook = PostgresHook(postgres_conn_id=conn.conn_id)
         hook.copy_expert(
             sql="COPY airnow_temp FROM stdin WITH DELIMITER as ','",
