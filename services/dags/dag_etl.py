@@ -34,7 +34,6 @@ conn = Connection(
     host="postgres",
     login="airflow",
     password="airflow",
-    # extra=json.dumps(dict(this_param="some val", that_param="other val*")),
 )
 
 @dag(
@@ -81,7 +80,7 @@ def airnow_etl():
             "agency name",
             "station id",
             "full station id",]
-        df = pd.read_csv("./files/aqi_data.csv", names=column_names)
+        df = pd.read_csv("/opt/airflow/dags/files/aqi_data.csv", names=column_names)
         df.dropna(axis=0)
         df = df.drop(
             ["unit", "agency name", "station id", "full station id"], axis=1
@@ -122,7 +121,10 @@ def airnow_etl():
     @task
     def transform_and_load():
         """transform(compare for new data) and load into production table"""
-
+        hook = PostgresHook(postgres_conn_id=conn.conn_id)
+        hook.copy_expert(
+            sql="COPY airnow FROM stdin WITH DELIMITER as ','",
+            filename='/opt/airflow/dags/files/aqi_data.csv')
 
     # create_airnow_tables >> extract_current_data()
 
