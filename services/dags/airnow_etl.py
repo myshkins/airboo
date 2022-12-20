@@ -27,7 +27,7 @@ AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
 
 @dag(
     dag_id="airnow_etl",
-    schedule=timedelta(minutes=1),
+    schedule=timedelta(minutes=10),
     start_date=dt(2022, 12, 2, 18, 39),
     catchup=False,
     dagrun_timeout=timedelta(minutes=2),
@@ -135,9 +135,9 @@ def airnow_etl():
         """upsert new data to the production table"""
         
         query = """
-            INSERT INTO airnow_readings
+        INSERT INTO airnow_readings (station_name, latitude, longitude, reading_datetime, pm_10_conc, pm_10_AQI, pm_10_AQI_CAT, pm_25_conc, pm_25_AQI, pm_25_AQI_CAT)
             SELECT * FROM airnow_readings_temp
-            ON CONFLICT DO NOTHING/UPDATE
+            ON CONFLICT DO NOTHING
         """
         try:
             hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
