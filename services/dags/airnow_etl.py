@@ -1,4 +1,4 @@
-"""daang look at that dag, it ETL"""
+"""airnow etl functions"""
 from datetime import datetime as dt, timedelta
 import os
 
@@ -26,7 +26,7 @@ AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
 
 
 @dag(
-    dag_id="etl",
+    dag_id="airnow_etl",
     schedule=timedelta(minutes=1),
     start_date=dt(2022, 12, 2, 18, 39),
     catchup=False,
@@ -34,12 +34,12 @@ AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
 )
 def airnow_etl():
     """
-    First, creates temp tables and final tables in postgres db. Then performs ETL of
+    First, creates temp table in postgres db. Then performs ETL of
     air quality data for all of USA for current observations."""
     create_airnow_tables = PostgresOperator(
-        task_id="create_AQI_table",
+        task_id="create_airnow_temp_table",
         postgres_conn_id="postgres_etl_conn",
-        sql="sql/create_airnow_table.sql",
+        sql="sql/create_temp_airnow_table.sql",
     )
 
     @task
@@ -60,8 +60,8 @@ def airnow_etl():
         Uses .groupby() to split 'parameter' column into pm2.5 and pm10 groups.
         Then merge groups together under columns:
         
-        site name | lat | long | datetime | PM10 conc. | PM10 AQI | PM10 AQI cat. |
-        PM2_5 conc. | PM2_5 AQI | PM2_5 AQI cat. 
+        site name | lat | long | datetime | PM10 conc. | PM10 AQI |
+        PM10 AQI cat. | PM2_5 conc. | PM2_5 AQI | PM2_5 AQI cat.
         """
         parameter_groups = df.groupby("parameter")
         pm10 = parameter_groups.get_group("PM10").drop(["parameter"], axis=1)
@@ -130,15 +130,26 @@ def airnow_etl():
             sql="COPY airnow_readings_temp FROM stdin WITH DELIMITER as ',' NULL AS ''",
             filename='/opt/airflow/dags/files/aqi_data.csv')
 
-    # @task
-    # def transform_and_load():
-    #     """transform(compare for new data) and load into production table"""
-    #     hook = PostgresHook(postgres_conn_id=conn.conn_id)
-    #     hook.copy_expert(
-    #         sql="COPY airnow FROM stdin WITH DELIMITER as ','",
-    #         filename='/opt/airflow/dags/files/aqi_data.csv')
+    @task
+    def load_to_production():
+        """upsert new data to the production table"""
+        
+        query = """
+            INSERT INTO airnow_readings
+            SELECT * FROM airnow_readings_temp
+            ON CONFLICT DO NOTHING/UPDATE
+        """
+        try:
+            hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
+            conn = hook.get_conn()
+            cur = conn.cursor()
+            cur.execute(query)
+            conn.commit()
+            return 0
+        except Exception as e:
+            return 1
 
-    create_airnow_tables >> extract_current_data() >> load_to_temp()
+    create_airnow_tables >> extract_current_data() >> load_to_temp() >> load_to_production()
 
 
 dag = airnow_etl()
