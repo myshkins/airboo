@@ -19,14 +19,14 @@ params = {
     "format": "text/csv",
     "verbose": "1",
     "monitorType": "2",
-    "includerawconcentrations": "1",
-    "API_KEY": os.environ.get("AIRNOW_KEY"),
+    "includerawconcentrations": "0",
+    "API_KEY": "AA5AB45D-9E64-41DE-A918-14578B9AC816",
     }
 AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
 
 
 @dag(
-    dag_id="el",
+    dag_id="etl",
     schedule=timedelta(minutes=1),
     start_date=dt(2022, 12, 2, 18, 39),
     catchup=False,
@@ -54,71 +54,82 @@ def airnow_etl():
         csv_data = response.text
         with open(data_path, 'w') as file:
             file.write(csv_data)
+    
+    def regroup_pm25_pm10(df):
+        """
+        Uses .groupby() to split 'parameter' column into pm2.5 and pm10 groups.
+        Then merge groups together under columns:
+        
+        site name | lat | long | datetime | PM10 conc. | PM10 AQI | PM10 AQI cat. |
+        PM2_5 conc. | PM2_5 AQI | PM2_5 AQI cat. 
+        """
+        parameter_groups = df.groupby("parameter")
+        pm10 = parameter_groups.get_group("PM10").drop(["parameter"], axis=1)
+        pm10.rename(
+            columns={
+                "concentration": "PM10 conc.",
+                "AQI": "PM10 AQI", "AQI cat.":
+                "PM10 AQI cat"},
+                inplace=True)
+        pm2_5 = parameter_groups.get_group("PM2.5").drop(["parameter"], axis=1)
+        pm2_5.rename(
+            columns={
+                "concentration": "PM2_5 conc.",
+                "AQI": "PM2_5 AQI",
+                "AQI cat": "PM2_5 AQI cat."},
+                inplace=True)
+        merged_df = pd.merge(
+            pm10,
+            pm2_5,
+            how="outer",
+            on=["latitude", "longitude", "datetime", "site name"],
+        )
+
+        cols = merged_df.columns.tolist()
+        cols = [cols[-4]] + cols[:6] + cols[-3:]
+        merged_df = merged_df[cols]
+        return merged_df
+
+    def clean_string_values(df):
+        """
+        changes string values that include quotations and commas. eg.:
+        "Rangely, CO"  --> Rangely_CO
+        """
+        df["site name"] = df["site name"].str.replace(',', '-')
+        return df
+
+    @task
+    def load_to_temp():
+        """load new data to temp table"""
+        column_names = [
+            "latitude",
+            "longitude",
+            "datetime",
+            "parameter",
+            "concentration",
+            "unit",
+            "AQI",
+            "AQI cat",
+            "site name",
+            "agency name",
+            "station id",
+            "full station id",]
+        df = pd.read_csv(
+            "/opt/airflow/dags/files/aqi_data.csv", names=column_names,
+            )
+        df.dropna(axis=0)
+        df = df.drop(
+            ["unit", "agency name", "station id", "full station id"], axis=1
+            )
+        merged_df = regroup_pm25_pm10(df)
+        merged_df = clean_string_values(merged_df)
+        merged_df.to_csv('/opt/airflow/dags/files/aqi_data.csv', header=False, index=False)
 
         hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
         hook.copy_expert(
-            sql="COPY airnow_readings_temp FROM stdin WITH DELIMITER as ','",
+            sql="COPY airnow_readings_temp FROM stdin WITH DELIMITER as ',' NULL AS ''",
             filename='/opt/airflow/dags/files/aqi_data.csv')
-    
-    @task
-    def load_to_temp():
-        """load any new data from csv to temp table"""
-        pass
-        # column_names = [
-        #     "latitude",
-        #     "longitude",
-        #     "datetime",
-        #     "parameter",
-        #     "concentration",
-        #     "unit",
-        #     "AQI",
-        #     "AQI cat",
-        #     "site name",
-        #     "agency name",
-        #     "station id",
-        #     "full station id",]
-        # df = pd.read_csv(
-        #     "/opt/airflow/dags/files/aqi_data.csv", names=column_names
-        #     )
-        # df.dropna(axis=0)
-        # df = df.drop(
-        #     ["unit", "agency name", "station id", "full station id"], axis=1
-        #     )
-        # df.to_csv(
-        #     '/opt/airflow/dags/files/aqi_data.csv', header=True, index=False
-        #     )
-        # pm10 = df.groupby("parameter").get_group('PM10')
-        # pm10 = pm10.drop(["parameter"], axis=1)
-        # pm10.rename(
-        #     columns={
-        #         "concentration": "PM10",
-        #         "AQI": "PM10 AQI", "AQI cat":
-        #         "PM10 AQI cat"},
-        #         inplace=True)
-        # pm2_5 = df.groupby("parameter").get_group('PM2.5')
-        # pm2_5 = pm2_5.drop(["parameter"], axis=1)
-        # pm2_5.rename(
-        #     columns={
-        #         "concentration": "PM2_5",
-        #         "AQI": "PM2_5 AQI",
-        #         "AQI cat": "PM2_5 AQI cat"},
-        #         inplace=True)
-        # merged_df = pd.merge(
-        #     pm10,
-        #     pm2_5,
-        #     how="outer",
-        #     on=["latitude", "longitude", "datetime", "site name"],
-        # )
-        # cols = merged_df.columns.tolist()
-        # cols = [cols[-4]] + cols[:6] + cols[-3:]
-        # merged_df = merged_df[cols]
-        # merged_df.to_csv('/opt/airflow/dags/files/aqi_data.csv', header=False, index=False)
 
-        # hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
-        # hook.copy_expert(
-        #     sql="COPY airnow_temp FROM stdin WITH DELIMITER as ','",
-        #     filename='/opt/airflow/dags/files/aqi_data.csv')
-    
     # @task
     # def transform_and_load():
     #     """transform(compare for new data) and load into production table"""
