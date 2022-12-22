@@ -7,7 +7,6 @@ import requests
 from airflow.decorators import dag, task
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from airflow.models.connection import Connection
 
 
 params = {
@@ -36,8 +35,8 @@ def airnow_etl():
     """
     First, creates temp table in postgres db. Then performs ETL of
     air quality data for all of USA for current observations."""
-    create_airnow_tables = PostgresOperator(
-        task_id="create_airnow_temp_table",
+    create_temp_airnow_table = PostgresOperator(
+        task_id="create_temp_airnow_temp_table",
         postgres_conn_id="postgres_etl_conn",
         sql="sql/create_temp_airnow_table.sql",
     )
@@ -55,7 +54,7 @@ def airnow_etl():
         with open(data_path, 'w') as file:
             file.write(csv_data)
     
-    def regroup_pm25_pm10(df):
+    def shape_airnow_data(df):
         """
         Uses .groupby() to split 'parameter' column into pm2.5 and pm10 groups.
         Then merge groups together under columns:
@@ -90,14 +89,6 @@ def airnow_etl():
         merged_df = merged_df[cols]
         return merged_df
 
-    def clean_string_values(df):
-        """
-        changes string values that include quotations and commas. eg.:
-        "Rangely, CO"  --> Rangely_CO
-        """
-        df["site name"] = df["site name"].str.replace(',', '-')
-        return df
-
     @task
     def load_to_temp():
         """load new data to temp table"""
@@ -121,13 +112,13 @@ def airnow_etl():
         df = df.drop(
             ["unit", "agency name", "station id", "full station id"], axis=1
             )
-        merged_df = regroup_pm25_pm10(df)
-        merged_df = clean_string_values(merged_df)
+        merged_df = shape_airnow_data(df)
+        merged_df["site name"] = merged_df["site name"].str.replace(',', '-')
         merged_df.to_csv('/opt/airflow/dags/files/aqi_data.csv', header=False, index=False)
 
         hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
         hook.copy_expert(
-            sql="COPY airnow_readings_temp FROM stdin WITH DELIMITER as ',' NULL AS ''",
+            sql="COPY airnow_readings_temp FROM stdin WITH DELIMITER AS ',' NULL AS ''",
             filename='/opt/airflow/dags/files/aqi_data.csv')
 
     @task
@@ -149,7 +140,7 @@ def airnow_etl():
         except Exception as e:
             return 1
 
-    create_airnow_tables >> extract_current_data() >> load_to_temp() >> load_to_production()
+    create_temp_airnow_table >> extract_current_data() >> load_to_temp() >> load_to_production()
 
 
 dag = airnow_etl()

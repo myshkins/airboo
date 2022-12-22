@@ -119,7 +119,7 @@ services:
   #     retries: 5
 
   postgres:
-    image: postgres:13
+    image: postgis/postgis:13-3.3-alpine
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
