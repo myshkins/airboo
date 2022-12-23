@@ -66,13 +66,13 @@ def airnow_station_ingest():
             on=["Latitude", "Longitude", "SiteName", "AgencyName"],
         )
         df = df.drop_duplicates(subset="SiteName", keep='first')
-        df = df.replace({',': '-'}, regex=True)
         df = df.dropna(axis=0)
-        df.to_csv('/opt/airflow/dags/files/station_data.csv', header=False, index=False)
+        df['Location Coord.'] = list(zip(df["Latitude"], df["Longitude"]))
+        df.to_csv('/opt/airflow/dags/files/station_data.csv', sep='|', header=False, index=False)
 
         hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
         hook.copy_expert(
-            sql="COPY airnow_stations_temp FROM stdin WITH DELIMITER AS ',' NULL AS ''",
+            sql="COPY airnow_stations_temp FROM stdin WITH DELIMITER AS '|' NULL AS ''",
             filename='/opt/airflow/dags/files/station_data.csv')
 
     @task
@@ -80,7 +80,7 @@ def airnow_station_ingest():
         """upsert new station data to the production station table"""
 
         query = """
-        INSERT INTO airnow_stations (station_name, agency_name, latitude, longitude)
+        INSERT INTO airnow_stations (station_name, agency_name, latitude, longitude, location_coord)
             SELECT * FROM airnow_stations_temp
             ON CONFLICT DO NOTHING
         """

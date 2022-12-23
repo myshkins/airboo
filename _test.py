@@ -39,7 +39,8 @@ def shape_station_data():
     )
     df = df.drop_duplicates(subset="SiteName", keep='first')
     df = df.replace({',': '-'}, regex=True)
-    df.to_csv('site-data.csv', header=False, index=False)
+    df['Location Coord.'] = list(zip(df["Latitude"], df["Longitude"]))
+    df.to_csv('site-data.csv', sep='|', header=False, index=False)
 
 get_station_data()
 shape_station_data()
