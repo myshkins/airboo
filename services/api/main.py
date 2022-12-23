@@ -18,7 +18,7 @@ def zipcode_to_latlong(zipcode: str):
     """helper func, returns tuple of lat long"""
     geo = pgeocode.Nominatim('us')
     loc = geo.query_postal_code(zipcode)
-    return loc["latitude"], loc["longitude"]
+    return float(loc["latitude"]), float(loc["longitude"])
 
 @app.get("/nearest-station/{zipcode}")
 def get_nearest_station(zipcode: str):
@@ -29,9 +29,11 @@ def get_nearest_station(zipcode: str):
             """
             SELECT station_name, location_coord
             FROM airnow_stations
-            ORDER BY location_coord <-> select cast (:y) as point
+            ORDER BY location_coord <-> ':y'::POINT
+            LIMIT 5
             """
         )
         result = session.execute(stmt, {"y": loc})
-        return result[0]
+        response = [row for row in result]
+        return response
 
