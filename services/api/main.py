@@ -27,7 +27,7 @@ def get_nearest_station(zipcode: str):
         stmt = text(
             """
             SELECT station_name, location_coord
-            FROM airnow_stations
+            FROM prod_airnow_stations
             ORDER BY location_coord <-> ':y'::POINT
             LIMIT 5
             """
@@ -52,7 +52,7 @@ def get_air_data_near_me(period: str, zipcode: str):
     with engine.connect() as conn:
         stmt = text(
             """
-            SELECT * FROM airnow_readings
+            SELECT * FROM prod_airnow_data
             ORDER BY reading_datetime"""
         )
         result = conn.execute(stmt)
