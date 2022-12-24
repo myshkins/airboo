@@ -1,8 +1,6 @@
-DROP TABLE IF EXISTS airnow_readings_temp;
-CREATE TABLE airnow_readings_temp(
+DROP TABLE IF EXISTS temp_airnow_data;
+CREATE TABLE temp_airnow_data(
             station_name varchar not null,
-            latitude    numeric(10,6) not null,
-            longitude   numeric(10,6) not null,
             reading_datetime timestamp not null,
             pm_10_conc       numeric(7,3),
             pm_10_AQI       numeric(7,3),

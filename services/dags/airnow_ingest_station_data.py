@@ -9,12 +9,12 @@ import requests
 import pandas as pd
 
 
-BASE_URL = "https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/"
-
 yesterday = (dt.now() - timedelta(days=1)).strftime("%Y%m%d")
 year = dt.now().year
-url = f"{BASE_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat"
 
+BASE_URL = "https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/"
+
+url = f"{BASE_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat"
 
 @dag(
     dag_id="airnow_station_ingest",
@@ -55,7 +55,7 @@ def airnow_station_ingest():
         )
         df = df.groupby("CountryFIPS").get_group("US")
         df = df.groupby("Status").get_group("Active")
-        df = df.drop(["Status", "CountryFIPS"], axis=1)
+        df.drop(["Status", "CountryFIPS"], axis=1, inplace=True)
         param_groups = df.groupby("Parameter")
         PM2_5 = param_groups.get_group("PM2.5").drop("Parameter", axis=1)
         PM10 = param_groups.get_group("PM10").drop("Parameter", axis=1)
@@ -66,13 +66,14 @@ def airnow_station_ingest():
             on=["Latitude", "Longitude", "SiteName", "AgencyName"],
         )
         df = df.drop_duplicates(subset="SiteName", keep='first')
+        df = df.replace({',': '-'}, regex=True)
         df = df.dropna(axis=0)
         df['Location Coord.'] = list(zip(df["Latitude"], df["Longitude"]))
         df.to_csv('/opt/airflow/dags/files/station_data.csv', sep='|', header=False, index=False)
 
         hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
         hook.copy_expert(
-            sql="COPY airnow_stations_temp FROM stdin WITH DELIMITER AS '|' NULL AS ''",
+            sql="COPY temp_airnow_stations FROM stdin WITH DELIMITER AS '|' NULL AS ''",
             filename='/opt/airflow/dags/files/station_data.csv')
 
     @task
@@ -80,8 +81,8 @@ def airnow_station_ingest():
         """upsert new station data to the production station table"""
 
         query = """
-        INSERT INTO airnow_stations (station_name, agency_name, latitude, longitude, location_coord)
-            SELECT * FROM airnow_stations_temp
+        INSERT INTO prod_airnow_stations (station_name, agency_name, latitude, longitude, location_coord)
+            SELECT * FROM temp_airnow_stations
             ON CONFLICT DO NOTHING
         """
         hook = PostgresHook(postgres_conn_id='postgres_etl_conn')

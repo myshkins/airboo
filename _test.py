@@ -1,46 +1,105 @@
-import csv
-from datetime import timedelta, datetime as dt
+"""airnow etl functions"""
+from datetime import datetime as dt, timedelta
+import os
 
-import requests
 import pandas as pd
+import requests
 
-BASE_URL = "https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/"
+params = {
+    "startDate": dt.utcnow().strftime('%Y-%m-%dT%H'),
+    "endDate": (dt.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H'),
+    "parameters": "OZONE,PM25,PM10,CO,NO2,SO2",
+    "BBOX": "-124.205070,28.716781, -75.337882,45.419415",
+    "dataType": "B",
+    "format": "text/csv",
+    "verbose": "1",
+    "monitorType": "2",
+    "includerawconcentrations": "0",
+    "API_KEY": "AA5AB45D-9E64-41DE-A918-14578B9AC816",
+}
+AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
 
-URL = "https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/2022/20221221/Monitoring_Site_Locations_V2.dat"
-rul2 = "https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/2022/20221114/Monitoring_Site_Locations_V2.dat"
 
 
-yesterday = (dt.now() - timedelta(days=1)).strftime("%Y%m%d")
-year = dt.now().year
-url = f"{BASE_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat"
+def extract_current_data():
+    """extracts data from airnow api and stages it in csv file."""
+    data_path = "site-data.csv"
 
-def get_station_data():
-    """gets station data file from airnow.org and writes it to .csv"""
-    with open('site-data.csv', mode='w') as file:
-        response = requests.get(url)
-        file.write(response.text)
-    # csv_reader = csv.reader(file, delimiter="|")
-
-def shape_station_data():
-    """reads station data from csv and shapes it with pandas"""
-    df = pd.read_csv("site-data.csv", delimiter="|")
-    df = df.drop(["StationID","AQSID","FullAQSID","MonitorType","SiteCode","AgencyID", "EPARegion","CBSA_ID","CBSA_Name","StateAQSCode","StateAbbreviation", "Elevation", "GMTOffset", "CountyName", "CountyAQSCode"], axis=1)
-    df = df.groupby("CountryFIPS").get_group("US")
-    df = df.groupby("Status").get_group("Active")
-    df = df.drop(["Status", "CountryFIPS"], axis=1)
-    param_groups = df.groupby("Parameter")
-    PM2_5 = param_groups.get_group("PM2.5").drop("Parameter", axis=1)
-    PM10 = param_groups.get_group("PM10").drop("Parameter", axis=1)
-    df = pd.merge(
-        PM10,
-        PM2_5,
-        how="outer",
-        on=["Latitude", "Longitude", "SiteName", "AgencyName"],
+    response = requests.get(
+        AIRNOW_BY_STATION_API_URL, params=params, timeout=20
     )
-    df = df.drop_duplicates(subset="SiteName", keep='first')
-    df = df.replace({',': '-'}, regex=True)
-    df['Location Coord.'] = list(zip(df["Latitude"], df["Longitude"]))
-    df.to_csv('site-data.csv', sep='|', header=False, index=False)
+    csv_data = response.text
+    with open(data_path, 'w') as file:
+        file.write(csv_data)
 
-get_station_data()
-shape_station_data()
+def shape_airnow_data(df):
+    """
+    Uses .groupby() to split 'parameter' column into pm2.5 and pm10 groups.
+    Then merge groups together under columns:
+
+    site name | datetime | PM10 conc. | PM10 AQI |
+    PM10 AQI cat. | PM2_5 conc. | PM2_5 AQI | PM2_5 AQI cat.
+    """
+    parameter_groups = df.groupby("parameter")
+    pm10 = parameter_groups.get_group("PM10").drop(["parameter"], axis=1)
+    pm10.rename(
+        columns={
+            "concentration": "pm_10_conc",
+            "AQI": "pm_10_AQI",
+            "AQI cat": "pm_10_cat"},
+        inplace=True
+    )
+    pm10.to_csv('pm10.csv', header=True, index=False)
+    pm2_5 = parameter_groups.get_group("PM2.5").drop(["parameter"], axis=1)
+    pm2_5.rename(
+        columns={
+            "concentration": "pm_25_conc",
+            "AQI": "pm_25_AQI",
+            "AQI cat": "pm_25_AQI_cat"},
+        inplace=True
+    )
+    pm2_5.to_csv('pm25.csv', header=True, index=False)
+    merged_df = pd.merge(
+        pm10,
+        pm2_5,
+        how="outer",
+        on=["station_name", "datetime"],
+        sort=False,
+        suffixes=('_x', '_y')
+    )
+    cols = merged_df.columns.tolist()
+    cols = [cols[-4]] + cols[:4] + cols[-3:]
+    merged_df = merged_df[cols]
+    return merged_df
+
+def load_to_temp():
+    """load new data to temp table"""
+    column_names = [
+        "latitude",
+        "longitude",
+        "datetime",
+        "parameter",
+        "concentration",
+        "unit",
+        "AQI",
+        "AQI cat",
+        "station_name",
+        "agency name",
+        "station id",
+        "full station id", ]
+    df = pd.read_csv(
+        "site-data.csv", names=column_names,
+    )
+    df.dropna(axis=0)
+    df = df.drop(
+        ["latitude", "longitude", "unit", "agency name", "station id",
+         "full station id"],
+        axis=1
+    )
+    df.to_csv('site-data2.csv', header=True, index=False)
+    merged_df = shape_airnow_data(df)
+    merged_df = merged_df.replace({',': '-'}, regex=True)
+    merged_df.to_csv('merged-data.csv', header=True, index=False)
+
+extract_current_data()
+load_to_temp()

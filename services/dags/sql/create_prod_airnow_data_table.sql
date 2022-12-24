@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS airnow_readings(
+CREATE TABLE IF NOT EXISTS prod_airnow_data(
             station_name varchar not null,
             reading_datetime timestamp not null,
             pm_10_conc       numeric(7,3),
