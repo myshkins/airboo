@@ -1,22 +1,50 @@
 :root {
-    --bg-color: rgb(255, 255, 255);
+    --bg-color: #2b2135;
 }
 
 html {
+    min-height: 100vh;
+    box-sizing: border-box;
     font-size: 10px;
 }
 
-body {
-    min-height: 100vh;
-    background-color: var(--bg-color);
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
 }
 
-body,html {
+body,
+html {
     margin: 0;
     padding: 0;
+}
+
+* {
+    background-color: var(--bg-color);
     font-family: Helvetica, Arial, sans-serif;
 }
 
 h1 {
     text-align: center;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+}
+
+.logo {
+    max-width: 100px;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+}
+
+.nav-links li {
+    margin: 0 2rem;
 }
