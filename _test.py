@@ -9,7 +9,7 @@ params = {
     "startDate": dt.utcnow().strftime('%Y-%m-%dT%H'),
     "endDate": (dt.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H'),
     "parameters": "OZONE,PM25,PM10,CO,NO2,SO2",
-    "BBOX": "-167.716404,3.233406,-63.653904,70.867976"
+    "BBOX": "-167.716404,3.233406,-63.653904,70.867976",
     "dataType": "B",
     "format": "text/csv",
     "verbose": "1",

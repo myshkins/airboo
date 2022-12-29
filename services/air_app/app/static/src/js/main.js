@@ -1,10 +1,17 @@
-const homeButton = document.querySelector('#btn-home');
+console.log('hellow')
+function toggleDropDown(e) {
+    const dropDownBtn = e.target
+    const dropDown = dropDownBtn.nextElementSibling
+    dropDown.classList.toggle('hidden')
+}
 
-homeButton.addEventListener('click', () => console.log(this));
+function hideDropDown(e) {
+    e.target.classList.add('hidden')
+}
 
-const sayHi = document.querySelector('#btn-hi');
-sayHi.addEventListener('click', (e) => {
-    const loc = document.querySelector('#btn-hi').getAttribute('data-location');
-    console.log(loc);
-    window.location = loc
+const dropDowns = document.querySelectorAll('.dropdown-btn')
+dropDowns.forEach((btn) => {
+    btn.addEventListener('click', toggleDropDown)
+    const dropDown = btn.nextElementSibling
+    dropDown.addEventListener('mouseleave', hideDropDown)
 })

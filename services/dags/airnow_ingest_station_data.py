@@ -1,4 +1,4 @@
-"""airnow etl functions"""
+"""airnow dag for ingesting station data"""
 import os
 from datetime import timedelta, datetime as dt
 
@@ -18,8 +18,8 @@ url = f"{BASE_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat"
 
 @dag(
     dag_id="airnow_station_ingest",
-    schedule=timedelta(days=1),
-    start_date=dt(2022, 12, 1, 12, 00),
+    schedule=timedelta(hours=12),
+    start_date=dt(2022, 12, 1, 12, 1),
     catchup=False,
     dagrun_timeout=timedelta(minutes=5),
 )
@@ -33,6 +33,7 @@ def airnow_station_ingest():
         postgres_conn_id="postgres_etl_conn",
         sql="sql/create_temp_airnow_station_table.sql",
     )
+
     @task
     def get_station_data():
         """gets station data file from airnow.org and writes it to .csv"""
@@ -42,7 +43,10 @@ def airnow_station_ingest():
 
     @task
     def shape_station_data():
-        """reads station data from csv and shapes it with pandas"""
+        """
+        reads station data from csv, shapes it with pandas, and loads it to
+        temp_airnow_stations
+        """
         df = pd.read_csv(
             "/opt/airflow/dags/files/station_data.csv", delimiter="|"
         )
@@ -69,31 +73,21 @@ def airnow_station_ingest():
         df = df.replace({',': '-'}, regex=True)
         df = df.dropna(axis=0)
         df['Location Coord.'] = list(zip(df["Latitude"], df["Longitude"]))
-        df.to_csv('/opt/airflow/dags/files/station_data.csv', sep='|', header=False, index=False)
+        df.to_csv(
+            '/opt/airflow/dags/files/station_data.csv',
+            sep='|',
+            header=False, index=False
+            )
 
         hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
         hook.copy_expert(
-            sql="COPY temp_airnow_stations FROM stdin WITH DELIMITER AS '|' NULL AS ''",
+            sql="""
+                COPY temp_airnow_stations FROM stdin WITH DELIMITER AS '|' 
+                NULL AS ''
+                """,
             filename='/opt/airflow/dags/files/station_data.csv')
+    
 
-    @task
-    def load_station_data():
-        """upsert new station data to the production station table"""
-
-        query = """
-        INSERT INTO prod_airnow_stations (station_name, agency_name, latitude, longitude, location_coord)
-            SELECT * FROM temp_airnow_stations
-            ON CONFLICT DO NOTHING
-        """
-        hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
-        conn = hook.get_conn()
-        cur = conn.cursor()
-        cur.execute(query)
-        conn.commit()
-
-
-    create_temp_station_table >> get_station_data()
-    shape_station_data()
-    load_station_data()
+    create_temp_station_table >> get_station_data() >> shape_station_data()
 
 airnow_station_ingest()

@@ -1,8 +1,16 @@
-"""airnow etl functions"""
+"""
+airnow etl functions
+
+for initial setup:
+    1. run airnow_ingest_station_data dag
+    2. run airnow_etl dag (the dag in this file)
+    3. after 1 hr run load prod dag
+"""
 from datetime import datetime as dt, timedelta
 import os
 
 import pandas as pd
+import numpy as np
 import requests
 from airflow.decorators import dag, task
 from airflow.providers.postgres.operators.postgres import PostgresOperator
@@ -27,7 +35,7 @@ AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
 @dag(
     dag_id="airnow_etl",
     schedule=timedelta(minutes=10),
-    start_date=dt(2022, 12, 2, 18, 39),
+    start_date=dt(2022, 12, 2, 12, 2),
     catchup=False,
     dagrun_timeout=timedelta(minutes=2),
 )
@@ -44,7 +52,7 @@ def airnow_etl():
     @task
     def extract_current_data():
         """extracts data from airnow api and stages it in csv file."""
-        data_path = "/opt/airflow/dags/files/aqi_data.csv"
+        data_path = "/opt/airflow/dags/files/raw_airnow_data.csv"
         os.makedirs(os.path.dirname(data_path), exist_ok=True)
 
         response = requests.get(
@@ -109,7 +117,7 @@ def airnow_etl():
             "station id",
             "full station id", ]
         df = pd.read_csv(
-            "/opt/airflow/dags/files/aqi_data.csv", names=column_names,
+            "/opt/airflow/dags/files/raw_airnow_data.csv", names=column_names,
         )
         df.dropna(axis=0)
         df = df.drop(
@@ -117,36 +125,37 @@ def airnow_etl():
              "full station id"],
             axis=1
         )
+        df.to_csv('/opt/airflow/dags/files/new_airnow_data.csv', header=True, index=False)
         merged_df = shape_airnow_data(df)
-        merged_df = merged_df.replace({',': '-'}, regex=True)
-        merged_df.to_csv('/opt/airflow/dags/files/aqi_data.csv', header=False, index=False)
+        merged_df.replace({',': '-'}, regex=True, inplace=True)
+        merged_df.replace(-999.0, np.nan, inplace=True)
+        merged_df.to_csv(
+            '/opt/airflow/dags/files/merged_airnow_data.csv', header=False, index=False
+            )
 
         hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
         hook.copy_expert(
-            sql="COPY temp_airnow_data FROM stdin WITH DELIMITER AS ',' NULL AS ''",
-            filename='/opt/airflow/dags/files/aqi_data.csv')
+            sql="""
+                COPY temp_airnow_data FROM stdin WITH DELIMITER AS ',' 
+                NULL AS ''
+                """,
+            filename='/opt/airflow/dags/files/merged_airnow_data.csv')
 
-    @task
-    def load_to_production():
-        """upsert new data to the production table"""
-        
-        query = """
-        INSERT INTO prod_airnow_data (
-                station_name, reading_datetime, pm_10_conc, pm_10_AQI, 
-                pm_10_AQI_CAT, pm_25_conc, pm_25_AQI, pm_25_AQI_CAT
-                )
-            SELECT * FROM temp_airnow_data
-            ON CONFLICT DO NOTHING
-        """
-        hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
-        conn = hook.get_conn()
-        cur = conn.cursor()
-        cur.execute(query)
-        conn.commit()
-        return 0
+    drop_CA_rows = PostgresOperator(
+        task_id="drop_CA_rows",
+        postgres_conn_id="postgres_etl_conn",
+        sql="sql/airnow_drop_CA_rows.sql",
+    )
+
+    load_to_production = PostgresOperator(
+        task_id="airnow_load_to_prod_data",
+        postgres_conn_id="postgres_etl_conn",
+        sql="sql/airnow_load_to_prod_data.sql",
+    )
 
 
-    create_temp_airnow_table >> extract_current_data() >> load_to_temp() >> load_to_production()
+    create_temp_airnow_table >> extract_current_data() >> load_to_temp()
+    load_to_temp() >> drop_CA_rows >> load_to_production
 
 
 dag = airnow_etl()

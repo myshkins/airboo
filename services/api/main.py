@@ -13,7 +13,10 @@ class TimePeriod(str, Enum):
     month = "month"
     year = "year"
 
-engine = create_engine("postgresql+psycopg2://airflow:airflow@postgres/airnow", future=True)
+engine = create_engine(
+    "postgresql+psycopg2://airflow:airflow@postgres/airnow",
+    future=True
+    )
 app = FastAPI()
 
 @app.get("/")

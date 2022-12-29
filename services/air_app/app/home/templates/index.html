@@ -7,6 +7,46 @@
 {% endblock %}
 
 {% block content %}
-    {% include "navigation.html" %}
-    <h1>This is the homepage!</h1>
+{% include "navigation.html" %}
+<div class="content">
+    <div class="left-side-bar">
+        <div class="data-sources-dropdown dropdown-btn">
+            data sources
+            <i class="bx bx-chevron-down"></i>
+        </div>
+        <div class="dropdown hidden">
+            <div class="data-source-option">Brooklyn, NY</div>
+            <div class="data-source-option">Manhattan, NY</div>
+            <div class="data-source-option">Queens, NY</div>
+        </div>
+        <button class="btn">add data source</button>
+        <div class="time-period-dropdown">
+            time-period
+            <i class="bx bx-chevron-down"></i>
+        </div>
+        <div class="settings-dropdown">settings</div>
+    </div>
+    <div class="graph-container"><img src="{{ url_for('static', filename='img/graph.png') }}"
+            alt="a spongebob meme showing patrick star standing in front of a graph"></div>
+    <div class="right-side-bar">
+        <div class="analysis-header">analysis</div>
+        <div class="stats">
+            <table>
+                
+                <tr>
+                    <th>average: </th>
+                    <td>5.5</td>
+                </tr>
+                <tr>
+                    <th>max: </th>
+                    <td>9</td>
+                </tr>
+                <tr>
+                    <th>min: </th>
+                    <td>3.3</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
 {% endblock %}
