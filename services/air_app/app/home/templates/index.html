@@ -10,29 +10,71 @@
 {% include "navigation.html" %}
 <div class="content">
     <div class="left-side-bar">
-        <div class="data-sources-dropdown dropdown-btn">
-            data sources
-            <i class="bx bx-chevron-down"></i>
-        </div>
-        <div class="dropdown hidden">
-            <div class="data-source-option">Brooklyn, NY</div>
-            <div class="data-source-option">Manhattan, NY</div>
-            <div class="data-source-option">Queens, NY</div>
+        <div class="dropdown-wrap">
+            <div class="data-sources-dropdown dropdown-btn">
+                data sources
+                <i class="bx bx-chevron-down"></i>
+            </div>
+            <div class="dropdown hidden">
+                <div class="checkbox-wrap">
+                    <input type="checkbox" name="brooklyn" id="brooklyn">
+                    <label for="brooklyn">Brooklyn, NY</label>
+                </div>
+                <div class="checkbox-wrap">
+                    <input type="checkbox" name="manhattan" id="manhattan">
+                    <label for="manhattan">Manhattan, NY</label>
+                </div>
+                <div class="checkbox-wrap">
+                    <input type="checkbox" name="queens" id="queens">
+                    <label for="queens">Queens, NY</label>
+                </div>
+                <div class="checkbox-wrap">
+                    <input type="checkbox" name="jersey" id="jersey">
+                    <label for="jersey">Jersey City, NJ</label>
+                </div>
+            </div>
         </div>
         <button class="btn">add data source</button>
-        <div class="time-period-dropdown">
-            time-period
-            <i class="bx bx-chevron-down"></i>
+        <div class="dropdown-wrap">
+            <div class="time-period-dropdown dropdown-btn">
+                time-period
+                <i class="bx bx-chevron-down"></i>
+            </div>
+            <div class="dropdown hidden">
+                <div class="checkbox-wrap">
+                    <input type="checkbox" name="12hr" id="12hr">
+                    <label for="12hr">12 hours</label>
+                </div>
+                <div class="checkbox-wrap">
+                    <input type="checkbox" name="48hr" id="48hr">
+                    <label for="48hr">48 hours</label>
+                </div>
+                <div class="checkbox-wrap">
+                    <input type="checkbox" name="5day" id="5day">
+                    <label for="5day">5 days</label>
+                </div>
+            </div>
         </div>
-        <div class="settings-dropdown">settings</div>
+        <div class="dropdown-wrap">
+            <div class="settings-dropdown dropdown-btn">
+                settings
+                <i class="bx bx-chevron-down"></i>
+            </div>
+            <div class="dropdown hidden">
+                <div class="data-source-option">Brooklyn, NY</div>
+                <div class="data-source-option">Manhattan, NY</div>
+                <div class="data-source-option">Queens, NY</div>
+            </div>
+        </div>
     </div>
-    <div class="graph-container"><img src="{{ url_for('static', filename='img/graph.png') }}"
-            alt="a spongebob meme showing patrick star standing in front of a graph"></div>
+    <div class="graph-container">
+        <canvas id="air-graph"></canvas>
+    </div>
     <div class="right-side-bar">
         <div class="analysis-header">analysis</div>
         <div class="stats">
             <table>
-                
+
                 <tr>
                     <th>average: </th>
                     <td>5.5</td>
@@ -49,4 +91,27 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('air-graph');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+            datasets: [{
+                label: '# of Votes',
+                data: [12, 19, 3, 5, 2, 3],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}

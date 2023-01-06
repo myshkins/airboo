@@ -1,9 +1,10 @@
 :root {
     --bg-color: rgb(38, 36, 43);
     --default-text-color: rgb(181, 219, 207);
-    --grey: rgb(71, 67, 80);
+    --grey: rgb(56, 53, 63);
+    --light-grey: rgb(94, 89, 105);
     --blue: rgb(69, 92, 177);
-    --pink: rgb(243, 199, 236);
+    --pink: rgb(204, 170, 198);
 }
 
 html {
@@ -32,7 +33,7 @@ html {
 html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp,
 small, strike, strong, sub, sup, tt, var, b, u, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, 
+table, caption, tbody, tfoot, thead, tr, th, td, article, aside, details, embed, 
 figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
 	margin: 0;
@@ -53,8 +54,12 @@ header {
     display: flex;
     align-items: center;
     padding: 1rem;
-    border-bottom: 1px solid var(--grey);
+    border-bottom: 1px solid var(--light-grey);
 }
+
+a, .nav-links li { transition: all .1s ease-in-out; }
+
+a:hover, .nav-links li:hover { transform: scale(1.05); }
 
 button {
     padding: .3rem;

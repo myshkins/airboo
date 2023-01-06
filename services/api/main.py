@@ -1,11 +1,10 @@
 """api routes"""
 from enum import Enum
 
-from datetime import timedelta, datetime as dt
+from datetime import datetime as dt
 from fastapi import FastAPI
 import pgeocode
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import Session
 
 class TimePeriod(str, Enum):
     day = "day"
@@ -29,8 +28,8 @@ def zipcode_to_latlong(zipcode: str):
     loc = geo.query_postal_code(zipcode)
     return float(loc["latitude"]), float(loc["longitude"])
 
-@app.get("/nearest-station/")
-def get_nearest_station(zipcode: str):
+@app.get("/nearest-stations/")
+def get_nearest_stations(zipcode: str):
     """with zipcode as query param, returns the nearest station"""
     loc = zipcode_to_latlong(zipcode)
     with engine.connect() as conn:
@@ -46,6 +45,13 @@ def get_nearest_station(zipcode: str):
         response = result.all()
         return response
 
+@app.get("/first-station")
+def get_first_station(zipcode: str):
+    """returns first closest station"""
+    stations = get_nearest_stations(zipcode)
+    closest = stations[0]
+    return closest
+    
 def query_airnow(period, station):
     now = dt.now()
     with engine.connect() as conn:
@@ -60,18 +66,9 @@ def query_airnow(period, station):
         return data
 
 @app.get("/air-data-near-me/")
-def get_air_data_near_me(period: TimePeriod, zipcode: str):
-    stations = get_nearest_station(zipcode)
-    nearest_station = stations[0]["station_name"]
-    if period is TimePeriod.day:
-        q_period = timedelta(hours=24)
-    if period is TimePeriod.week:
-        q_period = timedelta(days=7)
-    if period is TimePeriod.month:
-        q_period = timedelta(days=30)
-    if period is TimePeriod.year:
-        q_period = timedelta(days=365)
-
+def get_air_data_near_me(zipcode: str):
+    stations = get_nearest_stations(zipcode)
+    
     result = []
     for station in stations:
         s_name = station["station_name"]

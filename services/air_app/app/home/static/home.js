@@ -1,16 +1,19 @@
+
 function toggleDropDown(e) {
-    const dropDownBtn = e.target
-    const dropDown = dropDownBtn.nextElementSibling
-    dropDown.classList.toggle('hidden')
+    function toggle(d) {d.classList.toggle('hidden')}
+    if (e.target.classList.contains("dropdown-btn")) {
+        const dropDown = e.target.nextElementSibling
+        toggle(dropDown)
+    } else if (e.target.classList.contains("bx-chevron-down")) {
+        const dropdownBtn = e.target.parentElement
+        const dropDown = dropdownBtn.nextElementSibling
+        toggle(dropDown)
+    }
+
 }
 
-function hideDropDown(e) {
-    e.target.classList.add('hidden')
-}
 
 const dropDowns = document.querySelectorAll('.dropdown-btn')
 dropDowns.forEach((btn) => {
     btn.addEventListener('click', toggleDropDown)
-    const dropDown = btn.nextElementSibling
-    dropDown.addEventListener('mouseleave', hideDropDown)
 })
