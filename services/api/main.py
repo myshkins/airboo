@@ -1,26 +1,20 @@
 """api routes"""
-from enum import Enum
-
 from datetime import datetime as dt
+from functools import lru_cache
+
 from fastapi import FastAPI
 import pgeocode
 from sqlalchemy import create_engine, text
+from config import Settings
 
-class TimePeriod(str, Enum):
-    day = "day"
-    week = "week"
-    month = "month"
-    year = "year"
-
-engine = create_engine(
-    "postgresql+psycopg2://airflow:airflow@postgres/airnow",
-    future=True
-    )
+settings = Settings()
+engine = create_engine(settings.SQLALCHEMY_DATABASE_URL, future=True)
 app = FastAPI()
+
 
 @app.get("/")
 def root():
-    return {"message": "Hello myshy"}
+    return {"message": settings.SQLALCHEMY_DATABASE_URL}
 
 def zipcode_to_latlong(zipcode: str):
     """helper func, returns tuple of lat long"""
@@ -52,8 +46,7 @@ def get_first_station(zipcode: str):
     closest = stations[0]
     return closest
     
-def query_airnow(period, station):
-    now = dt.now()
+def query_airnow(station):
     with engine.connect() as conn:
         stmt = text(
             """
