@@ -6,5 +6,5 @@ class Settings(BaseSettings):
     AIRNOW_API_KEY: str
 
     class Config:
-        env_file = '.env.airflow'
+        env_file = '/opt/airflow/dags/.env.airflow'
         env_file_encoding = 'utf8'
