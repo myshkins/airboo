@@ -38,9 +38,9 @@ x-airflow-common:
     # AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     # _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
   volumes:
-    - ./services/dags:/opt/airflow/dags
-    - ./services/logs:/opt/airflow/logs
-    - ./services/plugins:/opt/airflow/plugins
+    - ./services/etl/dags:/opt/airflow/dags
+    - ./services/etl/logs:/opt/airflow/logs
+    - ./services/etl/plugins:/opt/airflow/plugins
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
