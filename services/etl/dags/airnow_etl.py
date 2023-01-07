@@ -6,17 +6,19 @@ for initial setup:
     2. run airnow_etl dag (the dag in this file)
     3. after 1 hr run load prod dag
 """
-from datetime import datetime as dt, timedelta
 import os
+from datetime import datetime as dt
+from datetime import timedelta
 
-import pandas as pd
+from config import Settings
 import numpy as np
+import pandas as pd
 import requests
 from airflow.decorators import dag, task
-from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 
-
+settings = Settings()
 params = {
     "startDate": dt.utcnow().strftime('%Y-%m-%dT%H'),
     "endDate": (dt.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H'),
@@ -27,7 +29,7 @@ params = {
     "verbose": "1",
     "monitorType": "2",
     "includerawconcentrations": "0",
-    "API_KEY": "AA5AB45D-9E64-41DE-A918-14578B9AC816",
+    "API_KEY": settings.AIRNOW_API_KEY,
     }
 AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
 
