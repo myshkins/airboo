@@ -18,11 +18,11 @@ x-airflow-common:
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
-    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+    _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:- pydantic}
   volumes:
-    - ./services/dags:/opt/airflow/dags
-    - ./services/logs:/opt/airflow/logs
-    - ./services/plugins:/opt/airflow/plugins
+    - ./services/etl/dags:/opt/airflow/dags
+    - ./services/etl/logs:/opt/airflow/logs
+    - ./services/etl/plugins:/opt/airflow/plugins
     - ./services/airflow.cfg:/opt/airflow/airflow.cfg
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
@@ -85,7 +85,6 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
-      AIRFLOW_CONN_POSTGRES: 'postgresql://airflow:airflow@postgres:5432/airflow'
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:
