@@ -1,12 +1,18 @@
 """sqlalchemy dependency for api routes"""
-from fastapi import Depends, FastAPI
-from sqlalchemy import text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from config import Settings
 
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://airflow:airflow@postgres/airnow"
-router = APIRouter()
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, future=True)
-
+settings = Settings()
+engine = create_engine(settings.SQLALCHEMY_DATABASE_URL, future=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
