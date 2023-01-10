@@ -41,7 +41,16 @@ def get_closest_station(zipcode: str, db: Session):
 def get_data(station: str, db: Session):
     stmt = text(
         """
-        SELECT * FROM prod_airnow_data
+        SELECT             
+            station_name,
+            reading_datetime,
+            pm_10_conc,
+            pm_10_AQI,
+            pm_10_AQI_CAT,
+            pm_25_conc,
+            pm_25_AQI,
+            pm_25_AQI_CAT
+        FROM prod_airnow_data
         WHERE station_name = :x
         ORDER BY reading_datetime"""
     )

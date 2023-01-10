@@ -44,7 +44,7 @@ services:
     volumes:
       - ./services/api:/api
     env_file:
-      - ./.env.dev
+      - ./.env
     depends_on:
       postgres:
         condition: service_healthy
@@ -59,7 +59,7 @@ services:
     volumes:
       - ./services/air_app:/air_app
     env_file:
-      - ./.env.dev
+      - ./.env
     depends_on:
       postgres:
         condition: service_healthy

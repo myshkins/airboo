@@ -4,19 +4,19 @@ airnow etl functions
 for initial setup:
     1. run airnow_ingest_station_data dag
     2. run airnow_etl dag (the dag in this file)
-    3. after 1 hr run load prod dag
+    3. at some-hr:59 run load prod dag
 """
 import os
 from datetime import datetime as dt
 from datetime import timedelta
 
-from config import Settings
 import numpy as np
 import pandas as pd
 import requests
 from airflow.decorators import dag, task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
+from config import Settings
 
 settings = Settings()
 params = {
@@ -44,7 +44,7 @@ AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
 def airnow_etl():
     """
     First, creates temp table in postgres db. Then performs ETL of
-    air quality data for all of USA for current observations."""
+    air quality data for all of USA for current hour."""
     create_temp_airnow_table = PostgresOperator(
         task_id="create_temp_airnow_temp_table",
         postgres_conn_id="postgres_etl_conn",
@@ -64,7 +64,7 @@ def airnow_etl():
         with open(data_path, 'w') as file:
             file.write(csv_data)
 
-    def shape_airnow_data(df):
+    def reshape_airnow_data(df):
         """
         Uses .groupby() to split 'parameter' column into pm2.5 and pm10 groups.
         Then merge groups together under columns:
@@ -121,18 +121,26 @@ def airnow_etl():
         df = pd.read_csv(
             "/opt/airflow/dags/files/raw_airnow_data.csv", names=column_names,
         )
-        df.dropna(axis=0)
+        df['station_name'].replace(r'^\s*$', np.nan, regex=True, inplace=True) #for rows with blank station names, fill station name with nan
+        df.dropna(axis=0, inplace=True)
         df = df.drop(
             ["latitude", "longitude", "unit", "agency name", "station id",
              "full station id"],
             axis=1
         )
-        df.to_csv('/opt/airflow/dags/files/new_airnow_data.csv', header=True, index=False)
-        merged_df = shape_airnow_data(df)
+        df.to_csv(
+            '/opt/airflow/dags/files/new_airnow_data.csv',
+            header=True,
+            index=False
+            )
+        merged_df = reshape_airnow_data(df)
+        merged_df.drop_duplicates(['station_name', 'datetime'], keep='last', inplace=True)
         merged_df.replace({',': '-'}, regex=True, inplace=True)
         merged_df.replace(-999.0, np.nan, inplace=True)
         merged_df.to_csv(
-            '/opt/airflow/dags/files/merged_airnow_data.csv', header=False, index=False
+            '/opt/airflow/dags/files/merged_airnow_data.csv',
+            header=False,
+            index=False
             )
 
         hook = PostgresHook(postgres_conn_id='postgres_etl_conn')

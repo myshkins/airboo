@@ -1,5 +1,6 @@
-"""airnow etl functions"""
-from datetime import timedelta, datetime as dt
+"""airnow dag for loading station data to production table"""
+from datetime import datetime as dt
+from datetime import timedelta
 
 from airflow.decorators import dag
 from airflow.providers.postgres.operators.postgres import PostgresOperator

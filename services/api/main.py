@@ -1,11 +1,8 @@
 """api routes"""
-from functools import lru_cache
-
-from fastapi import FastAPI
-from sqlalchemy import create_engine, text
 from config import Settings
-
+from fastapi import FastAPI
 from routers import air_data, stations
+from sqlalchemy import create_engine
 
 settings = Settings()
 engine = create_engine(settings.SQLALCHEMY_DATABASE_URL, future=True)

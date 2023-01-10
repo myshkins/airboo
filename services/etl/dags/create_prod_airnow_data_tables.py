@@ -1,5 +1,6 @@
 """airnow production table creation"""
 from datetime import datetime as dt
+
 from airflow.decorators import dag
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 

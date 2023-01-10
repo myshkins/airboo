@@ -1,19 +1,18 @@
 """airnow dag for ingesting station data"""
-import os
-from datetime import timedelta, datetime as dt
+from datetime import datetime as dt
+from datetime import timedelta
 
-from airflow.decorators import dag, task
-from airflow.providers.postgres.operators.postgres import PostgresOperator
-from airflow.providers.postgres.hooks.postgres import PostgresHook
-import requests
 import pandas as pd
+import requests
+from airflow.decorators import dag, task
+from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 
-yesterday = (dt.now() - timedelta(days=1)).strftime("%Y%m%d")
-year = dt.now().year
 
 BASE_URL = "https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/"
-
+yesterday = (dt.now() - timedelta(days=1)).strftime("%Y%m%d")
+year = dt.now().year
 url = f"{BASE_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat"
 
 @dag(
