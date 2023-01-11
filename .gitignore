@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# .csv data files
+aqi_data.csv
+merged_airnow_data.csv
+new_airnow_data.csv
+raw_airnow_data.csv
+station_data.csv
 
 # Distribution / packaging
 .Python
@@ -79,7 +85,7 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
-.env
+.env*
 .venv
 env/
 venv/

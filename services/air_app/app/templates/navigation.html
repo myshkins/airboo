@@ -1,10 +1,12 @@
-<nav class="navigation-default">
-  <div class="nav-wrapper">
-    <div class="nav-bar">
-        <div class='btn-nav' id='btn-home'>home</div>
-        <div class='btn-nav' id='btn-login'>login</div>
-        <div class='btn-nav' id='btn-about'>about</div>
-        <div class='btn-nav' id='btn-contact'>contact</div>
-    </div>
-  </div>
-</nav>
+<header>
+  <img class="logo" src="{{ url_for('static', filename='img/logo.png') }}" alt="a logo">
+  <nav class="navigation">
+    <ul class="nav-links">
+      <li><a href="#">home</a></li>
+      <li><a href="#">about</a></li>
+      <li><a href="#">upload</a></li>
+      <li><a href="#">contact</a></li>
+    </ul>
+  </nav>
+  <a href="#" class="btn profile-btn">my profile</a>
+</header>
