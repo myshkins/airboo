@@ -1,7 +1,5 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+#logs
+logs/
 
 # .csv data files
 aqi_data.csv
@@ -9,6 +7,11 @@ merged_airnow_data.csv
 new_airnow_data.csv
 raw_airnow_data.csv
 station_data.csv
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
 # Distribution / packaging
 .Python
