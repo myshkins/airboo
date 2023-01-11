@@ -1,7 +1,7 @@
 """api data routes"""
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from . import crud
+from .crud import crud
 from dependencies import get_db
 
 
