@@ -2,9 +2,9 @@
 airnow etl functions
 
 for initial setup:
-    1. run airnow_ingest_station_data dag
-    2. run airnow_etl dag (the dag in this file)
-    3. at some-hr:59 run load prod dag
+    1. run etl_airnow_stations dag
+    2. run etl_airnow dag (the dag in this file)
+    3. at some-hr:59 run load_prod_airnow_stations dag
 """
 import os
 from datetime import datetime as dt
@@ -35,7 +35,7 @@ AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
 
 
 @dag(
-    dag_id="airnow_etl",
+    dag_id="etl_airnow",
     schedule=timedelta(minutes=10),
     start_date=dt(2022, 12, 2, 12, 2),
     catchup=False,
@@ -46,9 +46,9 @@ def airnow_etl():
     First, creates temp table in postgres db. Then performs ETL of
     air quality data for all of USA for current hour."""
     create_temp_airnow_table = PostgresOperator(
-        task_id="create_temp_airnow_temp_table",
+        task_id="create_table_temp_airnow_readings",
         postgres_conn_id="postgres_etl_conn",
-        sql="sql/create_temp_airnow_data_table.sql",
+        sql="sql/create_table_temp_airnow_readings.sql",
     )
 
     @task
@@ -154,13 +154,13 @@ def airnow_etl():
     drop_CA_rows = PostgresOperator(
         task_id="drop_CA_rows",
         postgres_conn_id="postgres_etl_conn",
-        sql="sql/airnow_drop_CA_rows.sql",
+        sql="sql/drop_rows_airnow.sql",
     )
 
     load_to_production = PostgresOperator(
         task_id="airnow_load_to_prod_data",
         postgres_conn_id="postgres_etl_conn",
-        sql="sql/airnow_load_to_prod_data.sql",
+        sql="sql/load_prod_airnow_readings.sql",
     )
 
 

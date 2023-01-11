@@ -6,7 +6,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 
 @dag(
-    dag_id="airnow_production_table_creation",
+    dag_id="create_table_prod_airnow_readings",
     schedule='@once',
     start_date=dt(2022, 12, 2, 18, 39)
 )
@@ -18,13 +18,13 @@ def create_prod_tables():
     create_prod_airnow_data_table = PostgresOperator(
         task_id="create_prod_airnow_data_table",
         postgres_conn_id="postgres_etl_conn",
-        sql="sql/create_prod_airnow_data_table.sql",
+        sql="sql/create_table_prod_airnow_readings.sql",
     )
 
     create_prod_airnow_station_table = PostgresOperator(
         task_id="create_prod_airnow_station_table",
         postgres_conn_id="postgres_etl_conn",
-        sql="sql/create_prod_airnow_station_table.sql",
+        sql="sql/create_table_prod_airnow_stations.sql",
     )
 
 dag = create_prod_tables()

@@ -7,7 +7,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 
 @dag(
-    dag_id="airnow_load_prod_stations",
+    dag_id="load_prod_airnow_stations",
     schedule=timedelta(days=1),
     start_date=dt(2022, 12, 1, 12, 57),
     catchup=False,
@@ -20,13 +20,13 @@ def airnow_load_prod_stations():
     airnow_trim_stations = PostgresOperator(
         task_id="airnow_trim_stations",
         postgres_conn_id="postgres_etl_conn",
-        sql="sql/airnow_trim_stations.sql"
+        sql="sql/trim_airnow_stations.sql"
     )
 
     airnow_load_prod_stations = PostgresOperator(
         task_id="airnow_load_prod_stations",
         postgres_conn_id="postgres_etl_conn",
-        sql="sql/airnow_load_prod_stations.sql",
+        sql="sql/load_prod_airnow_stations.sql",
     )
 
     airnow_trim_stations >> airnow_load_prod_stations

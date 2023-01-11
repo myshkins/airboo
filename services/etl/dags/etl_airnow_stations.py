@@ -16,21 +16,21 @@ year = dt.now().year
 url = f"{BASE_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat"
 
 @dag(
-    dag_id="airnow_station_ingest",
+    dag_id="etl_airnow_stations",
     schedule=timedelta(hours=12),
     start_date=dt(2022, 12, 1, 12, 1),
     catchup=False,
     dagrun_timeout=timedelta(minutes=5),
 )
-def airnow_station_ingest():
+def etl_airnow_stations():
     """
     Dag definition for pulling airnow station data, shaping that data, and
     putting it into the station table.
     """
     create_temp_station_table = PostgresOperator(
-        task_id="create_temp_airnow_station_table",
+        task_id="create_table_temp_airnow_stations",
         postgres_conn_id="postgres_etl_conn",
-        sql="sql/create_temp_airnow_station_table.sql",
+        sql="sql/create_table_temp_airnow_stations.sql",
     )
 
     @task
@@ -89,4 +89,4 @@ def airnow_station_ingest():
 
     create_temp_station_table >> get_station_data() >> shape_station_data()
 
-airnow_station_ingest()
+etl_airnow_stations()
