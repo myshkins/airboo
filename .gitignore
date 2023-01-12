@@ -105,3 +105,6 @@ venv.bak/
 
 # Pycharm
 .idea
+
+# airflow log files
+service/etl/logs/
