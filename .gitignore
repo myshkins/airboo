@@ -79,7 +79,7 @@ celerybeat-schedule
 *.sage.py
 
 # Environments
-.env
+.env*
 .venv
 env/
 venv/
@@ -106,5 +106,5 @@ venv.bak/
 # Pycharm
 .idea
 
-# airflow log files
-service/etl/logs/
+# logs
+logs/
