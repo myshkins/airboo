@@ -1,4 +1,4 @@
-create table stations_waqi(
+create table if not exists stations_waqi(
     station_id      integer not null,
     station_name    varchar(500),
     latitude        numeric(10,6),

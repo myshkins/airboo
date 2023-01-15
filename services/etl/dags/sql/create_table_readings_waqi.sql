@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS air_quality.public.readings_waqi(
+create table if not exists air_quality.public.readings_waqi(
             station_name varchar not null,
             reading_datetime timestamp not null,
             request_datetime timestamp not null,

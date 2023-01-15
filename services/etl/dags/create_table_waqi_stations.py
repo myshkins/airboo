@@ -9,13 +9,13 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
     catchup=False,
     tags=["external_aq_data"]
 )
-def create_table_stations_waqi():
+def create_table_prod_waqi_stations():
     """This dag runs a table script to create the fact table with World Air Quality Index data"""
 
     create_waqi_table = PostgresOperator(
         task_id="create_table_stations_waqi",
         postgres_conn_id="postgres_aq",
-        sql="sql/create_table_stations_waqi.sql",
+        sql="sql/create_table_prod_waqi_stations.sql",
     )
 
-create_table_stations_waqi()
+create_table_prod_waqi_stations()

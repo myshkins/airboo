@@ -1,6 +1,5 @@
-from config import get_env_configs
 import requests
-
+from config import Settings
 
 latitude = "40.04967209583848"
 longitude = "-105.28730354750316"
@@ -9,7 +8,7 @@ def get_waqi_data(lat: str = latitude, long: str = longitude) -> dict:
     """
     TO-DO: add exception handling...better way to format dictionary?
     """
-    get_url = get_env_configs().WAQI_BASE_URL + "feed/geo:" + latitude + ";" + longitude + "/?token=" + get_env_configs().WAQI_TOKEN
+    get_url = Settings().WAQI_BASE_URL + "feed/geo:" + latitude + ";" + longitude + "/?token=" + Settings().WAQI_TOKEN
     response = requests.get(get_url)
     aq_json = response.json()['data']
     result_json = {'station_name': aq_json.get('city').get('name'),
