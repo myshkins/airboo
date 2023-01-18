@@ -4,6 +4,6 @@ create table stations_waqi_temp(
     station_name        varchar(500),
     latitude            numeric(10,6),
     longitude           numeric(10,6),
-    aqi_id              varchar(10),
+    data_datetime       timestamp,
     request_datetime    timestamp
 )

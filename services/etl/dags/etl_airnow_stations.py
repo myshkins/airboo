@@ -8,8 +8,6 @@ from airflow.decorators import dag, task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 
-
-
 BASE_URL = "https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/"
 yesterday = (dt.now() - timedelta(days=1)).strftime("%Y%m%d")
 year = dt.now().year

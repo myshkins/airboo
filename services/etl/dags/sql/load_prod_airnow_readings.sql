@@ -18,7 +18,7 @@ SELECT
     pm_25_AQI,
     pm_25_AQI_CAT
     FROM temp_airnow_data
-ON CONFLICT ON CONSTRAINT prod_airnow_data_pk DO UPDATE SET
+ON CONFLICT (station_name, reading_datetime) DO UPDATE SET
     station_name=EXCLUDED.station_name,
     reading_datetime=EXCLUDED.reading_datetime,
     pm_10_conc=EXCLUDED.pm_10_conc,

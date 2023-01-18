@@ -1,3 +1,5 @@
+from datetime import datetime as dt
+
 import requests
 from config import Settings
 
@@ -11,11 +13,12 @@ def get_waqi_data(lat: str = latitude, long: str = longitude) -> dict:
     get_url = Settings().WAQI_BASE_URL + "feed/geo:" + latitude + ";" + longitude + "/?token=" + Settings().WAQI_TOKEN
     response = requests.get(get_url)
     aq_json = response.json()['data']
+    time_now = str(dt.now())
     result_json = {'station_name': aq_json.get('city').get('name'),
                     'longitude': aq_json.get('city').get('geo')[0],
                     'latitude': aq_json.get('city').get('geo')[1],
                     'reading_datetime': aq_json.get('time').get('iso'),
-                    'request_datetime': aq_json.get('debug').get('sync'),
+                    'request_datetime': time_now,
                     'co': aq_json.get('iaqi').get('co').get('v'),
                     'h': aq_json['iaqi']['h']['v'],
                     'no2': aq_json['iaqi']['no2']['v'],

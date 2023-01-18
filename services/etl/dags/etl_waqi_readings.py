@@ -4,7 +4,7 @@ import pendulum
 from airflow.decorators import dag, task
 from api_interface import get_waqi_data as gwd
 from db.db_engine import get_db
-from db.models import Readings_WAQI_Temp
+from db.models.waqi_readings import Readings_WAQI_Temp
 from util.read_sql import read_sql
 
 

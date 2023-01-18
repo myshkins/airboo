@@ -14,7 +14,7 @@ def create_table_prod_waqi_stations():
 
     create_waqi_table = PostgresOperator(
         task_id="create_table_stations_waqi",
-        postgres_conn_id="postgres_aq",
+        postgres_conn_id="postgres_etl_conn",
         sql="sql/create_table_prod_waqi_stations.sql",
     )
 

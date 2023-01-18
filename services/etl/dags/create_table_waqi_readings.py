@@ -14,7 +14,7 @@ def create_table_readings_waqi():
 
     create_waqi_table = PostgresOperator(
         task_id="create_table_readings_waqi",
-        postgres_conn_id="postgres_aq",
+        postgres_conn_id="postgres_etl_conn",
         sql="sql/create_table_readings_waqi.sql",
     )
 
