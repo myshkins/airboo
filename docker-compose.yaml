@@ -2,7 +2,7 @@ version: '3'
 x-airflow-common:
   &airflow-common
   build: ./services/etl
-  env_file: ./.env
+  env_file: ./services/etl/dags/.env.airflow
   volumes:
     - ./services/etl/dags:/opt/airflow/dags
     - ./services/etl/logs:/opt/airflow/logs
@@ -50,7 +50,7 @@ services:
 
   postgres:
     profiles: ["air_app", "api", "airflow", "full"]
-    image: postgres:13.9 # postgis/postgis:13-3.3-alpine
+    image: postgis/postgis:13-3.3-alpine
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
