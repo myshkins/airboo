@@ -114,3 +114,6 @@ venv.bak/
 
 # Pycharm
 .idea
+
+# logs
+logs/

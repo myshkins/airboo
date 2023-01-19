@@ -1,30 +1,13 @@
-
-# This configuration supports basic configuration using environment variables or an .env file
-# The following variables are supported:
-#
-# AIRFLOW_IMAGE_NAME           - Docker image name used to run Airflow.
-#                                Default: apache/airflow:2.4.3
-# AIRFLOW_UID                  - User ID in Airflow containers
-#                                Default: 50000
-# Those configurations are useful mostly in case of standalone testing/running Airflow in test/try-out mode
-#
-# _AIRFLOW_WWW_USER_USERNAME   - Username for the administrator account (if requested).
-#                                Default: airflow
-# _AIRFLOW_WWW_USER_PASSWORD   - Password for the administrator account (if requested).
-#                                Default: airflow
-# _PIP_ADDITIONAL_REQUIREMENTS - Additional PIP requirements to add when starting all containers.
-#                                Default: ''
-
----
 version: '3'
 x-airflow-common:
   &airflow-common
   build: ./services/etl
-  env_file: ./services/etl/.env.airflow
+  env_file: ./services/etl/dags/.env.airflow
   volumes:
     - ./services/etl/dags:/opt/airflow/dags
     - ./services/etl/logs:/opt/airflow/logs
     - ./services/etl/plugins:/opt/airflow/plugins
+    # - ./services/etl/airflow.cfg:/opt/airflow/airflow.cfg
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
