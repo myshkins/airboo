@@ -1,5 +1,6 @@
 #logs
 logs/
+node_modules
 
 # .csv data files
 aqi_data.csv
