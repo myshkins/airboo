@@ -7,10 +7,11 @@ STATION_URL = "https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/"
 
 settings = Settings()
 yesterday = (pendulum.now() - pendulum.duration(days=1)).format('YMMDD')
-year = pendulum.now().year
+now = pendulum.now(tz='UTC')
+year = now.year
 params = {
-    "startDate": dt.utcnow().strftime('%Y-%m-%dT%H'),
-    "endDate": (dt.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H'),
+    "startDate": now.format('Y-MM-DDTH'),
+    "endDate": (now + pendulum.duration(hours=1)).format('Y-MM-DDTH'),
     "parameters": "OZONE,PM25,PM10,CO,NO2,SO2",
     "BBOX": "-167.716404,3.233406,-63.653904,70.867976",
     "dataType": "B",
