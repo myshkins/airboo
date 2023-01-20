@@ -1,5 +1,3 @@
-from datetime import timedelta
-
 import pendulum
 from airflow.decorators import dag, task
 from api_interface import get_waqi_data as gwd
@@ -9,7 +7,7 @@ from util.read_sql import read_sql
 
 
 @dag(
-    schedule=timedelta(minutes=1),
+    schedule=pendulum.duration(minutes=1),
     start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     catchup=False,
     tags=["readings"],

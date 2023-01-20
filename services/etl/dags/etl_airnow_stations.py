@@ -1,24 +1,17 @@
 """airnow dag for ingesting station data"""
-from datetime import datetime as dt
-from datetime import timedelta
-
 import pandas as pd
-import requests
+import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
-
-BASE_URL = "https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/"
-yesterday = (dt.now() - timedelta(days=1)).strftime("%Y%m%d")
-year = dt.now().year
-url = f"{BASE_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat"
+from api_interface import get_airnow_data as gad
 
 @dag(
     dag_id="etl_airnow_stations",
-    schedule=timedelta(hours=12),
-    start_date=dt(2022, 12, 1, 12, 1),
+    schedule=pendulum.duration(hours=12),
+    start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     catchup=False,
-    dagrun_timeout=timedelta(minutes=5),
+    dagrun_timeout=pendulum.duration(minutes=5),
 )
 def etl_airnow_stations():
     """
@@ -35,8 +28,8 @@ def etl_airnow_stations():
     def get_station_data():
         """gets station data file from airnow.org and writes it to .csv"""
         with open('/opt/airflow/dags/files/station_data.csv', mode='w') as file:
-            response = requests.get(url)
-            file.write(response.text)
+            data = gad.get_airnow_stations
+            file.write(data)
 
     @task
     def shape_station_data():

@@ -7,44 +7,29 @@ for initial setup:
     3. at some-hr:59 run load_prod_airnow_stations dag
 """
 import os
-from datetime import datetime as dt
-from datetime import timedelta
 
 import numpy as np
 import pandas as pd
-import requests
+import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from config import Settings
-
-settings = Settings()
-params = {
-    "startDate": dt.utcnow().strftime('%Y-%m-%dT%H'),
-    "endDate": (dt.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H'),
-    "parameters": "OZONE,PM25,PM10,CO,NO2,SO2",
-    "BBOX": "-167.716404,3.233406,-63.653904,70.867976",
-    "dataType": "B",
-    "format": "text/csv",
-    "verbose": "1",
-    "monitorType": "2",
-    "includerawconcentrations": "0",
-    "API_KEY": settings.AIRNOW_API_KEY,
-    }
-AIRNOW_BY_STATION_API_URL = "https://www.airnowapi.org/aq/data/"
+from api_interface import get_airnow_data as gad
 
 
 @dag(
     dag_id="etl_airnow",
-    schedule=timedelta(minutes=10),
-    start_date=dt(2022, 12, 2, 12, 2),
+    schedule=pendulum.duration(minutes=10),
+    start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     catchup=False,
-    dagrun_timeout=timedelta(minutes=2),
+    dagrun_timeout=pendulum.duration(minutes=2),
 )
 def airnow_etl():
     """
-    First, creates temp table in postgres db. Then performs ETL of
-    air quality data for all of USA for current hour."""
+    This dag retrieves air quality data from airnow.org for all of USA for
+    current hour."""
+    
     create_temp_airnow_table = PostgresOperator(
         task_id="create_table_temp_airnow_readings",
         postgres_conn_id="postgres_etl_conn",
@@ -56,11 +41,7 @@ def airnow_etl():
         """extracts data from airnow api and stages it in csv file."""
         data_path = "/opt/airflow/dags/files/raw_airnow_data.csv"
         os.makedirs(os.path.dirname(data_path), exist_ok=True)
-
-        response = requests.get(
-            AIRNOW_BY_STATION_API_URL, params=params, timeout=20
-            )
-        csv_data = response.text
+        csv_data = gad.get_airnow_data()
         with open(data_path, 'w') as file:
             file.write(csv_data)
 
@@ -68,9 +49,8 @@ def airnow_etl():
         """
         Uses .groupby() to split 'parameter' column into pm2.5 and pm10 groups.
         Then merge groups together under columns:
-
-        site name | datetime | PM10 conc. | PM10 AQI |
-        PM10 AQI cat. | PM2_5 conc. | PM2_5 AQI | PM2_5 AQI cat.
+        site name | datetime | PM10 conc. | PM10 AQI | PM10 AQI cat. |
+        PM2_5 conc. | PM2_5 AQI | PM2_5 AQI cat.
         """
         parameter_groups = df.groupby("parameter")
         pm10 = parameter_groups.get_group("PM10").drop(["parameter"], axis=1)
@@ -164,8 +144,14 @@ def airnow_etl():
     )
 
 
-    create_temp_airnow_table >> extract_current_data() >> load_to_temp()
-    load_to_temp() >> drop_CA_rows >> load_to_production
+    a = create_temp_airnow_table 
+    b = extract_current_data()
+    c = load_to_temp()
+    d = load_to_temp()
+    e = drop_CA_rows
+    f = load_to_production
+
+    a >> b >> c >> d >> e >> f 
 
 
 dag = airnow_etl()
