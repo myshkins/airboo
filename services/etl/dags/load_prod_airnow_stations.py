@@ -1,4 +1,6 @@
 """airnow dag for loading station data to production table"""
+from datetime import timedelta
+
 import pendulum
 from airflow.decorators import dag
 from airflow.providers.postgres.operators.postgres import PostgresOperator
@@ -6,7 +8,8 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 @dag(
     dag_id="load_prod_airnow_stations",
-    schedule=pendulum.duration(days=1),
+    schedule=timedelta(days=1),
+    # schedule=pendulum.duration(days=1),
     start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     catchup=False,
     dagrun_timeout=pendulum.duration(minutes=2),

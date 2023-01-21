@@ -7,7 +7,7 @@ for initial setup:
     3. at some-hr:59 run load_prod_airnow_stations dag
 """
 import os
-
+from datetime import timedelta
 import numpy as np
 import pandas as pd
 import pendulum
@@ -20,7 +20,8 @@ from api_interface import get_airnow_data as gad
 
 @dag(
     dag_id="etl_airnow",
-    schedule=pendulum.duration(minutes=10),
+    schedule=timedelta(minutes=10),
+    # schedule=pendulum.duration(minutes=10),
     start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     catchup=False,
     dagrun_timeout=pendulum.duration(minutes=2),

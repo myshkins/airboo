@@ -1,4 +1,6 @@
 """airnow dag for ingesting station data"""
+from datetime import timedelta
+
 import pandas as pd
 import pendulum
 from airflow.decorators import dag, task
@@ -6,9 +8,11 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from api_interface import get_airnow_data as gad
 
+
 @dag(
     dag_id="etl_airnow_stations",
-    schedule=pendulum.duration(hours=12),
+    schedule=timedelta(hours=12),
+    # schedule=pendulum.duration(hours=12),
     start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     catchup=False,
     dagrun_timeout=pendulum.duration(minutes=5),
