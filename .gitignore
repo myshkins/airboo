@@ -1,5 +1,6 @@
 #logs
 logs/
+services/etl/logs/scheduler/latest
 
 # .csv data files
 aqi_data.csv
