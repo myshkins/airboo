@@ -21,7 +21,6 @@ from api_interface import get_airnow_data as gad
 @dag(
     dag_id="etl_airnow",
     schedule=timedelta(minutes=10),
-    # schedule=pendulum.duration(minutes=10),
     start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     catchup=False,
     dagrun_timeout=pendulum.duration(minutes=2),
