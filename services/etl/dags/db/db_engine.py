@@ -4,7 +4,7 @@ from config import Settings
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine(Settings().POSTGRES_AQ_URI)
+engine = create_engine(Settings().POSTGRES_URI)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 @contextmanager
