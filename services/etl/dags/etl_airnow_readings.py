@@ -9,16 +9,13 @@ for initial setup:
 import os
 from datetime import timedelta
 
-from airflow.decorators import dag, task
-from airflow.providers.postgres.hooks.postgres import PostgresHook
-from airflow.providers.postgres.operators.postgres import PostgresOperator
 import numpy as np
 import pandas as pd
 import pendulum
-from sqlalchemy import text
-
-from db.db_engine import get_db
+from airflow.decorators import dag, task
 from api_interface import get_airnow_data as gad
+from db.db_engine import get_db
+from sqlalchemy import text
 from util.read_sql import read_sql
 
 

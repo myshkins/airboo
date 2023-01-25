@@ -1,5 +1,6 @@
 insert into prod_airnow_data (
     station_name,
+    request_datetime,
     reading_datetime,
     pm_10_conc,
     pm_10_AQI, 
@@ -10,6 +11,7 @@ insert into prod_airnow_data (
     )
 select
     station_name,
+    request_datetime,
     reading_datetime,
     pm_10_conc,
     pm_10_AQI, 
@@ -20,6 +22,7 @@ select
     from temp_airnow_data
 on conflict (station_name, reading_datetime) do update set 
     station_name=excluded.station_name,
+    request_datetime=excluded.request_datetime,
     reading_datetime=excluded.reading_datetime,
     pm_10_conc=excluded.pm_10_conc,
     pm_10_AQI=excluded.pm_10_AQI, 
