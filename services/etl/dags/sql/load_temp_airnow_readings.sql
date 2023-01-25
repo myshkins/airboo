@@ -1,7 +1,7 @@
-copy prod_airnow_data(
+copy temp_airnow_data(
     station_name,
-    reading_datetime,
     request_datetime,
+    reading_datetime,
     pm_10_conc,
     pm_10_AQI,
     pm_10_AQI_cat,

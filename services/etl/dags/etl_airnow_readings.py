@@ -116,7 +116,6 @@ def airnow_etl():
     @task
     def load_readings_temp_airnow():
         """load new readings to temp table"""
-        # stmt = read_sql('dags/sql/load_temp_airnow_readings.sql')
         with get_db() as db:
             path = '/opt/airflow/dags/files/merged_airnow_data.csv'
             with open(path, mode='r') as file:

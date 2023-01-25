@@ -5,7 +5,7 @@ from routers import air_data, stations
 from sqlalchemy import create_engine
 
 settings = Settings()
-engine = create_engine(settings.POSTGRES_URL, future=True)
+engine = create_engine(settings.POSTGRES_URI, future=True)
 app = FastAPI()
 
 
