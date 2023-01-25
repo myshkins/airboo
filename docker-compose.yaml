@@ -2,7 +2,7 @@ version: '3'
 x-airflow-common:
   &airflow-common
   build: ./services/etl
-  env_file: ./services/etl/dags/.env.airflow
+  env_file: ./services/etl/.env.airflow
   volumes:
     - ./services/etl/dags:/opt/airflow/dags
     - ./services/etl/logs:/opt/airflow/logs
@@ -47,6 +47,7 @@ services:
       postgres:
         condition: service_healthy
   
+
 
   postgres:
     profiles: ["air_app", "api", "airflow", "full"]
@@ -252,4 +253,3 @@ services:
 
 volumes:
   postgres-db-volume:
-  db_data:

@@ -24,7 +24,7 @@ def etl_readings_waqi():
         sql_stmts = read_sql('dags/sql/create_table_readings_waqi_temp.sql')
         for stmt in sql_stmts:
             with get_db() as db:
-                result = db.execute(stmt)
+                db.execute(stmt)
                 db.commit()
 
     @task()
@@ -36,7 +36,7 @@ def etl_readings_waqi():
     def load_readings_waqi_temp(waqi_data):
        new_row = Readings_WAQI_Temp(**waqi_data)
        with get_db() as db:
-            result = db.add(new_row)
+            db.add(new_row)
             db.commit()
             db.refresh(new_row)
             
@@ -45,7 +45,7 @@ def etl_readings_waqi():
         sql_stmts = read_sql('dags/sql/load_readings_waqi.sql')
         for stmt in sql_stmts:
             with get_db() as db:
-                result = db.execute(stmt)
+                db.execute(stmt)
                 db.commit()
 
     task_1 = create_temp_waqi()

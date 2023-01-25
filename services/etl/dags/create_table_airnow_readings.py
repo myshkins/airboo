@@ -1,6 +1,5 @@
 """airnow production table creation"""
-from datetime import datetime as dt
-
+import pendulum
 from airflow.decorators import dag
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 
@@ -8,7 +7,7 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
 @dag(
     dag_id="create_table_prod_airnow_readings",
     schedule='@once',
-    start_date=dt(2022, 12, 2, 18, 39)
+    start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
 )
 
 def create_prod_tables():
