@@ -2,5 +2,4 @@
 -- bounding box parameter
 delete from temp_airnow_data 
 where station_name not in 
-(select distinct station_name 
-from temp_airnow_stations);
+(select distinct station_name from temp_airnow_stations);

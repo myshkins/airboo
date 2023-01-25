@@ -31,7 +31,7 @@ def etl_airnow_stations():
     def get_station_data():
         """gets station data file from airnow.org and writes it to .csv"""
         with open('/opt/airflow/dags/files/station_data.csv', mode='w') as file:
-            data = gad.get_airnow_stations
+            data = gad.get_airnow_stations()
             file.write(data)
 
     @task

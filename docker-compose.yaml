@@ -51,7 +51,7 @@ services:
 
   postgres:
     profiles: ["air_app", "api", "airflow", "full"]
-    image: postgres:latest #postgis/postgis:13-3.3-alpine
+    image: postgis/postgis:13-3.3-alpine
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
@@ -253,4 +253,3 @@ services:
 
 volumes:
   postgres-db-volume:
-  postgres-aq-volume:

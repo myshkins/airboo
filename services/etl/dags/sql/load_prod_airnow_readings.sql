@@ -26,4 +26,4 @@ on conflict (station_name, reading_datetime) do update set
     pm_10_AQI_CAT=excluded.pm_10_AQI_CAT,
     pm_25_conc=excluded.pm_25_conc,
     pm_25_AQI=excluded.pm_25_AQI,
-    pm_25_AQI_CAT=excluded.pm_25_AQI_CAT
+    pm_25_AQI_CAT=excluded.pm_25_AQI_CAT;
