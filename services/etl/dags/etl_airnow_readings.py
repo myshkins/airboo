@@ -149,7 +149,7 @@ def airnow_etl():
     e = drop_canada_rows()
     f = load_readings_prod_airnow()
 
-
+    a >> b >> c >> d >> e >> f
 
 
 dag = airnow_etl()
