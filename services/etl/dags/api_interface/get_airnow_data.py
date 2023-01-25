@@ -32,5 +32,8 @@ def get_airnow_data():
 
 def get_airnow_stations():
     station_url = f"{STATION_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat"
-    response = requests.get(station_url)
-    return response.text
+    try:
+        response = requests.get(station_url)
+        return response.text
+    except requests.exceptions.RequestException as e:
+        raise e

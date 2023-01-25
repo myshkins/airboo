@@ -15,8 +15,7 @@ import pendulum
 from airflow.decorators import dag, task
 from api_interface import get_airnow_data as gad
 from db.db_engine import get_db
-from sqlalchemy import text
-from util.read_sql import read_sql
+from util.util_sql import read_sql, exec_sql 
 
 
 @dag(
@@ -34,10 +33,7 @@ def airnow_etl():
     @task
     def create_table_temp_airnow():
         sql_stmts = read_sql('dags/sql/create_table_temp_airnow_readings.sql')
-        for stmt in sql_stmts:
-            with get_db() as db:
-                db.execute(stmt)
-                db.commit()
+        exec_sql(sql_stmts)
 
     @task
     def extract_current_data():

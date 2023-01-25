@@ -5,7 +5,7 @@ from airflow.decorators import dag, task
 from api_interface import get_waqi_data as gwd
 from db.db_engine import get_db
 from db.models.waqi_readings import Readings_WAQI_Temp
-from util.read_sql import read_sql
+from util.util_sql import read_sql, exec_sql
 
 
 @dag(
@@ -22,10 +22,8 @@ def etl_readings_waqi():
     @task()
     def create_temp_waqi():
         sql_stmts = read_sql('dags/sql/create_table_readings_waqi_temp.sql')
-        for stmt in sql_stmts:
-            with get_db() as db:
-                db.execute(stmt)
-                db.commit()
+        exec_sql(sql_stmts)
+        
 
     @task()
     def get_readings_waqi():
@@ -43,10 +41,7 @@ def etl_readings_waqi():
     @task()
     def load_readings_waqi():
         sql_stmts = read_sql('dags/sql/load_readings_waqi.sql')
-        for stmt in sql_stmts:
-            with get_db() as db:
-                db.execute(stmt)
-                db.commit()
+        exec_sql(sql_stmts)
 
     task_1 = create_temp_waqi()
     task_2 = get_readings_waqi()

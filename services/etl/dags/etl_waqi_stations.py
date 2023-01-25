@@ -7,7 +7,7 @@ from db.models.waqi_stations import WAQI_Stations, WAQI_Stations_Temp
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.schema import CreateTable, DropTable
-from util.read_sql import read_sql
+from util.util_sql import read_sql, exec_sql
 
 
 @dag(
@@ -22,10 +22,7 @@ def etl_waqi_stations():
     @task()
     def create_stations_temp():
         sql_stmts = read_sql("dags/sql/create_table_stations_waqi_temp.sql")
-        for stmt in sql_stmts:
-            with get_db() as db:
-                result = db.execute(stmt)
-                db.commit()
+        exec_sql(sql_stmts)
         # with get_db() as db:
         #     DropTable(WAQI_Stations_Temp, bind=engine)
         #     db.flush()
