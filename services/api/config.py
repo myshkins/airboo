@@ -3,7 +3,7 @@ from pydantic import BaseSettings
 
 class Settings(BaseSettings):
     """config for api"""
-    POSTGRES_URL: str
+    POSTGRES_URI: str
 
     class Config:
         env_file = '.env.api'

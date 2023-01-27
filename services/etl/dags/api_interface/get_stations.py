@@ -24,19 +24,22 @@ def get_waqi_stations():
         "token": settings.WAQI_TOKEN # "bb10d851797e497b46823a5b4f984354c6ff4d9a"
         # "token": "bb10d851797e497b46823a5b4f984354c6ff4d9a"
     }
-    response = requests.get(station_url, params=station_params)
-    stations = response.json().get('data')
-    station_result = []
-    now = str(dt.now())
-    for station in stations:
-        station_result.append({
-                "station_name": station.get("station").get("name"),
-                "latitude": station.get("lat"),
-                "longitude": station.get("lon"),
-                "station_id": station.get("uid"),
-                "aqi_id": station.get("aqi"),
-                "request_datetime": now
-            })
-    return station_result
+    try:
+        response = requests.get(station_url, params=station_params)
+        stations = response.json().get('data')
+        station_result = []
+        now = str(dt.now())
+        for station in stations:
+            station_result.append({
+                    "station_name": station.get("station").get("name"),
+                    "latitude": station.get("lat"),
+                    "longitude": station.get("lon"),
+                    "station_id": station.get("uid"),
+                    "aqi_id": station.get("aqi"),
+                    "request_datetime": now
+                })
+        return station_result
+    except requests.exceptions.RequestException as e:
+        raise e
 
 get_waqi_stations()

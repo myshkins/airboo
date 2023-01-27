@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 settings = Settings()
-engine = create_engine(settings.POSTGRES_URL, future=True)
+engine = create_engine(settings.POSTGRES_URI, future=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

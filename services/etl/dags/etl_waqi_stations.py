@@ -5,11 +5,11 @@ from db.db_engine import get_db
 from db.models.waqi_stations import WAQI_Stations, WAQI_Stations_Temp
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
-from util.read_sql import read_sql
+from util.util_sql import exec_sql, read_sql
 
 
 @dag(
-    schedule="@daily",
+    schedule=timedelta(minutes=10),
     start_date=pendulum.datetime(2023, 1, 1, tz="UTC"),
     catchup=False,
     tags=["stations"]
@@ -24,6 +24,13 @@ def etl_waqi_stations():
             with get_db() as db:
                 db.execute(stmt)
                 db.commit()
+        exec_sql(sql_stmts)
+        # with get_db() as db:
+        #     DropTable(WAQI_Stations_Temp, bind=engine)
+        #     db.flush()
+        #     Base.metadata.create_all(engine)
+        #     db.flush()
+            # CreateTable(WAQI_Stations_Temp, bind=engine)
 
     @task()
     def get_stations():
@@ -68,5 +75,4 @@ def etl_waqi_stations():
     task_1 >> task_2 >> task_3 >> task_4
 
 
-# Base.metadata.create_all(bind=engine)
 etl_waqi_stations()
