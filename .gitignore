@@ -1,10 +1,7 @@
 #logs
 logs/
-<<<<<<< HEAD
 services/etl/logs/scheduler/latest
-=======
 node_modules
->>>>>>> develop
 
 # .csv data files
 aqi_data.csv

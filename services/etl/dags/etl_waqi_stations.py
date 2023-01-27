@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import pendulum
 from airflow.decorators import dag, task
 from api_interface.get_stations import get_waqi_stations
@@ -20,17 +22,7 @@ def etl_waqi_stations():
     @task()
     def create_stations_temp():
         sql_stmts = read_sql("dags/sql/create_table_stations_waqi_temp.sql")
-        for stmt in sql_stmts:
-            with get_db() as db:
-                db.execute(stmt)
-                db.commit()
         exec_sql(sql_stmts)
-        # with get_db() as db:
-        #     DropTable(WAQI_Stations_Temp, bind=engine)
-        #     db.flush()
-        #     Base.metadata.create_all(engine)
-        #     db.flush()
-            # CreateTable(WAQI_Stations_Temp, bind=engine)
 
     @task()
     def get_stations():
