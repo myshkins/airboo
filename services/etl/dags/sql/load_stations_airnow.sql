@@ -1,4 +1,4 @@
-insert into prod_airnow_stations (
+insert into stations_airnow (
     station_name,
     agency_name,
     latitude,
@@ -11,7 +11,7 @@ select
     latitude,
     longitude,
     location_coord
-    from temp_airnow_stations
+    from stations_airnow_temp
 on conflict (station_name) do update set
     station_name=excluded.station_name,
     agency_name=excluded.agency_name,

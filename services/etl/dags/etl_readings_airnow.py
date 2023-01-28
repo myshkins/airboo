@@ -13,39 +13,39 @@ import numpy as np
 import pandas as pd
 import pendulum
 from airflow.decorators import dag, task
-from api_interface import get_airnow_data as gad
+from api_interface import get_readings_airnow as gad
 from db.db_engine import get_db
 from util.util_sql import read_sql, exec_sql 
 
 
 @dag(
-    dag_id="etl_airnow",
+    dag_id="etl_readings_airnow",
     schedule=timedelta(minutes=10),
     start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     catchup=False,
     dagrun_timeout=timedelta(minutes=2),
 )
-def airnow_etl():
+def etl_airnow_readings():
     """
     This dag retrieves air quality data from airnow.org for all of USA for
     current hour."""
     
     @task
-    def create_table_temp_airnow():
-        sql_stmts = read_sql('dags/sql/create_table_temp_airnow_readings.sql')
+    def create_table_readings_airnow_temp():
+        sql_stmts = read_sql('dags/sql/create_table_readings_airnow_temp.sql')
         exec_sql(sql_stmts)
 
     @task
-    def extract_current_data():
+    def extract_current_readings():
         """extracts data from airnow api and stages it in csv file."""
-        data_path = "/opt/airflow/dags/files/raw_airnow_data.csv"
+        data_path = "/opt/airflow/dags/files/raw_readings_airnow.csv"
         os.makedirs(os.path.dirname(data_path), exist_ok=True)
-        csv_data = gad.get_airnow_data()
+        csv_data = gad.get_stations_airnow()
         with open(data_path, 'w') as file:
             file.write(csv_data)
 
     @task
-    def transform_airnow_data():
+    def transform_airnow_readings():
         """
         Cleans data. Then, uses .groupby() to split 'parameter' column into 
         pm2.5 and pm10 groups.Then merge groups together under columns: 
@@ -57,7 +57,7 @@ def airnow_etl():
             "unit", "AQI", "AQI cat", "station_name", "agency name", 
             "station id", "full station id",]
         df = pd.read_csv(
-            "/opt/airflow/dags/files/raw_airnow_data.csv", names=column_names,
+            "/opt/airflow/dags/files/raw_readings_airnow.csv", names=column_names,
         )
         df['station_name'].replace(r'^\s*$', np.nan, regex=True, inplace=True) #for rows with blank station names, fill station name with nan
         df.dropna(axis=0, inplace=True)
@@ -101,18 +101,18 @@ def airnow_etl():
         merged_df.replace(-999.0, np.nan, inplace=True)
         merged_df.drop_duplicates(['station_name'], inplace=True)
         merged_df.to_csv(
-            '/opt/airflow/dags/files/merged_airnow_data.csv',
+            '/opt/airflow/dags/files/merged_readings_airnow.csv',
             header=False,
             index=False
             )
 
     @task
-    def load_readings_temp_airnow():
+    def load_readings_airnow_temp():
         """load new readings to temp table"""
         with get_db() as db:
-            path = '/opt/airflow/dags/files/merged_airnow_data.csv'
+            path = '/opt/airflow/dags/files/merged_readings_airnow.csv'
             with open(path, mode='r') as file:
-                stmt = read_sql('dags/sql/load_temp_airnow_readings.sql')
+                stmt = read_sql('dags/sql/load_readings_airnow_temp.sql')
                 cursor = db.connection().connection.cursor()
                 cursor.copy_expert(stmt[0], file)
             db.commit()
@@ -126,22 +126,22 @@ def airnow_etl():
             db.commit()
 
     @task
-    def load_readings_prod_airnow():
+    def load_readings_airnow():
         """upserts airnow readings to prod table"""
-        stmt = read_sql('dags/sql/load_prod_airnow_readings.sql')
+        stmt = read_sql('dags/sql/load_readings_airnow.sql')
         with get_db() as db:
             db.execute(stmt[0])
             db.commit()
 
 
-    a = create_table_temp_airnow()
-    b = extract_current_data()
-    c = transform_airnow_data()
-    d = load_readings_temp_airnow()
+    a = create_table_readings_airnow_temp()
+    b = extract_current_readings()
+    c = transform_airnow_readings()
+    d = load_readings_airnow_temp()
     e = drop_canada_rows()
-    f = load_readings_prod_airnow()
+    f = load_readings_airnow()
 
     a >> b >> c >> d >> e >> f
 
 
-dag = airnow_etl()
+etl_airnow_readings()

@@ -1,4 +1,3 @@
-import json
 from datetime import datetime as dt
 
 import requests
@@ -13,7 +12,7 @@ from config import Settings
 settings = Settings()
 # WAQI_BASE_URL = "https://api.waqi.info/"
 
-def get_waqi_stations():
+def get_stations_waqi():
     """get list of all stationsa and return as json"""
 
     us_lat_long = "32.000000,-125.000000,47.500000,-69.000000"
@@ -41,5 +40,3 @@ def get_waqi_stations():
         return station_result
     except requests.exceptions.RequestException as e:
         raise e
-
-get_waqi_stations()

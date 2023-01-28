@@ -34,7 +34,7 @@ select
     t,
     w,
     wg
-from readings_waqi_temp wt
+from readings_waqi_temp
 on conflict (station_name, reading_datetime) 
 do update set
     station_name = excluded.station_name,
