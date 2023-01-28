@@ -1,4 +1,4 @@
-copy temp_airnow_data(
+copy readings_airnow_temp(
     station_name,
     request_datetime,
     reading_datetime,

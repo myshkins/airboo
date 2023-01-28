@@ -1,12 +1,10 @@
 import pendulum
 from airflow.decorators import dag, task
-from api_interface.get_stations import get_waqi_stations
-from db.db_engine import engine, get_db
-from db.models import Base
+from api_interface.get_stations_waqi import get_stations_waqi
+from db.db_engine import get_db
 from db.models.waqi_stations import WAQI_Stations, WAQI_Stations_Temp
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.schema import CreateTable, DropTable
 from util.util_sql import read_sql, exec_sql
 
 
@@ -16,32 +14,24 @@ from util.util_sql import read_sql, exec_sql
     catchup = False,
     tags=["stations"]
 )
-def etl_waqi_stations():
+def etl_stations_waqi():
     """This dag retrieves all stations from the World Air Quality Index project: https://aqicn.org/api/"""
 
     @task()
     def create_stations_temp():
         sql_stmts = read_sql("dags/sql/create_table_stations_waqi_temp.sql")
         exec_sql(sql_stmts)
-        # with get_db() as db:
-        #     DropTable(WAQI_Stations_Temp, bind=engine)
-        #     db.flush()
-        #     Base.metadata.create_all(engine)
-        #     db.flush()
-            # CreateTable(WAQI_Stations_Temp, bind=engine)
 
     @task()
     def get_stations():
-        stations = get_waqi_stations()
+        stations = get_stations_waqi()
         return stations
-
 
     @task()
     def load_stations_temp(waqi_stations):
         with get_db() as db:
             db.execute(insert(WAQI_Stations_Temp), waqi_stations,)
             db.commit()
-
 
     @task()
     def load_stations():
@@ -75,6 +65,4 @@ def etl_waqi_stations():
     task_4 = load_stations()
     task_1 >> task_2 >> task_3 >> task_4
 
-
-# Base.metadata.create_all(bind=engine)
-etl_waqi_stations()
+etl_stations_waqi()

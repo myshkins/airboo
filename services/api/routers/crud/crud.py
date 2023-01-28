@@ -16,7 +16,7 @@ def get_nearby_stations(zipcode: str, db: Session):
     stmt = text(
         """
         SELECT station_name, location_coord
-        FROM prod_airnow_stations
+        FROM stations_airnow
         ORDER BY location_coord <-> ':y'::POINT
         LIMIT 5
         """
@@ -30,7 +30,7 @@ def get_closest_station(zipcode: str, db: Session):
     stmt = text(
         """
         SELECT station_name, location_coord
-        FROM prod_airnow_stations
+        FROM stations_airnow
         ORDER BY location_coord <-> ':y'::POINT
         LIMIT 1
         """
@@ -50,7 +50,7 @@ def get_data(station: str, db: Session):
             pm_25_conc,
             pm_25_AQI,
             pm_25_AQI_CAT
-        FROM prod_airnow_data
+        FROM airnow_readings
         WHERE station_name = :x
         ORDER BY reading_datetime"""
     )

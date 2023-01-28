@@ -1,4 +1,4 @@
-create table if not exists prod_airnow_stations(
+create table if not exists stations_airnow(
     station_name varchar not null primary key,
     agency_name varchar,
     latitude    numeric(10,6) not null,

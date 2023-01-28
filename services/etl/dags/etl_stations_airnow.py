@@ -6,42 +6,42 @@ import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
-from api_interface import get_airnow_data as gad
+from api_interface import get_readings_airnow as gad
 
 
 @dag(
-    dag_id="etl_airnow_stations",
+    dag_id="etl_stations_airnow",
     schedule=timedelta(hours=12),
     start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     catchup=False,
     dagrun_timeout=pendulum.duration(minutes=5),
 )
-def etl_airnow_stations():
+def etl_stations_airnow():
     """
     Dag definition for pulling airnow station data, shaping that data, and
     putting it into the station table.
     """
-    create_temp_station_table = PostgresOperator(
-        task_id="create_table_temp_airnow_stations",
+    create_table_stations_airnow_temp = PostgresOperator(
+        task_id="create_table_stations_airnow_temp",
         postgres_conn_id="postgres_etl_conn",
-        sql="sql/create_table_temp_airnow_stations.sql",
+        sql="sql/create_table_stations_airnow_temp.sql",
     )
 
     @task
-    def get_station_data():
+    def get_stations_airnow():
         """gets station data file from airnow.org and writes it to .csv"""
-        with open('/opt/airflow/dags/files/station_data.csv', mode='w') as file:
-            data = gad.get_airnow_stations()
+        with open('/opt/airflow/dags/files/stations_airnow.csv', mode='w') as file:
+            data = gad.get_stations_airnow()
             file.write(data)
 
     @task
     def shape_station_data():
         """
         reads station data from csv, shapes it with pandas, and loads it to
-        temp_airnow_stations
+        stations_airnow_temp
         """
         df = pd.read_csv(
-            "/opt/airflow/dags/files/station_data.csv", delimiter="|"
+            "/opt/airflow/dags/files/stations_airnow.csv", delimiter="|"
         )
         df = df.drop(
             ["StationID","AQSID","FullAQSID","MonitorType","SiteCode",
@@ -67,7 +67,7 @@ def etl_airnow_stations():
         df = df.dropna(axis=0)
         df['Location Coord.'] = list(zip(df["Latitude"], df["Longitude"]))
         df.to_csv(
-            '/opt/airflow/dags/files/station_data.csv',
+            '/opt/airflow/dags/files/stations_airnow.csv',
             sep='|',
             header=False, index=False
             )
@@ -75,12 +75,15 @@ def etl_airnow_stations():
         hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
         hook.copy_expert(
             sql="""
-                COPY temp_airnow_stations FROM stdin WITH DELIMITER AS '|' 
+                COPY stations_airnow_temp FROM stdin WITH DELIMITER AS '|' 
                 NULL AS ''
                 """,
-            filename='/opt/airflow/dags/files/station_data.csv')
-    
+            filename='/opt/airflow/dags/files/stations_airnow.csv')
 
-    create_temp_station_table >> get_station_data() >> shape_station_data()
+    a = create_table_stations_airnow_temp
+    b = get_stations_airnow()
+    c = shape_station_data()
 
-etl_airnow_stations()
+    a >> b >> c
+
+etl_stations_airnow()

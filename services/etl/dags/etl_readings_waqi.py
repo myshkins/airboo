@@ -2,7 +2,7 @@ from datetime import timedelta
 
 import pendulum
 from airflow.decorators import dag, task
-from api_interface import get_waqi_data as gwd
+from api_interface import get_readings_waqi as gwd
 from db.db_engine import get_db
 from db.models.waqi_readings import Readings_WAQI_Temp
 from util.util_sql import read_sql, exec_sql
@@ -27,7 +27,7 @@ def etl_readings_waqi():
 
     @task()
     def get_readings_waqi():
-        waqi_data = gwd.get_waqi_data()
+        waqi_data = gwd.get_readings_waqi()
         return waqi_data
 
     @task()

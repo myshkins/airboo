@@ -23,14 +23,14 @@ params = {
     }
 
 
-def get_airnow_data():
+def get_readings_airnow():
     try:
         response = requests.get(AIRNOW_URL, params=params, timeout=20)
         return response.text
     except requests.exceptions.RequestException as e:
         raise e
 
-def get_airnow_stations():
+def get_stations_airnow():
     station_url = f"{STATION_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat"
     try:
         response = requests.get(station_url)

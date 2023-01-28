@@ -6,7 +6,7 @@ from config import Settings
 latitude = "40.04967209583848"
 longitude = "-105.28730354750316"
 
-def get_waqi_data(lat: str = latitude, long: str = longitude) -> dict:
+def get_readings_waqi(lat: str = latitude, long: str = longitude) -> dict:
     """
     TO-DO: better way to format dictionary?
     """

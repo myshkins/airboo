@@ -26,7 +26,7 @@ def airnow_load_prod_stations():
     airnow_load_prod_stations = PostgresOperator(
         task_id="airnow_load_prod_stations",
         postgres_conn_id="postgres_etl_conn",
-        sql="sql/load_prod_airnow_stations.sql",
+        sql="sql/load_stations_airnow.sql",
     )
 
     airnow_trim_stations >> airnow_load_prod_stations
