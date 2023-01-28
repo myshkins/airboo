@@ -40,7 +40,7 @@ def etl_airnow_readings():
         """extracts data from airnow api and stages it in csv file."""
         data_path = "/opt/airflow/dags/files/raw_readings_airnow.csv"
         os.makedirs(os.path.dirname(data_path), exist_ok=True)
-        csv_data = gad.get_stations_airnow()
+        csv_data = gad.get_readings_airnow()
         with open(data_path, 'w') as file:
             file.write(csv_data)
 
