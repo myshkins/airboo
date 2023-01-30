@@ -2,20 +2,21 @@ import pendulum
 from airflow.decorators import dag, task
 from api_interface.get_stations_waqi import get_stations_waqi
 from db.db_engine import get_db
-from db.models.waqi_stations import WAQI_Stations, WAQI_Stations_Temp
+from shared_models.stations_waqi import WAQI_Stations, WAQI_Stations_Temp
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from util.util_sql import read_sql, exec_sql
 
 
 @dag(
-    schedule = "@daily",
+    schedule="@daily",
     start_date=pendulum.datetime(2023, 1, 1, tz="UTC"),
-    catchup = False,
+    catchup=False,
     tags=["stations"]
 )
 def etl_stations_waqi():
-    """This dag retrieves all stations from the World Air Quality Index project: https://aqicn.org/api/"""
+    """This dag retrieves all stations from the World Air Quality Index
+    project: https://aqicn.org/api/"""
 
     @task()
     def create_stations_temp():
@@ -36,28 +37,28 @@ def etl_stations_waqi():
     @task()
     def load_stations():
         with get_db() as db:
-                insert_stmt = insert(WAQI_Stations).from_select((
-                    WAQI_Stations.station_id,
-                    WAQI_Stations.station_name,
-                    WAQI_Stations.latitude,
-                    WAQI_Stations.longitude,
-                    WAQI_Stations.request_datetime,
-                    WAQI_Stations.data_datetime)
-                ,
-                select(WAQI_Stations_Temp))
+            insert_stmt = insert(WAQI_Stations).from_select((
+                WAQI_Stations.station_id,
+                WAQI_Stations.station_name,
+                WAQI_Stations.latitude,
+                WAQI_Stations.longitude,
+                WAQI_Stations.request_datetime,
+                WAQI_Stations.data_datetime)
+            ,
+            select(WAQI_Stations_Temp))
 
-                upsert = insert_stmt.on_conflict_do_update(
-                    index_elements=[WAQI_Stations.station_id],
-                    set_ = {
-                        WAQI_Stations.station_name: insert_stmt.excluded.station_name,
-                        WAQI_Stations.latitude: insert_stmt.excluded.latitude,
-                        WAQI_Stations.longitude: insert_stmt.excluded.longitude,
-                        WAQI_Stations.request_datetime: insert_stmt.excluded.request_datetime,
-                        WAQI_Stations.data_datetime: insert_stmt.excluded.data_datetime
-                    }
-                )
-                db.execute(upsert)
-                db.commit()
+            upsert = insert_stmt.on_conflict_do_update(
+                index_elements=[WAQI_Stations.station_id],
+                set_ = {
+                    WAQI_Stations.station_name: insert_stmt.excluded.station_name,
+                    WAQI_Stations.latitude: insert_stmt.excluded.latitude,
+                    WAQI_Stations.longitude: insert_stmt.excluded.longitude,
+                    WAQI_Stations.request_datetime: insert_stmt.excluded.request_datetime,
+                    WAQI_Stations.data_datetime: insert_stmt.excluded.data_datetime
+                }
+            )
+            db.execute(upsert)
+            db.commit()
 
     task_1 = create_stations_temp()
     task_2 = get_stations()

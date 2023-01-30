@@ -29,7 +29,7 @@ def etl_airnow_readings():
     """
     This dag retrieves air quality data from airnow.org for all of USA for
     current hour."""
-    
+
     @task
     def create_table_readings_airnow_temp():
         sql_stmts = read_sql('dags/sql/create_table_readings_airnow_temp.sql')
@@ -53,13 +53,15 @@ def etl_airnow_readings():
         PM2_5 conc. | PM2_5 AQI | PM2_5 AQI cat.
         """
         column_names = [
-            "latitude", "longitude", "reading_datetime", "parameter", "concentration",
-            "unit", "AQI", "AQI cat", "station_name", "agency name", 
-            "station id", "full station id",]
+            "latitude", "longitude", "reading_datetime", "parameter",
+            "concentration", "unit", "AQI", "AQI cat", "station_name",
+            "agency name", "station id", "full station id", ]
         df = pd.read_csv(
-            "/opt/airflow/dags/files/raw_readings_airnow.csv", names=column_names,
+            "/opt/airflow/dags/files/raw_readings_airnow.csv",
+            names=column_names,
         )
-        df['station_name'].replace(r'^\s*$', np.nan, regex=True, inplace=True) #for rows with blank station names, fill station name with nan
+        # for rows with blank station names, fill station name with nan
+        df['station_name'].replace(r'^\s*$', np.nan, regex=True, inplace=True)
         df.dropna(axis=0, inplace=True)
         df.drop(
             ["latitude", "longitude", "unit", "agency name", "station id",
@@ -93,8 +95,9 @@ def etl_airnow_readings():
         )
         merged_df = merged_df.assign(request_datetime=pendulum.now(tz='UTC'))
         cols = [
-        'station_name', 'request_datetime', 'reading_datetime', 'pm_10_conc',
-        'pm_10_AQI', 'pm_10_cat', 'pm_25_conc', 'pm_25_AQI', 'pm_25_AQI_cat'
+            'station_name', 'request_datetime', 'reading_datetime',
+            'pm_10_conc', 'pm_10_AQI', 'pm_10_cat', 'pm_25_conc', 'pm_25_AQI',
+            'pm_25_AQI_cat'
         ]
         merged_df = merged_df[cols]
         merged_df.replace({',': '-'}, regex=True, inplace=True)
@@ -116,7 +119,7 @@ def etl_airnow_readings():
                 cursor = db.connection().connection.cursor()
                 cursor.copy_expert(stmt[0], file)
             db.commit()
-    
+
     @task
     def drop_canada_rows():
         """drops canada rows from readings"""
@@ -132,7 +135,6 @@ def etl_airnow_readings():
         with get_db() as db:
             db.execute(stmt[0])
             db.commit()
-
 
     a = create_table_readings_airnow_temp()
     b = extract_current_readings()

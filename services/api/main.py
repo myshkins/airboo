@@ -2,18 +2,22 @@
 from config import Settings
 from fastapi import FastAPI
 from routers import air_data, stations
-from sqlalchemy import create_engine
+from database import engine
+from shared_models import Base
+from shared_models import stations_waqi, readings_waqi
 
 settings = Settings()
-engine = create_engine(settings.POSTGRES_URI, future=True)
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI()
 
 
 app.include_router(air_data.router)
+
+
 app.include_router(stations.router)
+
 
 @app.get("/")
 def root():
     return {"message": "ah poop"}
-
-
