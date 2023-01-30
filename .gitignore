@@ -1,6 +1,7 @@
 #logs
 logs/
 node_modules
+service/etl/logs/scheduler/latest
 
 # .csv data files
 aqi_data.csv
