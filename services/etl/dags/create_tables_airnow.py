@@ -9,7 +9,6 @@ from airflow.providers.postgres.operators.postgres import PostgresOperator
     schedule='@once',
     start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
 )
-
 def create_tables_airnow():
     """
     Create production tables for airnow
@@ -26,4 +25,5 @@ def create_tables_airnow():
         sql="sql/create_table_stations_airnow.sql",
     )
 
-dag = create_tables_airnow()
+
+create_tables_airnow()
