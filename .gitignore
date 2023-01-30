@@ -5,6 +5,7 @@ node_modules
 # .csv data files
 aqi_data.csv
 merged_airnow_data.csv
+merged_readings_airnow.csv
 new_airnow_data.csv
 raw_readings_airnow.csv
 stations_airnow.csv
