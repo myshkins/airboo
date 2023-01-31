@@ -10,6 +10,7 @@ def zipcode_to_latlong(zipcode: str):
     loc = geo.query_postal_code(zipcode)
     return loc["latitude"], loc["longitude"]
 
+
 def get_nearby_stations(zipcode: str, db: Session):
     """given zipcode, returns the 5 nearest stations"""
     loc = zipcode_to_latlong(zipcode)
@@ -24,6 +25,7 @@ def get_nearby_stations(zipcode: str, db: Session):
     result = db.execute(stmt, {'y': loc}).all()
     return result
 
+
 def get_closest_station(zipcode: str, db: Session):
     """given zipcode, returns the closest station"""
     loc = zipcode_to_latlong(zipcode)
@@ -37,6 +39,7 @@ def get_closest_station(zipcode: str, db: Session):
     )
     result = db.execute(stmt, {'y': loc}).all()
     return result
+
 
 def get_data(station: str, db: Session):
     stmt = text(
