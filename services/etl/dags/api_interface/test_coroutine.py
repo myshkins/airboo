@@ -1,20 +1,23 @@
-
-def next_cr(func):
-    def call_next(*args, **kwargs):
+def coroutine(func):
+    def send_next(*args, **kwargs):
         cr = func(*args, **kwargs)
-        cr.next()
-    return call_next
+        cr.send(None)
+        return cr
+    return send_next
 
 
-# @next_cr
-def my_coroutine(n: int):
-    i = 2 + (yield)
-    print(i)
+@coroutine
+def my_coroutine():
+    try:
+        while True:
+            i = 10 * (yield)
+            print(i)
+    except GeneratorExit:
+        print("goodbye")
 
 
-i = 3
-breakpoint()
-x = my_coroutine(i)
-x.send(None)
-for i in range(3):
-    x.send(i * 2)
+mc = my_coroutine()
+for i in range(17):
+    mc.send(i)
+
+mc.close()

@@ -11,6 +11,7 @@ from config import Settings
 
 settings = Settings()
 
+
 def get_stations_waqi():
     us_lat_long = "32.000000,-125.000000,47.500000,-69.000000"
     station_url = settings.WAQI_BASE_URL + "map/bounds/"
