@@ -8,4 +8,4 @@ copy readings_airnow_temp(
     pm_25_conc,
     pm_25_AQI,
     pm_25_AQI_cat)
-from stdin with csv
+from stdin delimiter ',' csv
