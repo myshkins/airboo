@@ -29,11 +29,11 @@ def upgrade() -> None:
         sa.Column('reading_datetime', sa.DateTime(), nullable=False),
         sa.Column('request_datetime', sa.DateTime(), nullable=False),
         sa.Column('pm_10_conc', sa.Numeric(7, 3), nullable=True),
-        sa.Column('pm_10_AQI', sa.Numeric(7, 3), nullable=True),
-        sa.Column('pm_10_AQI_CAT', sa.Numeric(2, 1), nullable=True),
+        sa.Column('pm_10_aqi', sa.Numeric(7, 3), nullable=True),
+        sa.Column('pm_10_aqi_cat', sa.Numeric(2, 1), nullable=True),
         sa.Column('pm_25_conc', sa.Numeric(7, 3), nullable=True),
-        sa.Column('pm_25_AQI', sa.Numeric(7, 3), nullable=True),
-        sa.Column('pm_25_AQI_CAT', sa.Numeric(2, 1), nullable=True),
+        sa.Column('pm_25_aqi', sa.Numeric(7, 3), nullable=True),
+        sa.Column('pm_25_aqi_cat', sa.Numeric(2, 1), nullable=True),
         sa.PrimaryKeyConstraint('station_name', 'reading_datetime')
     )
     op.create_table(

@@ -15,7 +15,7 @@ import pendulum
 from airflow.decorators import dag, task
 from api_interface import get_readings_airnow as gad
 from db.db_engine import get_db
-from util.util_sql import read_sql, exec_sql 
+from util.util_sql import read_sql, exec_sql
 
 
 @dag(
