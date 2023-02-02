@@ -11,7 +11,8 @@ def read_sql(filename):
 
 
 def exec_sql(sql_stmts):
-    for stmt in sql_stmts:
-        with get_db() as db:
+    with get_db() as db:
+        for stmt in sql_stmts:
             db.execute(stmt)
             db.commit()
+            db.expire_all()

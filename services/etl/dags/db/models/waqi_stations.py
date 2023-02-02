@@ -2,7 +2,7 @@ from db.models import Base
 from sqlalchemy import Column, DateTime, Integer, Numeric, String
 
 
-class WAQI_Stations(Base):
+class Waqi_Stations(Base):
     __tablename__ = 'stations_waqi'
 
     station_id = Column(Integer, primary_key=True, nullable=False)
@@ -13,7 +13,7 @@ class WAQI_Stations(Base):
     data_datetime = Column(DateTime, nullable=True)
 
 
-class WAQI_Stations_Temp(Base):
+class Waqi_Stations_Temp(Base):
     __tablename__ = 'stations_waqi_temp'
 
     station_id = Column(Integer, primary_key=True, nullable=False)

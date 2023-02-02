@@ -1,5 +1,6 @@
 create table if not exists air_quality.public.readings_waqi(
-            station_name varchar not null,
+            station_id integer,
+            station_name varchar(200) not null,
             reading_datetime timestamp not null,
             request_datetime timestamp not null,
             latitude    numeric(10,6),
@@ -15,5 +16,5 @@ create table if not exists air_quality.public.readings_waqi(
             t           numeric(7,3),
             w           numeric(7,3),
             wg          numeric(7,3),
-            primary key (station_name, reading_datetime)
+            primary key (station_id, reading_datetime)
 );
