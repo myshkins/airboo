@@ -2,7 +2,6 @@
 import pgeocode
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from geoalchemy2 import Geometry
 
 
 def zipcode_to_latlong(zipcode: str):
@@ -19,7 +18,7 @@ def get_nearby_stations(zipcode: str, db: Session):
         """
         SELECT station_name, latitude, longitude, location_coord
         FROM stations_airnow
-        ORDER BY location_coord <-> 'SRID=4326;POINT(:x :y)'::geometry
+        ORDER BY location_coord <-> 'SRID=4326;POINT(:y :x)'::geometry
         LIMIT 5
         """
     )
@@ -35,7 +34,7 @@ def get_closest_station(zipcode: str, db: Session):
         """
         SELECT station_name, latitude, longitude, location_coord
         FROM stations_airnow
-        ORDER BY location_coord <-> 'SRID=4326;POINT(:x :y)'::geometry
+        ORDER BY location_coord <-> 'SRID=4326;POINT(:y :x)'::geometry
         LIMIT 1
         """
     )
