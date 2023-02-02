@@ -3,5 +3,5 @@ create table if not exists stations_airnow(
     agency_name varchar,
     latitude    numeric(10,6) not null,
     longitude   numeric(10,6) not null,
-    location_coord  point
+    location_coord geometry(point, 4326)
 );

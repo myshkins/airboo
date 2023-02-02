@@ -7,6 +7,7 @@ from airflow.decorators import dag, task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from api_interface import get_readings_airnow as gad
+from util.util_sql import read_sql, exec_sql
 
 
 @dag(
@@ -67,20 +68,19 @@ def etl_stations_airnow():
         df = df.drop_duplicates(subset="SiteName", keep='first')
         df = df.replace({',': '-'}, regex=True)
         df = df.dropna(axis=0)
-        df['Location Coord.'] = list(zip(df["Latitude"], df["Longitude"]))
         df.to_csv(
             '/opt/airflow/dags/files/stations_airnow.csv',
             sep='|',
             header=False, index=False
             )
-
         hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
+        stmt = read_sql('/opt/airflow/dags/sql/copy_stations_airnow_temp.sql')
         hook.copy_expert(
-            sql="""
-                COPY stations_airnow_temp FROM stdin WITH DELIMITER AS '|' 
-                NULL AS ''
-                """,
+            sql=stmt[0],
             filename='/opt/airflow/dags/files/stations_airnow.csv')
+        stmt = read_sql(
+            '/opt/airflow/dags/sql/populate_station_coord_airnow.sql')
+        exec_sql(stmt)
 
     a = create_table_stations_airnow_temp
     b = get_stations_airnow()
