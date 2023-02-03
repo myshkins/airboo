@@ -2,13 +2,14 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from .crud import crud
-from dependencies import get_db
+from database import get_db
 
 
 router = APIRouter(
     prefix="/air-data",
     tags=["air-data"],
 )
+
 
 @router.get("/from-closest/")
 def get_data_from_closest(zipcode: str, db: Session = Depends(get_db)):

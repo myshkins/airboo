@@ -1,11 +1,12 @@
 #logs
 logs/
 node_modules
-service/etl/logs/scheduler/latest
+services/etl/logs/scheduler/latest
 
 # .csv data files
 aqi_data.csv
 merged_airnow_data.csv
+merged_readings_airnow.csv
 new_airnow_data.csv
 raw_readings_airnow.csv
 stations_airnow.csv
@@ -117,5 +118,5 @@ venv.bak/
 # Pycharm
 .idea
 
-# logs
-logs/
+# data files
+services/etl/dags/files/*

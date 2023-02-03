@@ -1,1 +1,0 @@
-https://api.waqi.info/feed/:city/?token=bb10d851797e497b46823a5b4f984354c6ff4d9a

@@ -2,7 +2,7 @@ import pendulum
 from airflow.decorators import dag, task
 from api_interface.get_stations_waqi import get_stations_waqi
 from db.db_engine import get_db
-from db.models.waqi_stations import Waqi_Stations, Waqi_Stations_Temp
+from shared_models.stations_waqi import Waqi_Stations, Waqi_Stations_Temp
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from util.util_sql import exec_sql, read_sql
@@ -15,7 +15,8 @@ from util.util_sql import exec_sql, read_sql
     tags=["stations"]
 )
 def etl_stations_waqi():
-    """This dag retrieves all stations from the World Air Quality Index project: https://aqicn.org/api/"""
+    """This dag retrieves all stations from the World Air Quality Index
+    project: https://aqicn.org/api/"""
 
     @task()
     def create_stations_temp():

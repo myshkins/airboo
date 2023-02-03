@@ -31,4 +31,5 @@ def airnow_load_prod_stations():
 
     airnow_trim_stations >> airnow_load_prod_stations
 
-dag = airnow_load_prod_stations()
+
+airnow_load_prod_stations()

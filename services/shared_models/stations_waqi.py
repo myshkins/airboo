@@ -1,4 +1,4 @@
-from db.models import Base
+from shared_models import Base
 from sqlalchemy import Column, DateTime, Integer, Numeric, String
 
 

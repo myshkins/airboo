@@ -30,7 +30,9 @@ def etl_stations_airnow():
     @task
     def get_stations_airnow():
         """gets station data file from airnow.org and writes it to .csv"""
-        with open('/opt/airflow/dags/files/stations_airnow.csv', mode='w') as file:
+        with open(
+                '/opt/airflow/dags/files/stations_airnow.csv',
+                mode='w') as file:
             data = gad.get_stations_airnow()
             file.write(data)
 
@@ -44,8 +46,8 @@ def etl_stations_airnow():
             "/opt/airflow/dags/files/stations_airnow.csv", delimiter="|"
         )
         df = df.drop(
-            ["StationID","AQSID","FullAQSID","MonitorType","SiteCode",
-             "AgencyID", "EPARegion","CBSA_ID","CBSA_Name","StateAQSCode",
+            ["StationID", "AQSID", "FullAQSID", "MonitorType", "SiteCode",
+             "AgencyID", "EPARegion", "CBSA_ID", "CBSA_Name", "StateAQSCode",
              "StateAbbreviation", "Elevation", "GMTOffset", "CountyName",
              "CountyAQSCode"],
             axis=1
@@ -85,5 +87,6 @@ def etl_stations_airnow():
     c = shape_station_data()
 
     a >> b >> c
+
 
 etl_stations_airnow()

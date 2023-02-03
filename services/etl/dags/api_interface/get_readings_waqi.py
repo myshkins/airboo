@@ -5,7 +5,8 @@ from aiohttp import ClientError, ClientSession, InvalidURL
 from aiohttp.web import HTTPException
 from config import Settings
 from db.db_engine import get_db
-from db.models.waqi_stations import Waqi_Stations
+from logger import LOGGER
+from shared_models.stations_waqi import Waqi_Stations
 from sqlalchemy import select
 
 
@@ -75,11 +76,11 @@ async def fetch_readings_urls(session: ClientSession, url: str) -> dict:
             else:
                 result_json = None
     except InvalidURL as e:
-        print('Invalid sation URL for waqi readings', str(e))
+        LOGGER.error(f"Invalid sation URL for waqi readings {url}: {e}")
     except ClientError as e:
-        print('Client error getting waqi readings', str(e))
+        LOGGER.error(f"Client error getting waqi readings {url}: {e}")
     except HTTPException as e:
-        print('HTTP Exception', str(e))
+        LOGGER.error(f"HTTPException getting {url}: {e}")
 
     return result_json
 
@@ -90,7 +91,3 @@ async def get_waqi_readings():
         readings_list = await asyncio.gather(*task_list)
         result_list = [reading for reading in readings_list if reading]  # remove None values
     return result_list
-
-
-# readings = asyncio.run(get_waqi_readings())
-# pprint.pprint(readings)

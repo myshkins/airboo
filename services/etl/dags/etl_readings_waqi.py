@@ -3,7 +3,7 @@ from datetime import timedelta
 import pendulum
 from airflow.decorators import dag, task
 from db.db_engine import get_db
-from db.models.waqi_readings import Readings_WAQI_Temp
+from shared_models.readings_waqi import Readings_Waqi_Temp
 from sqlalchemy import insert
 
 
@@ -15,7 +15,8 @@ from sqlalchemy import insert
 )
 def etl_readings_waqi():
     """
-    This dag retrieves air quality readings data from World Air Quality Index project: https://aqicn.org/api/
+    This dag retrieves air quality readings data from World Air Quality Index 
+    project: https://aqicn.org/api/
     """
     import asyncio
 
@@ -35,7 +36,7 @@ def etl_readings_waqi():
     @task()
     def load_readings_waqi_temp(waqi_data):
         with get_db() as db:
-            db.execute(insert(Readings_WAQI_Temp), waqi_data)
+            db.execute(insert(Readings_Waqi_Temp), waqi_data)
             db.commit()
             db.expire_all()
 
