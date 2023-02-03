@@ -47,7 +47,7 @@ def etl_stations_airnow():
             "/opt/airflow/dags/files/stations_airnow.csv", delimiter="|"
         )
         df = df.drop(
-            ["StationID", "AQSID", "FullAQSID", "MonitorType", "SiteCode",
+            ["FullAQSID", "MonitorType", "SiteCode",
              "AgencyID", "EPARegion", "CBSA_ID", "CBSA_Name", "StateAQSCode",
              "StateAbbreviation", "Elevation", "GMTOffset", "CountyName",
              "CountyAQSCode"],
@@ -63,7 +63,7 @@ def etl_stations_airnow():
             PM10,
             PM2_5,
             how="outer",
-            on=["Latitude", "Longitude", "SiteName", "AgencyName"],
+            on=["StationID", "Latitude", "Longitude", "SiteName", "AgencyName"],
         )
         df = df.drop_duplicates(subset="SiteName", keep='first')
         df = df.replace({',': '-'}, regex=True)

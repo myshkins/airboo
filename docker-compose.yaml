@@ -53,7 +53,7 @@ services:
     profiles: ["air_app", "api", "airflow", "full"]
     build: ./services/postgres
     environment:
-      POSTGRES_MULTIPLE_DATABASES: "air_quality,airflow: airflow,airflow"
+      POSTGRES_MULTIPLE_DATABASES: "air_quality,airflow"
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
