@@ -1,6 +1,7 @@
 #logs
 logs/
 node_modules
+services/etl/logs/scheduler/latest
 
 # .csv data files
 aqi_data.csv
@@ -117,5 +118,5 @@ venv.bak/
 # Pycharm
 .idea
 
-# logs
-logs/
+# data files
+services/etl/dags/files/*

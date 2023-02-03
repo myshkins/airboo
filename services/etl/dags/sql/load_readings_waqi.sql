@@ -1,5 +1,6 @@
 insert into air_quality.public.readings_waqi
 (
+    station_id,
     station_name,
     reading_datetime,
     request_datetime,
@@ -18,6 +19,7 @@ insert into air_quality.public.readings_waqi
     wg
 )
 select
+    station_id,
     station_name,
     reading_datetime,
     request_datetime,
@@ -35,10 +37,9 @@ select
     w,
     wg
 from readings_waqi_temp
-on conflict (station_name, reading_datetime) 
+on conflict (station_id, reading_datetime) 
 do update set
     station_name = excluded.station_name,
-    reading_datetime = excluded.reading_datetime,
     request_datetime = excluded.request_datetime,
     latitude = excluded.latitude,
     longitude = excluded.longitude,

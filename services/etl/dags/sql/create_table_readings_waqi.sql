@@ -1,6 +1,5 @@
-drop table if exists air_quality.public.readings_waqi_temp;
-create table air_quality.public.readings_waqi_temp(
-            station_id  integer,
+create table if not exists air_quality.public.readings_waqi(
+            station_id integer,
             station_name varchar(200) not null,
             reading_datetime timestamp not null,
             request_datetime timestamp not null,
@@ -16,5 +15,6 @@ create table air_quality.public.readings_waqi_temp(
             so2         numeric(7,3),
             t           numeric(7,3),
             w           numeric(7,3),
-            wg          numeric(7,3)
+            wg          numeric(7,3),
+            primary key (station_id, reading_datetime)
 );
