@@ -1,6 +1,7 @@
 drop table if exists air_quality.public.readings_waqi_temp;
-create table readings_waqi_temp(
-            station_name varchar not null,
+create table air_quality.public.readings_waqi_temp(
+            station_id  integer,
+            station_name varchar(200) not null,
             reading_datetime timestamp not null,
             request_datetime timestamp not null,
             latitude    numeric(10,6),

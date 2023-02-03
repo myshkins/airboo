@@ -2,14 +2,13 @@ from datetime import timedelta
 
 import pendulum
 from airflow.decorators import dag, task
-from api_interface import get_readings_waqi as gwd
 from db.db_engine import get_db
-from shared_models.readings_waqi import Readings_WAQI_Temp
-from util.util_sql import read_sql, exec_sql
+from shared_models.readings_waqi import Readings_Waqi_Temp
+from sqlalchemy import insert
 
 
 @dag(
-    schedule=timedelta(minutes=1),
+    schedule=timedelta(minutes=15),
     start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     catchup=False,
     tags=["readings"],
@@ -19,6 +18,10 @@ def etl_readings_waqi():
     This dag retrieves air quality readings data from World Air Quality Index 
     project: https://aqicn.org/api/
     """
+    import asyncio
+
+    from api_interface.get_readings_waqi import get_waqi_readings
+    from util.util_sql import exec_sql, read_sql
 
     @task()
     def create_temp_waqi():
@@ -26,17 +29,16 @@ def etl_readings_waqi():
         exec_sql(sql_stmts)
 
     @task()
-    def get_readings_waqi():
-        waqi_data = gwd.get_readings_waqi()
-        return waqi_data
+    def request_waqi_readings():
+        waqi_readings = asyncio.run(get_waqi_readings())
+        return waqi_readings
 
     @task()
     def load_readings_waqi_temp(waqi_data):
-        new_row = Readings_WAQI_Temp(**waqi_data)
         with get_db() as db:
-            db.add(new_row)
+            db.execute(insert(Readings_Waqi_Temp), waqi_data)
             db.commit()
-            db.refresh(new_row)
+            # db.expire_all()
 
     @task()
     def load_readings_waqi():
@@ -44,7 +46,7 @@ def etl_readings_waqi():
         exec_sql(sql_stmts)
 
     task_1 = create_temp_waqi()
-    task_2 = get_readings_waqi()
+    task_2 = request_waqi_readings()
     task_3 = load_readings_waqi_temp(task_2)
     task_4 = load_readings_waqi()
 
