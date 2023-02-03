@@ -38,7 +38,7 @@ def etl_readings_waqi():
         with get_db() as db:
             db.execute(insert(Readings_Waqi_Temp), waqi_data)
             db.commit()
-            db.expire_all()
+            # db.expire_all()
 
     @task()
     def load_readings_waqi():

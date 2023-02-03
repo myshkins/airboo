@@ -20,7 +20,6 @@ def get_station_list():
 
 
 def init_urls():
-    """loops through all waqi stations and asynchronously requests data for each."""
     station_list = get_station_list()
     url_list = [Settings().WAQI_BASE_URL
                 + "feed/@" + str(station)
@@ -30,6 +29,7 @@ def init_urls():
 
 
 async def create_task_list(session: ClientSession):
+    """loops through all waqi stations and create an asynchronous task to fetch data for each."""
     task_list = []
     url_list = init_urls()
     for url in url_list:
