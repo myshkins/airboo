@@ -46,7 +46,7 @@ def get_data(station: str, db: Session):
     stmt = text(
         """
         SELECT
-            station_name,
+            station_id,
             reading_datetime,
             pm_10_conc,
             pm_10_AQI,
