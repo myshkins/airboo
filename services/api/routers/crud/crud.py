@@ -10,39 +10,43 @@ def zipcode_to_latlong(zipcode: str):
     loc = geo.query_postal_code(zipcode)
     return loc["latitude"], loc["longitude"]
 
+
 def get_nearby_stations(zipcode: str, db: Session):
     """given zipcode, returns the 5 nearest stations"""
     loc = zipcode_to_latlong(zipcode)
     stmt = text(
         """
-        SELECT station_name, location_coord
+        SELECT station_name, latitude, longitude, location_coord
         FROM stations_airnow
-        ORDER BY location_coord <-> ':y'::POINT
+        ORDER BY location_coord <-> 'SRID=4326;POINT(:y :x)'::geometry
         LIMIT 5
         """
     )
-    result = db.execute(stmt, {'y': loc}).all()
+    result = db.execute(stmt, {'x': loc[0], 'y': loc[1]}).all()
     return result
 
+
 def get_closest_station(zipcode: str, db: Session):
-    """given zipcode, returns the closest station"""
+    """given zipcode, returns the closest station. note srid=4326 signifies
+    that the data is of the latitude/longitude type."""
     loc = zipcode_to_latlong(zipcode)
     stmt = text(
         """
-        SELECT station_name, location_coord
+        SELECT station_name, latitude, longitude, location_coord
         FROM stations_airnow
-        ORDER BY location_coord <-> ':y'::POINT
+        ORDER BY location_coord <-> 'SRID=4326;POINT(:y :x)'::geometry
         LIMIT 1
         """
     )
-    result = db.execute(stmt, {'y': loc}).all()
+    result = db.execute(stmt, {'x': loc[0], 'y': loc[1]}).all()
     return result
+
 
 def get_data(station: str, db: Session):
     stmt = text(
         """
-        SELECT             
-            station_name,
+        SELECT
+            station_id,
             reading_datetime,
             pm_10_conc,
             pm_10_AQI,

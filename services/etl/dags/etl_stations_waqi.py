@@ -5,7 +5,6 @@ from db.db_engine import get_db
 from shared_models.stations_waqi import Waqi_Stations, Waqi_Stations_Temp
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
-from util.util_sql import exec_sql, read_sql
 
 
 @dag(
@@ -20,8 +19,11 @@ def etl_stations_waqi():
 
     @task()
     def create_stations_temp():
-        sql_stmts = read_sql("dags/sql/create_table_stations_waqi_temp.sql")
-        exec_sql(sql_stmts)
+        with get_db() as db:
+            engine = db.get_bind()
+            if engine.has_table('stations_waqi_temp'):
+                Waqi_Stations_Temp.__table__.drop(db.get_bind())
+            Waqi_Stations_Temp.__table__.create(db.get_bind())
 
     @task()
     def get_stations():
