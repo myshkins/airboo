@@ -1,5 +1,5 @@
 copy readings_airnow_temp(
-    station_name,
+    station_id,
     request_datetime,
     reading_datetime,
     pm_10_conc,

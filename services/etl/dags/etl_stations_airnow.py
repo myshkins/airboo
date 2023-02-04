@@ -27,7 +27,10 @@ def etl_stations_airnow():
     def create_table_stations_airnow_temp():
         """create temp table for airnow stations"""
         with get_db() as db:
-            AirnowStationsTemp.__table__.drop(db.get_bind())
+            try:
+                AirnowStationsTemp.__table__.drop(db.get_bind())
+            except: # todo: add better error handling
+                pass
             AirnowStationsTemp.__table__.create(db.get_bind())
 
     @task
@@ -49,7 +52,7 @@ def etl_stations_airnow():
             "/opt/airflow/dags/files/stations_airnow.csv", delimiter="|"
         )
         df = df.drop(
-            ["FullAQSID", "MonitorType", "SiteCode",
+            ["AQSID", "FullAQSID", "MonitorType", "SiteCode",
              "AgencyID", "EPARegion", "CBSA_ID", "CBSA_Name", "StateAQSCode",
              "StateAbbreviation", "Elevation", "GMTOffset", "CountyName",
              "CountyAQSCode"],
@@ -69,6 +72,7 @@ def etl_stations_airnow():
                 "StationID", "Latitude", "Longitude", "SiteName", "AgencyName"
                 ],
         )
+        df.to_csv('/opt/airflow/dags/files/stations3.csv', sep='|', header=True, index=False)
         df = df.drop_duplicates(subset="SiteName", keep='first')
         df = df.replace({',': '-'}, regex=True)
         df = df.dropna(axis=0)

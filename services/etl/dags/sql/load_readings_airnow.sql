@@ -1,5 +1,5 @@
 insert into readings_airnow (
-    station_name,
+    station_id,
     request_datetime,
     reading_datetime,
     pm_10_conc,
@@ -10,7 +10,7 @@ insert into readings_airnow (
     pm_25_aqi_cat
     )
 select
-    station_name,
+    station_id,
     request_datetime,
     reading_datetime,
     pm_10_conc,
@@ -20,8 +20,8 @@ select
     pm_25_aqi,
     pm_25_aqi_cat
     from readings_airnow_temp
-on conflict (station_name, reading_datetime) do update set 
-    station_name=excluded.station_name,
+on conflict (station_id, reading_datetime) do update set 
+    station_id=excluded.station_id,
     request_datetime=excluded.request_datetime,
     reading_datetime=excluded.reading_datetime,
     pm_10_conc=excluded.pm_10_conc,

@@ -18,7 +18,6 @@ from db.db_engine import get_db
 from util.util_sql import read_sql
 from shared_models.readings_airnow import ReadingsAirnowTemp
 
-
 @dag(
     dag_id="etl_readings_airnow",
     schedule=timedelta(minutes=10),
@@ -34,7 +33,10 @@ def etl_airnow_readings():
     @task
     def create_table_readings_airnow_temp():
         with get_db() as db:
-            ReadingsAirnowTemp.__table__.drop(db.get_bind())
+            try:
+                ReadingsAirnowTemp.__table__.drop(db.get_bind())
+            except: # add better error handling
+                pass
             ReadingsAirnowTemp.__table__.create(db.get_bind())
 
     @task
@@ -51,23 +53,23 @@ def etl_airnow_readings():
         """
         Cleans data. Then, uses .groupby() to split 'parameter' column into 
         pm2.5 and pm10 groups.Then merge groups together under columns: 
-        site name | reading_datetime | PM10 conc. | PM10 AQI | PM10 AQI cat. |
-        PM2_5 conc. | PM2_5 AQI | PM2_5 AQI cat.
+        site name | reading_datetime | pm10_conc | pm10_aqi | pm10_aqi_cat |
+        pm2_5_conc | pm2_5_aqi | pm2_5_aqi_cat
         """
         column_names = [
             "latitude", "longitude", "reading_datetime", "parameter",
-            "concentration", "unit", "AQI", "AQI cat", "station_name",
-            "agency name", "station id", "full station id", ]
+            "concentration", "unit", "aqi", "aqi_cat", "station_name",
+            "agency_name", "station_id", "full_station_id", ]
         df = pd.read_csv(
             "/opt/airflow/dags/files/raw_readings_airnow.csv",
             names=column_names,
         )
         # for rows with blank station names, fill station name with nan
-        df['station_name'].replace(r'^\s*$', np.nan, regex=True, inplace=True)
+        df['station_id'].replace(r'^\s*$', np.nan, regex=True, inplace=True)
         df.dropna(axis=0, inplace=True)
         df.drop(
-            ["latitude", "longitude", "unit", "agency name", "station id",
-             "full station id"],
+            ["latitude", "longitude", "unit", "agency_name", "station_name",
+             "full_station_id"],
             axis=1,
             inplace=True,
         )
@@ -76,35 +78,36 @@ def etl_airnow_readings():
         pm10.rename(
             columns={
                 "concentration": "pm_10_conc",
-                "AQI": "pm_10_AQI",
-                "AQI cat": "pm_10_cat"},
+                "aqi": "pm_10_aqi",
+                "aqi_cat": "pm_10_cat"},
             inplace=True
         )
         pm2_5 = parameter_groups.get_group("PM2.5").drop(["parameter"], axis=1)
         pm2_5.rename(
             columns={
                 "concentration": "pm_25_conc",
-                "AQI": "pm_25_AQI",
-                "AQI cat": "pm_25_AQI_cat"},
+                "aqi": "pm_25_aqi",
+                "aqi_cat": "pm_25_aqi_cat"},
             inplace=True
         )
         merged_df = pd.merge(
             pm10,
             pm2_5,
             how="outer",
-            on=["reading_datetime", "station_name"],
+            on=["reading_datetime", "station_id"],
             sort=False,
         )
+        df.to_csv("/opt/airflow/dags/files/a_rds_2.csv", header=True, index=False)
         merged_df = merged_df.assign(request_datetime=pendulum.now(tz='UTC'))
         cols = [
-            'station_name', 'request_datetime', 'reading_datetime',
-            'pm_10_conc', 'pm_10_AQI', 'pm_10_cat', 'pm_25_conc', 'pm_25_AQI',
-            'pm_25_AQI_cat'
+            'station_id', 'request_datetime', 'reading_datetime',
+            'pm_10_conc', 'pm_10_aqi', 'pm_10_cat', 'pm_25_conc', 'pm_25_aqi',
+            'pm_25_aqi_cat'
         ]
         merged_df = merged_df[cols]
         merged_df.replace({',': '-'}, regex=True, inplace=True)
         merged_df.replace(-999.0, np.nan, inplace=True)
-        merged_df.drop_duplicates(['station_name'], inplace=True)
+        merged_df.drop_duplicates(['station_id'], inplace=True)
         merged_df.to_csv(
             '/opt/airflow/dags/files/merged_readings_airnow.csv',
             header=False,

@@ -21,16 +21,16 @@ def upgrade() -> None:
     op.execute('create extension postgis;')
     op.create_table(
         "readings_airnow",
-        sa.Column("station_id", sa.Integer(), nullable=False),
+        sa.Column("station_id", sa.String(), nullable=False),
         sa.Column("station_name", sa.String(), nullable=False),
         sa.Column("reading_datetime", sa.DateTime(), nullable=False),
         sa.Column("request_datetime", sa.DateTime(), nullable=False),
         sa.Column("pm_10_conc", sa.Numeric(7, 3), nullable=True),
         sa.Column("pm_10_aqi", sa.Numeric(7, 3), nullable=True),
-        sa.Column("pm_10_aqi_CAT", sa.Numeric(2, 1), nullable=True),
+        sa.Column("pm_10_aqi_cat", sa.Numeric(2, 1), nullable=True),
         sa.Column("pm_25_conc", sa.Numeric(7, 3), nullable=True),
         sa.Column("pm_25_aqi", sa.Numeric(7, 3), nullable=True),
-        sa.Column("pm_25_aqi_CAT", sa.Numeric(2, 1), nullable=True),
+        sa.Column("pm_25_aqi_cat", sa.Numeric(2, 1), nullable=True),
         sa.PrimaryKeyConstraint("station_id", "reading_datetime"),
     )
     op.create_table(
@@ -56,7 +56,7 @@ def upgrade() -> None:
     )
     op.create_table(
         "stations_airnow",
-        sa.Column("station_id", sa.Integer(), nullable=False),
+        sa.Column("station_id", sa.String(), nullable=False),
         sa.Column("station_name", sa.String(), nullable=False),
         sa.Column("agency_name", sa.String(), nullable=False),
         sa.Column("latitude", sa.Numeric(10, 6), nullable=False),
