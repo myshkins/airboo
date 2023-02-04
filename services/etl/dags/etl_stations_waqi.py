@@ -20,10 +20,9 @@ def etl_stations_waqi():
     @task()
     def create_stations_temp():
         with get_db() as db:
-            try:
+            engine = db.get_bind()
+            if engine.has_table('stations_waqi_temp'):
                 Waqi_Stations_Temp.__table__.drop(db.get_bind())
-            except:
-                pass
             Waqi_Stations_Temp.__table__.create(db.get_bind())
 
     @task()

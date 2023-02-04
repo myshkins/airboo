@@ -33,10 +33,9 @@ def etl_airnow_readings():
     @task
     def create_table_readings_airnow_temp():
         with get_db() as db:
-            try:
+            engine = db.get_bind()
+            if engine.has_table('readings_airnow_temp'):
                 ReadingsAirnowTemp.__table__.drop(db.get_bind())
-            except: # add better error handling
-                pass
             ReadingsAirnowTemp.__table__.create(db.get_bind())
 
     @task

@@ -27,10 +27,9 @@ def etl_stations_airnow():
     def create_table_stations_airnow_temp():
         """create temp table for airnow stations"""
         with get_db() as db:
-            try:
+            engine = db.get_bind()
+            if engine.has_table('stations_airnow_temp'):
                 AirnowStationsTemp.__table__.drop(db.get_bind())
-            except: # todo: add better error handling
-                pass
             AirnowStationsTemp.__table__.create(db.get_bind())
 
     @task

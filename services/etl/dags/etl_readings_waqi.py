@@ -27,10 +27,9 @@ def etl_readings_waqi():
     @task()
     def create_temp_waqi():
         with get_db() as db:
-            try:
+            engine = db.get_bind()
+            if engine.has_table('readings_waqi_temp'):
                 Readings_Waqi_Temp.__table__.drop(db.get_bind())
-            except [UndefinedTable, ProgrammingError] as e:
-                raise e
             Readings_Waqi_Temp.__table__.create(db.get_bind())
 
     @task()
