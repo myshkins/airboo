@@ -5,9 +5,10 @@ import pandas as pd
 import pendulum
 from airflow.decorators import dag, task
 from airflow.providers.postgres.hooks.postgres import PostgresHook
-from airflow.providers.postgres.operators.postgres import PostgresOperator
 from api_interface import get_readings_airnow as gad
 from util.util_sql import read_sql, exec_sql
+from db.db_engine import get_db
+from shared_models.stations_airnow import AirnowStationsTemp
 
 
 @dag(
@@ -22,11 +23,12 @@ def etl_stations_airnow():
     Dag definition for pulling airnow station data, shaping that data, and
     putting it into the station table.
     """
-    create_table_stations_airnow_temp = PostgresOperator(
-        task_id="create_table_stations_airnow_temp",
-        postgres_conn_id="postgres_etl_conn",
-        sql="sql/create_table_stations_airnow_temp.sql",
-    )
+    @task
+    def create_table_stations_airnow_temp():
+        """create temp table for airnow stations"""
+        with get_db() as db:
+            AirnowStationsTemp.__table__.drop(db.get_bind())
+            AirnowStationsTemp.__table__.create(db.get_bind())
 
     @task
     def get_stations_airnow():
@@ -63,7 +65,9 @@ def etl_stations_airnow():
             PM10,
             PM2_5,
             how="outer",
-            on=["StationID", "Latitude", "Longitude", "SiteName", "AgencyName"],
+            on=[
+                "StationID", "Latitude", "Longitude", "SiteName", "AgencyName"
+                ],
         )
         df = df.drop_duplicates(subset="SiteName", keep='first')
         df = df.replace({',': '-'}, regex=True)
@@ -82,7 +86,7 @@ def etl_stations_airnow():
             '/opt/airflow/dags/sql/populate_station_coord_airnow.sql')
         exec_sql(stmt)
 
-    a = create_table_stations_airnow_temp
+    a = create_table_stations_airnow_temp()
     b = get_stations_airnow()
     c = shape_station_data()
 

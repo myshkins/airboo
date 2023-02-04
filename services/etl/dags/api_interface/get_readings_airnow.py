@@ -30,8 +30,10 @@ def get_readings_airnow():
     except requests.exceptions.RequestException as e:
         raise e
 
+
 def get_stations_airnow():
-    station_url = f"{STATION_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat"
+    station_url = (
+        f"{STATION_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat")
     try:
         response = requests.get(station_url)
         return response.text

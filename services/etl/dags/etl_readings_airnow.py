@@ -15,7 +15,8 @@ import pendulum
 from airflow.decorators import dag, task
 from api_interface import get_readings_airnow as gad
 from db.db_engine import get_db
-from util.util_sql import read_sql, exec_sql
+from util.util_sql import read_sql
+from shared_models.readings_airnow import ReadingsAirnowTemp
 
 
 @dag(
@@ -32,8 +33,9 @@ def etl_airnow_readings():
 
     @task
     def create_table_readings_airnow_temp():
-        sql_stmts = read_sql('dags/sql/create_table_readings_airnow_temp.sql')
-        exec_sql(sql_stmts)
+        with get_db() as db:
+            ReadingsAirnowTemp.__table__.drop(db.get_bind())
+            ReadingsAirnowTemp.__table__.create(db.get_bind())
 
     @task
     def extract_current_readings():
