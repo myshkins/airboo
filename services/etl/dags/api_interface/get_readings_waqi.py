@@ -68,16 +68,22 @@ async def format_waqi_response(response: dict) -> dict:
 
 
 async def fetch_readings_urls(session: ClientSession, url: str) -> dict:
-    async with session.get(url) as response:
-        if response.status >= 400:
-            raise HTTPException(message='HTTP 400+ error calling waqi readings')
-        response_json = await response.json()
-        if response_json.get('status') == 'ok':
-            result_json = await format_waqi_response(response_json)
-        else:
-            result_json = None
-
-    return result_json
+    try:
+        async with session.get(url) as response:
+            response_json = await response.json()
+            if response_json.get('status') != 'ok':
+                result_json = None
+                raise HTTPException(text=f"No WAQI station data returned for {url}")
+            else:
+                result_json = await format_waqi_response(response_json)
+    except HTTPException as e:
+        LOGGER.error(f"some HTTP error {e.text}")
+    except InvalidURL as e:
+        LOGGER.error(f"Invalid URL {e.text} for {url}")
+    except ClientError as e:
+        LOGGER.error(f"Client error {e.text} for {url}")
+    finally:
+        return result_json
 
 
 async def get_waqi_readings():
@@ -86,6 +92,3 @@ async def get_waqi_readings():
         readings_list = await asyncio.gather(*task_list)
         result_list = [reading for reading in readings_list if reading]
     return result_list
-
-# waqi_readings = asyncio.run(get_waqi_readings())
-# print(waqi_readings)

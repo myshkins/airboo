@@ -3,7 +3,6 @@ from datetime import timedelta
 import pendulum
 from airflow.decorators import dag, task
 from db.db_engine import get_db
-from logger import LOGGER
 from shared_models.readings_waqi import Readings_Waqi_Temp
 from sqlalchemy import insert
 
@@ -35,7 +34,6 @@ def etl_readings_waqi():
     @task()
     def request_waqi_readings():
         waqi_readings = asyncio.run(get_waqi_readings())
-        LOGGER.info(waqi_readings)
         return waqi_readings
 
     @task()
