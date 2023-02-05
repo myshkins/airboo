@@ -52,6 +52,10 @@ def create_logger() -> custom_logger:
     """
     custom_logger.remove()
     custom_logger.add(stdout, colorize=True, format=formatter)
+    custom_logger.add(
+        "opt/airflow/logs/app_logs/file_{time:YYYY_MM_DD}.log",
+        rotation="12:00",
+        format="{time:HH:mm:ss A} - {level} - {message}")
     return custom_logger
 
 
