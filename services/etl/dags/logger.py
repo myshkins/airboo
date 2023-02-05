@@ -44,6 +44,10 @@ def formatter(log: dict) -> str:
         )
 
 
+def airflow_formatter(log: dict) -> str:
+    return "{time:HH:mm:ss A} - {level} - {message}"
+
+
 def create_logger() -> custom_logger:
     """
     Create custom logger.
@@ -51,11 +55,11 @@ def create_logger() -> custom_logger:
     :returns: custom_logger
     """
     custom_logger.remove()
-    custom_logger.add(stdout, colorize=True, format=formatter)
+    custom_logger.add(stdout, colorize=True, format=airflow_formatter)
     custom_logger.add(
         "/opt/airflow/logs/app_logs/file_{time:YYYY_MM_DD}.log",
         rotation="12:00",
-        format="{time:HH:mm:ss A} - {level} - {message}")
+        format=formatter)
     return custom_logger
 
 
