@@ -5,8 +5,7 @@ from airflow.decorators import dag, task
 from db.db_engine import get_db
 from shared_models.readings_waqi import Readings_Waqi_Temp
 from sqlalchemy import insert
-from sqlalchemy.exc import ProgrammingError
-from psycopg2.errors import UndefinedTable
+
 
 @dag(
     schedule=timedelta(minutes=15),
@@ -42,7 +41,6 @@ def etl_readings_waqi():
         with get_db() as db:
             db.execute(insert(Readings_Waqi_Temp), waqi_data)
             db.commit()
-            # db.expire_all()
 
     @task()
     def load_readings_waqi():
