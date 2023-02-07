@@ -14,6 +14,6 @@ router = APIRouter(
 @router.get("/from-closest/")
 def get_data_from_closest(zipcode: str, db: Session = Depends(get_db)):
     station_data = crud.get_closest_station(zipcode, db)
-    station = station_data[0][0]
-    data = crud.get_data(station, db)
+    station_id = station_data[0][0]
+    data = crud.get_data(station_id, db)
     return data

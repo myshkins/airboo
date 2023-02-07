@@ -61,7 +61,7 @@ a, .nav-links li { transition: all .1s ease-in-out; }
 
 a:hover, .nav-links li:hover { transform: scale(1.05); }
 
-button {
+button, input[type="submit"] {
   padding: .3rem;
   width: fit-content;
   background-color: var(--bg-color);

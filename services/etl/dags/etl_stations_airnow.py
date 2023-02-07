@@ -10,6 +10,8 @@ from util.util_sql import read_sql, exec_sql
 from db.db_engine import get_db
 from shared_models.stations_airnow import AirnowStationsTemp
 
+PATH = "/opt/airflow/dags/"
+
 
 @dag(
     dag_id="etl_stations_airnow",
@@ -23,21 +25,20 @@ def etl_stations_airnow():
     Dag definition for pulling airnow station data, shaping that data, and
     putting it into the station table.
     """
+
     @task
     def create_table_stations_airnow_temp():
         """create temp table for airnow stations"""
         with get_db() as db:
             engine = db.get_bind()
-            if engine.has_table('stations_airnow_temp'):
+            if engine.has_table("stations_airnow_temp"):
                 AirnowStationsTemp.__table__.drop(db.get_bind())
             AirnowStationsTemp.__table__.create(db.get_bind())
 
     @task
     def get_stations_airnow():
         """gets station data file from airnow.org and writes it to .csv"""
-        with open(
-                '/opt/airflow/dags/files/stations_airnow.csv',
-                mode='w') as file:
+        with open(f"{PATH}files/stations_airnow.csv", mode="w") as file:
             data = gad.get_stations_airnow()
             file.write(data)
 
@@ -48,14 +49,25 @@ def etl_stations_airnow():
         stations_airnow_temp
         """
         df = pd.read_csv(
-            "/opt/airflow/dags/files/stations_airnow.csv", delimiter="|"
-        )
+            f"{PATH}files/stations_airnow.csv", delimiter="|")
         df = df.drop(
-            ["AQSID", "FullAQSID", "MonitorType", "SiteCode",
-             "AgencyID", "EPARegion", "CBSA_ID", "CBSA_Name", "StateAQSCode",
-             "StateAbbreviation", "Elevation", "GMTOffset", "CountyName",
-             "CountyAQSCode"],
-            axis=1
+            [
+                "AQSID",
+                "FullAQSID",
+                "MonitorType",
+                "SiteCode",
+                "AgencyID",
+                "EPARegion",
+                "CBSA_ID",
+                "CBSA_Name",
+                "StateAQSCode",
+                "StateAbbreviation",
+                "Elevation",
+                "GMTOffset",
+                "CountyName",
+                "CountyAQSCode",
+            ],
+            axis=1,
         )
         df = df.groupby("CountryFIPS").get_group("US")
         df = df.groupby("Status").get_group("Active")
@@ -68,25 +80,27 @@ def etl_stations_airnow():
             PM2_5,
             how="outer",
             on=[
-                "StationID", "Latitude", "Longitude", "SiteName", "AgencyName"
-                ],
+                "StationID", "Latitude", "Longitude", "SiteName", "AgencyName"],
         )
-        df.to_csv('/opt/airflow/dags/files/stations3.csv', sep='|', header=True, index=False)
-        df = df.drop_duplicates(subset="SiteName", keep='first')
-        df = df.replace({',': '-'}, regex=True)
+        df.to_csv(
+            f"{PATH}files/stations3.csv",
+            sep="|", header=True, index=False
+        )
+        df = df.drop_duplicates(subset="SiteName", keep="first")
+        df = df.replace({",": "-"}, regex=True)
         df = df.dropna(axis=0)
         df.to_csv(
-            '/opt/airflow/dags/files/stations_airnow.csv',
-            sep='|',
-            header=False, index=False
-            )
-        hook = PostgresHook(postgres_conn_id='postgres_etl_conn')
-        stmt = read_sql('/opt/airflow/dags/sql/copy_stations_airnow_temp.sql')
+            f"{PATH}files/stations_airnow.csv",
+            sep="|",
+            header=False,
+            index=False,
+        )
+        hook = PostgresHook(postgres_conn_id="postgres_etl_conn")
+        stmt = read_sql(f"{PATH}sql/copy_stations_airnow_temp.sql")
         hook.copy_expert(
-            sql=stmt[0],
-            filename='/opt/airflow/dags/files/stations_airnow.csv')
-        stmt = read_sql(
-            '/opt/airflow/dags/sql/populate_station_coord_airnow.sql')
+            sql=stmt[0], filename=f"{PATH}files/stations_airnow.csv"
+        )
+        stmt = read_sql(f"{PATH}sql/populate_station_coord_airnow.sql")
         exec_sql(stmt)
 
     a = create_table_stations_airnow_temp()
