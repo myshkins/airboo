@@ -1,4 +1,5 @@
-from sqlalchemy import Column, DateTime, Numeric, String
+from sqlalchemy import (Column, DateTime, ForeignKey, Numeric, String,
+                        relationship)
 
 from . import Base
 
@@ -19,6 +20,9 @@ class ReadingsAirnowCommon(Base):
 
 class ReadingsAirnow(ReadingsAirnowCommon):
     __tablename__ = "readings_airnow"
+    station_id = Column(String, ForeignKey("stations_airnow.station_id"), primary_key=True, nullable=False)
+
+    stations_rel = relationship("AirnowStations", backref="readings_airnow")
 
 
 class ReadingsAirnowTemp(ReadingsAirnowCommon):
