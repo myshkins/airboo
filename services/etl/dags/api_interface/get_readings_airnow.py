@@ -1,6 +1,7 @@
 import pendulum
 import requests
 from config import Settings
+from logger import LOGGER
 
 AIRNOW_URL = "https://www.airnowapi.org/aq/data/"
 STATION_URL = "https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/"
@@ -34,6 +35,7 @@ def get_readings_airnow():
 def get_stations_airnow():
     station_url = (
         f"{STATION_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat")
+    LOGGER.info(station_url)
     try:
         response = requests.get(station_url)
         return response.text
