@@ -6,6 +6,7 @@ import SideDropDown from "../components/SideDropDown";
 import SideDropDownInput from "../components/SideDropDownInput";
 import EditStationsWindow from "../components/EditStationsWindow";
 import React, { useEffect, useState } from "react";
+import HomeButton from "../components/HomeButton";
 
 const Home = () => {
   const timePeriods = [
@@ -29,9 +30,10 @@ const Home = () => {
   const [tempStations, setTempStations] = useState(null);
   const [leftSideBarVisible, setLeftSideBarVisible] = useState(true);
   const [stationDropVisible, setStationDropVisible] = useState(true);
-  const [editStationPopupVisible, setEditStationPopupVisible] = useState(false)
+  const [editStationPopupVisible, setEditStationPopupVisible] = useState(false);
   const [timeDropVisible, setTimeDropVisible] = useState(true);
-  const [zipcode, setZipcode] = useState(11206);
+  const [zipcode, setZipcode] = useState("11206");
+  const [zipQuery, setZipQuery] = useState("11206")
 
   const toggleSideBar = () => {
     setLeftSideBarVisible(!leftSideBarVisible);
@@ -46,8 +48,17 @@ const Home = () => {
   };
 
   const toggleEditStationPopup = () => {
-    setEditStationPopupVisible(!editStationPopupVisible)
+    setEditStationPopupVisible(!editStationPopupVisible);
+  };
+
+  const handleZipcodeChange = (e) => {
+    setZipcode(e.target.value);
+  };
+
+  const handleZipQueryChange = () => {
+    setZipQuery(zipcode)
   }
+
   const updateStations = (e) => {
     e.preventDefault();
     let trueStations = tempStations.map((station) =>
@@ -63,7 +74,7 @@ const Home = () => {
     );
     let newStations = trueStations.filter(Boolean);
     setStations(newStations);
-    toggleEditStationPopup()
+    toggleEditStationPopup();
   };
 
   const handleCheckChange = (e) => {
@@ -81,19 +92,29 @@ const Home = () => {
     );
     setTempStations(updatedTempStations);
   };
-  useEffect(() => {
-    findStations();
-  }, []);
 
-  async function findStations() {
-    const response = await fetch(
-      `http://localhost:8100/stations/all-nearby/?zipcode=${zipcode}`,
-      { mode: "cors" }
-    );
-    const data = await response.json();
-    data.forEach((station) => (station["checked"] = false));
-    setTempStations(data);
-  }
+  useEffect(() => {
+    const findStations = async () => {
+      console.log(`http://localhost:8100/stations/all-nearby/?zipcode=${zipcode}`)
+      const response = await fetch(
+        `http://localhost:8100/stations/all-nearby/?zipcode=${zipcode}`,
+        { mode: "cors" }
+      );
+
+      const data = await response.json();
+      const tempArr = [...data, ...stations]
+      const tempArrTwo = tempArr.filter((value, index, arr) => {
+        return index === arr.findIndex((item) => (
+          item["station_id"] === value["station_id"]
+        ))
+      })
+      tempArrTwo.forEach((station) => (station["checked"] = false));
+      
+      setTempStations(tempArrTwo);
+    };
+
+    findStations();
+  }, [zipQuery]);
 
   return (
     <div className="dashboard-container">
@@ -101,14 +122,17 @@ const Home = () => {
         toggleSideBar={toggleSideBar}
         contentVisible={leftSideBarVisible}
       >
-        <EditStationsWindow
-          zipcode={zipcode}
-          setZipcode={setZipcode}
-          tempStations={tempStations}
-          updateStations={updateStations}
-          handleCheckChange={handleCheckChange}
-          findStations={findStations}
-        />
+        {editStationPopupVisible ? (
+          <EditStationsWindow
+            zipcode={zipcode}
+            setZipcode={setZipcode}
+            tempStations={tempStations}
+            updateStations={updateStations}
+            handleCheckChange={handleCheckChange}
+            handleZipcodeChange={handleZipcodeChange}
+            handleZipQueryChange={handleZipQueryChange}
+          />
+        ) : null}
         <SideDropDown
           name={"stations"}
           onClick={toggleStationDrop}
@@ -122,12 +146,17 @@ const Home = () => {
               type="checkbox"
             />
           ))}
+          <HomeButton
+            onClick={toggleEditStationPopup}
+            value={"add/remove stations"}
+          />
         </SideDropDown>
 
         <SideDropDown
           name={"time period"}
           onClick={toggleTimeDrop}
           contentVisible={timeDropVisible}
+          hasBtn={false}
         >
           {timePeriods.map((period) => (
             <SideDropDownInput
