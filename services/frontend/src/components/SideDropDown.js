@@ -1,4 +1,6 @@
 import { BiChevronDown } from "react-icons/bi"
+import { HomeButton } from "./HomeButton"
+
 
 const SideDropDown = (props) => {
   return (
@@ -11,7 +13,7 @@ const SideDropDown = (props) => {
           <>
             {props.children}
           </> : null}
-
+      <HomeButton />
       </div>
     </div>
   )

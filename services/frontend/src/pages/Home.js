@@ -29,6 +29,7 @@ const Home = () => {
   const [tempStations, setTempStations] = useState(null);
   const [leftSideBarVisible, setLeftSideBarVisible] = useState(true);
   const [stationDropVisible, setStationDropVisible] = useState(true);
+  const [editStationPopupVisible, setEditStationPopupVisible] = useState(false)
   const [timeDropVisible, setTimeDropVisible] = useState(true);
   const [zipcode, setZipcode] = useState(11206);
 
@@ -44,6 +45,9 @@ const Home = () => {
     setTimeDropVisible(!timeDropVisible);
   };
 
+  const toggleEditStationPopup = () => {
+    setEditStationPopupVisible(!editStationPopupVisible)
+  }
   const updateStations = (e) => {
     e.preventDefault();
     let trueStations = tempStations.map((station) =>
@@ -59,6 +63,7 @@ const Home = () => {
     );
     let newStations = trueStations.filter(Boolean);
     setStations(newStations);
+    toggleEditStationPopup()
   };
 
   const handleCheckChange = (e) => {
