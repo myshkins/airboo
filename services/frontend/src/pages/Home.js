@@ -8,6 +8,7 @@ import SideDropDownRadio from "../components/SideDropDownRadio";
 import EditStationsWindow from "../components/EditStationsWindow";
 import React, { useEffect, useState } from "react";
 import HomeButton from "../components/HomeButton";
+import { config } from "../Constants";
 
 const Home = () => {
   const timePeriods = [
@@ -26,7 +27,8 @@ const Home = () => {
   const [editStationPopupVisible, setEditStationPopupVisible] = useState(false);
   const [timeDropVisible, setTimeDropVisible] = useState(true);
   const [zipcode, setZipcode] = useState("11206");
-  const [zipQuery, setZipQuery] = useState("11206")
+  const [zipQuery, setZipQuery] = useState("11206");
+  const [airData, setAirData] = useState({});
 
   const toggleSideBar = () => {
     setLeftSideBarVisible(!leftSideBarVisible);
@@ -49,8 +51,10 @@ const Home = () => {
   };
 
   const handleZipQueryChange = () => {
-    setZipQuery(zipcode)
-  }
+    setZipQuery(zipcode);
+  };
+
+  const getReadings = () => {};
 
   const updateStations = (e) => {
     e.preventDefault();
@@ -88,27 +92,31 @@ const Home = () => {
 
   useEffect(() => {
     const findStations = async () => {
-      console.log(`http://localhost:8100/stations/all-nearby/?zipcode=${zipcode}`)
       const response = await fetch(
-        `http://localhost:8100/stations/all-nearby/?zipcode=${zipcode}`,
+        `${config.urls.STATIONS_URL}${zipcode}`,
         { mode: "cors" }
       );
 
       const data = await response.json();
-      const tempArr = [...data, ...stations]
-      const tempArrTwo = tempArr.filter((value, index, arr) => (
-        index === arr.findIndex((item) => (
-          item["station_id"] === value["station_id"]
-        ))
-      ))
+      const tempArr = [...data, ...stations];
+      const tempArrTwo = tempArr.filter(
+        (value, index, arr) =>
+          index ===
+          arr.findIndex((item) => item["station_id"] === value["station_id"])
+      );
       tempArrTwo.forEach((station) => (station["checked"] = false));
-      
+
       setTempStations(tempArrTwo);
     };
 
     findStations();
   }, [zipQuery]);
 
+  useEffect(() => {
+    const getAirData = async () => {
+      const response = await fetch(``);
+    };
+  });
   return (
     <div className="dashboard-container">
       <HomeSideBarLeft
@@ -160,6 +168,7 @@ const Home = () => {
             />
           ))}
         </SideDropDown>
+        <HomeButton onClick={getReadings} value={"update graph"} />
       </HomeSideBarLeft>
 
       <HomeGraph />

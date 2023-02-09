@@ -42,7 +42,7 @@ def get_closest_station(zipcode: str, db: Session):
     return result
 
 
-def get_data(station_id: str, db: Session):
+def get_data(ids: list[str], db: Session):
     stmt = text(
         """
         SELECT
@@ -58,5 +58,8 @@ def get_data(station_id: str, db: Session):
         WHERE station_id = :x
         ORDER BY reading_datetime"""
     )
-    data = db.execute(stmt, {"x": station_id}).all()
-    return data
+    result = []
+    for id in ids:
+        data = db.execute(stmt, {"x": id}).all()
+        result.append({id: data})
+    return result

@@ -26,6 +26,7 @@ const EditStationsWindow = (props) => {
               key={station["location_coord"]}
               name={station["station_id"]}
               value={station["station_name"]}
+              checked={station["checked"]}
               onChange={props.handleCheckChange}
               type="checkbox"
             />
