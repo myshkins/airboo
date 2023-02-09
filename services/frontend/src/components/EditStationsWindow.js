@@ -1,5 +1,5 @@
 import HomeButton from "./HomeButton";
-import SideDropDownInput from "./SideDropDownInput";
+import SideDropDownInput from "./SideDropDownCheckbox";
 
 const EditStationsWindow = (props) => {
   return (

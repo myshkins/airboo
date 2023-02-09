@@ -3,7 +3,8 @@ import HomeSideBarRight from "../components/HomeSideBarRight";
 import HomeGraph from "../components/HomeGraph";
 import "./Home.css";
 import SideDropDown from "../components/SideDropDown";
-import SideDropDownInput from "../components/SideDropDownInput";
+import SideDropDownCheckbox from "../components/SideDropDownCheckbox";
+import SideDropDownRadio from "../components/SideDropDownRadio";
 import EditStationsWindow from "../components/EditStationsWindow";
 import React, { useEffect, useState } from "react";
 import HomeButton from "../components/HomeButton";
@@ -18,15 +19,7 @@ const Home = () => {
     "10day",
     "1month",
   ];
-  const [stations, setStations] = useState([
-    {
-      station_id: "360470118",
-      station_name: "Bklyn - PS274",
-      latitude: 40.694401,
-      longitude: -73.928596,
-      location_coord: "0101000020E610000092CCEA1D6E7B52C0A4A7C821E2584440",
-    },
-  ]);
+  const [stations, setStations] = useState([]);
   const [tempStations, setTempStations] = useState(null);
   const [leftSideBarVisible, setLeftSideBarVisible] = useState(true);
   const [stationDropVisible, setStationDropVisible] = useState(true);
@@ -103,11 +96,11 @@ const Home = () => {
 
       const data = await response.json();
       const tempArr = [...data, ...stations]
-      const tempArrTwo = tempArr.filter((value, index, arr) => {
-        return index === arr.findIndex((item) => (
+      const tempArrTwo = tempArr.filter((value, index, arr) => (
+        index === arr.findIndex((item) => (
           item["station_id"] === value["station_id"]
         ))
-      })
+      ))
       tempArrTwo.forEach((station) => (station["checked"] = false));
       
       setTempStations(tempArrTwo);
@@ -139,11 +132,11 @@ const Home = () => {
           contentVisible={stationDropVisible}
         >
           {stations.map((station) => (
-            <SideDropDownInput
+            <SideDropDownCheckbox
               key={station["station_id"]}
               name={station["station_id"]}
               value={station["station_name"]}
-              type="checkbox"
+              checked={station["checked"]}
             />
           ))}
           <HomeButton
@@ -159,7 +152,7 @@ const Home = () => {
           hasBtn={false}
         >
           {timePeriods.map((period) => (
-            <SideDropDownInput
+            <SideDropDownRadio
               key={period}
               name={period}
               value={period}
