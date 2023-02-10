@@ -31,7 +31,7 @@ const Home = () => {
   const [rawData, setRawData] = useState({});
   const [dates, setDates] = useState([]);
   const [aqiData, setAqiData] = useState([]);
-  const [idsToGraph, setIdsToGraph] = useState([]);
+  const [idsToGraph, setIdsToGraph] = useState(["360470118"]);
 
   const toggleSideBar = () => {
     setLeftSideBarVisible(!leftSideBarVisible);
@@ -137,43 +137,29 @@ const Home = () => {
     findStations();
   }, [zipQuery]);
 
-
   useEffect(() => {
     const getReadings = async () => {
-      let qParam = idsToGraph.reduce((prev, id) => (prev + `ids=${id}&`), "?");
-      if (qParam.slice(-1) === "&") {qParam = qParam.slice(0, -1)}
+      let qParam = idsToGraph.reduce((prev, id) => prev + `ids=${id}&`, "?");
+      if (qParam.slice(-1) === "&") {
+        qParam = qParam.slice(0, -1);
+      }
 
       const response = await fetch(`${config.urls.READINGS_URL}${qParam}`);
       const data = await response.json();
-      console.log(data)
-      
-      setRawData(data)
-    }
-
-    const getDates = (data) => {
       const dates = data[0]["data"].map(
         (reading) => reading["reading_datetime"]
       );
-      return dates
-    }
 
-    const getAqiData = (data) => {
-      const aqiData = data.map((station) => (
-        {
-          "station_id": station["station_id"],
-          "data": station["data"].map((reading) => (reading["pm_25_aqi"]))
-      }
-      )) 
-      return aqiData
-    }
+      const aqiData = data.map((station) => ({
+        station_id: station["station_id"],
+        data: station["data"].map((reading) => reading["pm_25_aqi"]),
+      }));
 
-    getReadings()
-    const newDates = getDates(rawData)
-    const newAqiData = getAqiData(rawData)
-    console.log('newAqiData')
-    console.log(newAqiData)
-    setDates(newDates);
-    setAqiData(newAqiData)
+      setRawData(data);
+      setDates(dates);
+      setAqiData(aqiData);
+    };
+    getReadings();
   }, [idsToGraph]);
 
   return (
@@ -231,7 +217,9 @@ const Home = () => {
         <HomeButton onClick={updateIds} value={"update graph"} />
       </HomeSideBarLeft>
 
-      <HomeGraph />
+      <HomeGraph
+        dates={dates}
+        aqiData={aqiData} />
 
       <HomeSideBarRight />
     </div>
