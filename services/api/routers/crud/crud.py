@@ -61,5 +61,5 @@ def get_data(ids: list[str], db: Session):
     result = []
     for id in ids:
         data = db.execute(stmt, {"x": id}).all()
-        result.append({id: data})
+        result.append({"station_id": id, "data": data})
     return result

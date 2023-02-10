@@ -29,8 +29,8 @@ const Home = () => {
   const [zipcode, setZipcode] = useState("11206");
   const [zipQuery, setZipQuery] = useState("11206");
   const [rawData, setRawData] = useState({});
-  const [dates, setDates] = useState([])
-  const [aqiData, setAqiData] = useState([])
+  const [dates, setDates] = useState([]);
+  const [aqiData, setAqiData] = useState([]);
   const [idsToGraph, setIdsToGraph] = useState([]);
 
   const toggleSideBar = () => {
@@ -87,12 +87,12 @@ const Home = () => {
   };
 
   const updateIds = () => {
-    const newIds = []
+    const newIds = [];
     stations.forEach((station) => {
       if (station["checked"]) {
-        newIds.push(station["station_id"])
+        newIds.push(station["station_id"]);
       }
-    })  
+    });
     setIdsToGraph(newIds);
   };
 
@@ -137,23 +137,43 @@ const Home = () => {
     findStations();
   }, [zipQuery]);
 
+
   useEffect(() => {
     const getReadings = async () => {
-      let queryParam = idsToGraph.reduce((prev, id) => {
-        return prev + `?ids=${id}&`
-      }, "")
-      if (queryParam.slice(-1) === "&") {
-        queryParam = queryParam.slice(0, -1)}
-      const response = await fetch(`${config.urls.READINGS_URL}${queryParam}`);
-      console.log(response)
+      let qParam = idsToGraph.reduce((prev, id) => (prev + `ids=${id}&`), "?");
+      if (qParam.slice(-1) === "&") {qParam = qParam.slice(0, -1)}
+
+      const response = await fetch(`${config.urls.READINGS_URL}${qParam}`);
       const data = await response.json();
-      setRawData(data);
       console.log(data)
-      const newDates = data[0].map((reading) => (reading["reading_datetime"]))
-      console.log("newDates")
-      console.log(newDates)
-    };
-    getReadings();
+      
+      setRawData(data)
+    }
+
+    const getDates = (data) => {
+      const dates = data[0]["data"].map(
+        (reading) => reading["reading_datetime"]
+      );
+      return dates
+    }
+
+    const getAqiData = (data) => {
+      const aqiData = data.map((station) => (
+        {
+          "station_id": station["station_id"],
+          "data": station["data"].map((reading) => (reading["pm_25_aqi"]))
+      }
+      )) 
+      return aqiData
+    }
+
+    getReadings()
+    const newDates = getDates(rawData)
+    const newAqiData = getAqiData(rawData)
+    console.log('newAqiData')
+    console.log(newAqiData)
+    setDates(newDates);
+    setAqiData(newAqiData)
   }, [idsToGraph]);
 
   return (
