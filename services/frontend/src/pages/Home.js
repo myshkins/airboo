@@ -11,15 +11,15 @@ import HomeButton from "../components/HomeButton";
 import { config } from "../Constants";
 
 const Home = () => {
-  const timePeriods = [
-    "6hr",
-    "12hr",
-    "24hr",
-    "48hr",
-    "5day",
-    "10day",
-    "1month",
-  ];
+  const [timePeriods, setTimePeriod] = useState({
+    "6hr": true,
+    "12hr": false,
+    "24hr": false,
+    "48hr": false,
+    "5day": false,
+    "10day": false,
+    "1month": false,
+  });
   const [stations, setStations] = useState([]);
   const [tempStations, setTempStations] = useState(null);
   const [leftSideBarVisible, setLeftSideBarVisible] = useState(true);
@@ -29,6 +29,7 @@ const Home = () => {
   const [zipcode, setZipcode] = useState("11206");
   const [zipQuery, setZipQuery] = useState("11206");
   const [airData, setAirData] = useState({});
+  const [idsToGraph, setIdsToGraph] = useState([]);
 
   const toggleSideBar = () => {
     setLeftSideBarVisible(!leftSideBarVisible);
@@ -54,48 +55,71 @@ const Home = () => {
     setZipQuery(zipcode);
   };
 
-  const getReadings = () => {};
+  const pickTimePeriod = (e) => {
+    const newPeriods = {};
+    for (const key of Object.keys(timePeriods)) {
+      key === e.target.name
+        ? (newPeriods[key] = true)
+        : (newPeriods[key] = false);
+    }
+    setTimePeriod(newPeriods);
+  };
 
   const updateStations = (e) => {
     e.preventDefault();
-    let trueStations = tempStations.map((station) =>
+    const trueStations = tempStations.map((station) =>
       station["checked"] === true
         ? {
             station_id: station["station_id"],
             station_name: station["station_name"],
+            checked: true,
             latitude: station["latitude"],
             longitude: station["longitude"],
             location_coord: station["location_coord"],
           }
         : null
     );
-    let newStations = trueStations.filter(Boolean);
+    const newStations = trueStations.filter(Boolean);
     setStations(newStations);
     toggleEditStationPopup();
   };
 
-  const handleCheckChange = (e) => {
-    let updatedTempStations = tempStations.map((station) =>
-      station["station_id"] === e.target.name
-        ? {
-            station_id: station["station_id"],
-            station_name: station["station_name"],
-            latitude: station["latitude"],
-            longitude: station["longitude"],
-            location_coord: station["location_coord"],
-            checked: !station["checked"],
-          }
-        : station
-    );
+  const updateIds = () => {
+    console.log('hewo')
+    const newIds = []
+    stations.forEach((station) => {
+      if (station["checked"]) {
+        newIds.push(station["station_id"])
+      }
+    })  
+    setIdsToGraph(newIds);
+  };
+
+  const handleStationCheckChange = (e) => {
+    const updatedStations = [...stations];
+    updatedStations.forEach((station) => {
+      if (station["station_id"] === e.target.name) {
+        station["checked"] = !station["checked"];
+      }
+    });
+    setStations(updatedStations);
+  };
+
+  const handleTempCheckChange = (e) => {
+    const updatedTempStations = [...tempStations];
+    updatedTempStations.forEach((station) => {
+      if (station["station_id"] === e.target.name) {
+        station["checked"] = !station["checked"];
+      }
+    });
     setTempStations(updatedTempStations);
   };
 
   useEffect(() => {
     const findStations = async () => {
-      const response = await fetch(
-        `${config.urls.STATIONS_URL}${zipcode}`,
-        { mode: "cors" }
-      );
+      const response = await fetch(`${config.urls.STATIONS_URL}${zipcode}`, {
+        mode: "cors",
+      });
 
       const data = await response.json();
       const tempArr = [...data, ...stations];
@@ -112,11 +136,17 @@ const Home = () => {
     findStations();
   }, [zipQuery]);
 
-  useEffect(() => {
-    const getAirData = async () => {
-      const response = await fetch(``);
-    };
-  });
+  // useEffect(() => {
+  //   const getReadings = async () => {
+  //     const queryParam = idsToGraph.reduce((prev, id) => prev + `?=${id}`, "");
+
+  //     const response = await fetch(`${config.urls.READINGS_URL}${queryParam}`);
+  //     const data = await response.json();
+  //     setAirData(data);
+  //   };
+  //   getReadings();
+  // }, [idsToGraph]);
+
   return (
     <div className="dashboard-container">
       <HomeSideBarLeft
@@ -129,7 +159,7 @@ const Home = () => {
             setZipcode={setZipcode}
             tempStations={tempStations}
             updateStations={updateStations}
-            handleCheckChange={handleCheckChange}
+            handleTempCheckChange={handleTempCheckChange}
             handleZipcodeChange={handleZipcodeChange}
             handleZipQueryChange={handleZipQueryChange}
           />
@@ -145,6 +175,7 @@ const Home = () => {
               name={station["station_id"]}
               value={station["station_name"]}
               checked={station["checked"]}
+              onChange={handleStationCheckChange}
             />
           ))}
           <HomeButton
@@ -159,16 +190,16 @@ const Home = () => {
           contentVisible={timeDropVisible}
           hasBtn={false}
         >
-          {timePeriods.map((period) => (
+          {Object.entries(timePeriods).map((item) => (
             <SideDropDownRadio
-              key={period}
-              name={period}
-              value={period}
-              type="radio"
+              key={item[0]}
+              name={item[0]}
+              checked={item[1]}
+              onChange={pickTimePeriod}
             />
           ))}
         </SideDropDown>
-        <HomeButton onClick={getReadings} value={"update graph"} />
+        <HomeButton onClick={updateIds} value={"update graph"} />
       </HomeSideBarLeft>
 
       <HomeGraph />

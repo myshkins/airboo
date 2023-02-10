@@ -23,11 +23,11 @@ const EditStationsWindow = (props) => {
         <form onSubmit={props.updateStations}>
           {props.tempStations.map((station) => (
             <SideDropDownInput
-              key={station["location_coord"]}
+              key={station["station_id"]}
               name={station["station_id"]}
               value={station["station_name"]}
               checked={station["checked"]}
-              onChange={props.handleCheckChange}
+              onChange={props.handleTempCheckChange}
               type="checkbox"
             />
           ))}

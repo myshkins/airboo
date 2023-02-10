@@ -1,6 +1,5 @@
 """api data routes"""
-from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from .crud import crud
 from database import get_db
@@ -12,10 +11,6 @@ router = APIRouter(
 )
 
 
-class IdList(BaseModel):
-    ids: list[str]
-
-
 @router.get("/from-closest/")
 def get_data_from_closest(zipcode: str, db: Session = Depends(get_db)):
     station_data = crud.get_closest_station(zipcode, db)
@@ -25,6 +20,6 @@ def get_data_from_closest(zipcode: str, db: Session = Depends(get_db)):
 
 
 @router.get("/from-ids/")
-def get_readings_from_ids(ids: IdList, db: Session = Depends(get_db)):
+def get_readings_from_ids(ids: list[str] = Query(), db: Session = Depends(get_db)):
     data = crud.get_data(ids, db)
     return data

@@ -4,8 +4,9 @@ const SideDropDownRadio = (props) => {
       <input
         type="radio"
         name={props.name}
-        onChange={props.onChange}/>
-      <label htmlFor={props.name}>{props.value}</label>
+        onChange={props.onChange}
+        checked={props.checked}/>
+      <label htmlFor={props.name}>{props.name}</label>
     </div>
   )
 }
