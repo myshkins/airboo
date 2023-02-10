@@ -28,7 +28,9 @@ const Home = () => {
   const [timeDropVisible, setTimeDropVisible] = useState(true);
   const [zipcode, setZipcode] = useState("11206");
   const [zipQuery, setZipQuery] = useState("11206");
-  const [airData, setAirData] = useState({});
+  const [rawData, setRawData] = useState({});
+  const [dates, setDates] = useState([])
+  const [aqiData, setAqiData] = useState([])
   const [idsToGraph, setIdsToGraph] = useState([]);
 
   const toggleSideBar = () => {
@@ -85,7 +87,6 @@ const Home = () => {
   };
 
   const updateIds = () => {
-    console.log('hewo')
     const newIds = []
     stations.forEach((station) => {
       if (station["checked"]) {
@@ -136,16 +137,24 @@ const Home = () => {
     findStations();
   }, [zipQuery]);
 
-  // useEffect(() => {
-  //   const getReadings = async () => {
-  //     const queryParam = idsToGraph.reduce((prev, id) => prev + `?=${id}`, "");
-
-  //     const response = await fetch(`${config.urls.READINGS_URL}${queryParam}`);
-  //     const data = await response.json();
-  //     setAirData(data);
-  //   };
-  //   getReadings();
-  // }, [idsToGraph]);
+  useEffect(() => {
+    const getReadings = async () => {
+      let queryParam = idsToGraph.reduce((prev, id) => {
+        return prev + `?ids=${id}&`
+      }, "")
+      if (queryParam.slice(-1) === "&") {
+        queryParam = queryParam.slice(0, -1)}
+      const response = await fetch(`${config.urls.READINGS_URL}${queryParam}`);
+      console.log(response)
+      const data = await response.json();
+      setRawData(data);
+      console.log(data)
+      const newDates = data[0].map((reading) => (reading["reading_datetime"]))
+      console.log("newDates")
+      console.log(newDates)
+    };
+    getReadings();
+  }, [idsToGraph]);
 
   return (
     <div className="dashboard-container">

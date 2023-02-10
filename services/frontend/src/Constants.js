@@ -8,7 +8,7 @@ const prod = {
 const dev = {
   urls: {
     STATIONS_URL: 'http://localhost:8100/stations/all-nearby/?zipcode=',
-    READINGS_URL: ''
+    READINGS_URL: 'http://localhost:8100/air-readings/from-ids/'
   }
 }
 
