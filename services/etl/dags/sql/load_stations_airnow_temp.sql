@@ -1,7 +1,7 @@
-COPY stations_airnow_temp_2(
+COPY stations_airnow_temp(
     station_id,
-    aqsid,
-    full_aqsid,
+    aqs_id,
+    full_aqs_id,
     parameter,
     monitor_type,
     site_code,
@@ -21,5 +21,7 @@ COPY stations_airnow_temp_2(
     state_abbrev,
     county_code,
     county_name
-) FROM stdin WITH DELIMITER AS '|' 
-NULL AS '';
+) 
+FROM stdin WITH DELIMITER AS '|' 
+NULL AS ''
+HEADER;
