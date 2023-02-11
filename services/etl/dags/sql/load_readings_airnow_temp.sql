@@ -1,11 +1,16 @@
 copy readings_airnow_temp(
-    station_id,
-    request_datetime,
-    reading_datetime,
-    pm_10_conc,
-    pm_10_aqi,
-    pm_10_aqi_cat,
-    pm_25_conc,
-    pm_25_aqi,
-    pm_25_aqi_cat)
-from stdin delimiter ',' csv
+    latitude,
+    longitude,
+    timestamp_utc,
+    pollutant,
+    concentration,
+    unit,
+    aqi,
+    category,
+    site_name,
+    site_agency,
+    aqs_id,
+    full_aqs_id
+)
+from stdin with csv delimiter as ',' quote as '"' null as ''
+
