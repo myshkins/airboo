@@ -16,6 +16,8 @@ def get_station_list():
     with get_db() as db:
         stations_result = db.execute(sql_stmt).all()
     station_list = [station.station_id for station in stations_result]
+    if not station_list:
+        raise ValueError("No stations retrieved from stations_waqi table")
     return station_list
 
 
@@ -68,26 +70,25 @@ async def format_waqi_response(response: dict) -> dict:
 async def fetch_readings_urls(session: ClientSession, url: str) -> dict:
     try:
         async with session.get(url) as response:
-            if response.status >= 400:
-                raise HTTPException(message='HTTP 400+ error calling waqi readings')
             response_json = await response.json()
-            if response_json.get('status') == 'ok':
-                result_json = await format_waqi_response(response_json)
-            else:
+            if response_json.get('status') != 'ok':
                 result_json = None
-    except InvalidURL as e:
-        LOGGER.error(f"Invalid sation URL for waqi readings {url}: {e}")
-    except ClientError as e:
-        LOGGER.error(f"Client error getting waqi readings {url}: {e}")
+                raise HTTPException(text=f"No WAQI station data returned for {url}")
+            else:
+                result_json = await format_waqi_response(response_json)
     except HTTPException as e:
-        LOGGER.error(f"HTTPException getting {url}: {e}")
-
-    return result_json
+        LOGGER.error(f"some HTTP error {e.text}")
+    except InvalidURL as e:
+        LOGGER.error(f"Invalid URL {e.text} for {url}")
+    except ClientError as e:
+        LOGGER.error(f"Client error {e.text} for {url}")
+    finally:
+        return result_json
 
 
 async def get_waqi_readings():
     async with ClientSession() as session:
         task_list = await create_task_list(session)
         readings_list = await asyncio.gather(*task_list)
-        result_list = [reading for reading in readings_list if reading]  # remove None values
+        result_list = [reading for reading in readings_list if reading]
     return result_list
