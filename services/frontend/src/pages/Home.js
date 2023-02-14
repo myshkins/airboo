@@ -26,12 +26,12 @@ const Home = () => {
   const [stationDropVisible, setStationDropVisible] = useState(true);
   const [editStationPopupVisible, setEditStationPopupVisible] = useState(false);
   const [timeDropVisible, setTimeDropVisible] = useState(true);
-  const [zipcode, setZipcode] = useState("11206");
-  const [zipQuery, setZipQuery] = useState("11206");
-  const [rawData, setRawData] = useState({});
+  const [zipcode, setZipcode] = useState("80304");
+  const [zipQuery, setZipQuery] = useState("80304");
+  const [rawReadings, setRawReadings] = useState({});
   const [dates, setDates] = useState([]);
   const [aqiData, setAqiData] = useState([]);
-  const [idsToGraph, setIdsToGraph] = useState(["360470118"]);
+  const [idsToGraph, setIdsToGraph] = useState([""]);
 
   const toggleSideBar = () => {
     setLeftSideBarVisible(!leftSideBarVisible);
@@ -146,16 +146,18 @@ const Home = () => {
 
       const response = await fetch(`${config.urls.READINGS_URL}${qParam}`);
       const data = await response.json();
+      console.log('data')
+      console.log(data)
       const dates = data[0]["data"].map(
         (reading) => reading["reading_datetime"]
       );
 
       const aqiData = data.map((station) => ({
         station_id: station["station_id"],
-        data: station["data"].map((reading) => reading["pm_25_aqi"]),
+        data: station["data"].map((reading) => reading["pm25_aqi"]),
       }));
 
-      setRawData(data);
+      setRawReadings(data);
       setDates(dates);
       setAqiData(aqiData);
     };
@@ -217,9 +219,7 @@ const Home = () => {
         <HomeButton onClick={updateIds} value={"update graph"} />
       </HomeSideBarLeft>
 
-      <HomeGraph
-        dates={dates}
-        aqiData={aqiData} />
+      <HomeGraph dates={dates} aqiData={aqiData} />
 
       <HomeSideBarRight />
     </div>
