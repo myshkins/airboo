@@ -8,6 +8,8 @@ from db.db_engine import get_db
 from shared_models.stations_airnow import AirnowStationsTemp
 from util.util_sql import exec_sql, read_sql
 
+PATH = "/opt/airflow/dags/"
+
 
 @dag(
     dag_id="etl_stations_airnow",
@@ -21,21 +23,20 @@ def etl_stations_airnow():
     Dag definition for pulling airnow station data, shaping that data, and
     putting it into the station table.
     """
+
     @task
     def create_table_stations_airnow_temp():
         """create temp table for airnow stations"""
         with get_db() as db:
             engine = db.get_bind()
-            if engine.has_table('stations_airnow_temp'):
+            if engine.has_table("stations_airnow_temp"):
                 AirnowStationsTemp.__table__.drop(db.get_bind())
             AirnowStationsTemp.__table__.create(db.get_bind())
 
     @task
     def get_stations_airnow():
         """gets station data file from airnow.org and writes it to .csv"""
-        with open(
-                '/opt/airflow/dags/files/stations_airnow.csv',
-                mode='w') as file:
+        with open(f"{PATH}files/stations_airnow.csv", mode="w") as file:
             data = gad.get_stations_airnow()
             file.write(data)
 

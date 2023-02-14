@@ -9,6 +9,7 @@
 
 
 .left-side-bar {
+  position: relative;
   padding: 0 1rem 1rem;
 }
 
@@ -59,4 +60,11 @@
 .analysis-header {
   margin-bottom: 2rem;
   align-self: center;
+}
+
+.edit-station-window {
+  position: absolute;
+  left: 90%;
+  background-color: var(--grey);
+  padding: 2rem;
 }

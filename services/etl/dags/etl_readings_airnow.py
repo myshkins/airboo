@@ -18,6 +18,7 @@ from shared_models.readings_airnow import ReadingsAirnowTemp
 from util.util_sql import read_sql
 
 
+
 @dag(
     dag_id="etl_readings_airnow",
     schedule=timedelta(minutes=10),
@@ -33,7 +34,7 @@ def etl_airnow_readings():
     def create_table_readings_airnow_temp():
         with get_db() as db:
             engine = db.get_bind()
-            if engine.has_table('readings_airnow_temp'):
+            if engine.has_table("readings_airnow_temp"):
                 ReadingsAirnowTemp.__table__.drop(db.get_bind())
             ReadingsAirnowTemp.__table__.create(db.get_bind())
 
@@ -43,7 +44,7 @@ def etl_airnow_readings():
         data_path = "/opt/airflow/dags/files/raw_readings_airnow.csv"
         os.makedirs(os.path.dirname(data_path), exist_ok=True)
         csv_data = gad.get_readings_airnow()
-        with open(data_path, 'w') as file:
+        with open(data_path, "w") as file:
             file.write(csv_data)
 
     @task

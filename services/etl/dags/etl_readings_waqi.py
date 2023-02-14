@@ -15,7 +15,7 @@ from sqlalchemy import insert
 )
 def etl_readings_waqi():
     """
-    This dag retrieves air quality readings data from World Air Quality Index 
+    This dag retrieves air quality readings data from World Air Quality Index
     project: https://aqicn.org/api/
     """
     import asyncio
@@ -27,7 +27,7 @@ def etl_readings_waqi():
     def create_temp_waqi():
         with get_db() as db:
             engine = db.get_bind()
-            if engine.has_table('readings_waqi_temp'):
+            if engine.has_table("readings_waqi_temp"):
                 Readings_Waqi_Temp.__table__.drop(db.get_bind())
             Readings_Waqi_Temp.__table__.create(db.get_bind())
 
@@ -44,7 +44,7 @@ def etl_readings_waqi():
 
     @task()
     def load_readings_waqi():
-        sql_stmts = read_sql('dags/sql/load_readings_waqi.sql')
+        sql_stmts = read_sql("dags/sql/load_readings_waqi.sql")
         exec_sql(sql_stmts)
 
     task_1 = create_temp_waqi()

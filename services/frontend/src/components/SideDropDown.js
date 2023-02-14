@@ -1,5 +1,6 @@
 import { BiChevronDown } from "react-icons/bi"
 
+
 const SideDropDown = (props) => {
   return (
     <div className="dropdown-wrap">
@@ -11,7 +12,6 @@ const SideDropDown = (props) => {
           <>
             {props.children}
           </> : null}
-
       </div>
     </div>
   )

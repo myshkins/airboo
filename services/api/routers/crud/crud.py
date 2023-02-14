@@ -16,7 +16,7 @@ def get_nearby_stations(zipcode: str, db: Session):
     loc = zipcode_to_latlong(zipcode)
     stmt = text(
         """
-        SELECT station_name, latitude, longitude, location_coord
+        SELECT station_id, station_name, latitude, longitude, location_coord
         FROM stations_airnow
         ORDER BY location_coord <-> 'SRID=4326;POINT(:y :x)'::geometry
         LIMIT 5
@@ -32,7 +32,7 @@ def get_closest_station(zipcode: str, db: Session):
     loc = zipcode_to_latlong(zipcode)
     stmt = text(
         """
-        SELECT station_name, latitude, longitude, location_coord
+        SELECT station_id, station_name, latitude, longitude, location_coord
         FROM stations_airnow
         ORDER BY location_coord <-> 'SRID=4326;POINT(:y :x)'::geometry
         LIMIT 1
@@ -42,21 +42,19 @@ def get_closest_station(zipcode: str, db: Session):
     return result
 
 
-def get_data(station: str, db: Session):
+def get_data(ids: list[str], db: Session):
     stmt = text(
         """
         SELECT
             station_id,
             reading_datetime,
-            pm_10_conc,
-            pm_10_AQI,
-            pm_10_AQI_CAT,
-            pm_25_conc,
-            pm_25_AQI,
-            pm_25_AQI_CAT
-        FROM airnow_readings
-        WHERE station_name = :x
+            pm_25
+        FROM readings_waqi
+        WHERE station_id = :x
         ORDER BY reading_datetime"""
     )
-    data = db.execute(stmt, {"x": station}).all()
-    return data
+    result = []
+    for id in ids:
+        data = db.execute(stmt, {"x": id}).all()
+        result.append({"station_id": id, "data": data})
+    return result
