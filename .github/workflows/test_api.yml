@@ -28,6 +28,7 @@ jobs:
       run:
         working-directory: services/api
     steps:
+      - run: echo ${{ needs.configure.outputs.uid_gid }}
       - uses: actions/checkout@v3
       - run: pip install --upgrade pip
       - run: pip install -r requirements.txt
