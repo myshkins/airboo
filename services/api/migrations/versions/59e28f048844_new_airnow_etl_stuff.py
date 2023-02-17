@@ -10,8 +10,8 @@ from alembic import op
 from geoalchemy2 import Geometry
 
 # revision identifiers, used by Alembic.
-revision = '59e28f048844'
-down_revision = '55036a2dee06'
+revision = "59e28f048844"
+down_revision = "55036a2dee06"
 branch_labels = None
 depends_on = None
 
@@ -70,7 +70,8 @@ def upgrade() -> None:
             "data_datetime",
             sa.TIMESTAMP(),
             server_default=sa.text("now()"),
-            nullable=False),
+            nullable=False,
+        ),
         sa.Column("pm25_conc", sa.Numeric(7, 3), nullable=True),
         sa.Column("pm25_aqi", sa.Integer(), nullable=True),
         sa.Column("pm25_cat", sa.Integer(), nullable=True),
@@ -97,7 +98,8 @@ def upgrade() -> None:
             "readings_temp_pk",
             sa.Integer(),
             sa.Identity(start=1, cycle=False),
-            primary_key=True),
+            primary_key=True,
+        ),
         sa.Column("latitude", sa.String(), nullable=False),
         sa.Column("longitude", sa.String(), nullable=False),
         sa.Column("timestamp_utc", sa.String(), nullable=False),
@@ -124,7 +126,9 @@ def downgrade() -> None:
         sa.Column("latitude", sa.Numeric(10, 6), nullable=False),
         sa.Column("longitude", sa.Numeric(10, 6), nullable=False),
         sa.Column(
-            "location_coord", Geometry(geometry_type="POINT"), nullable=True,
+            "location_coord",
+            Geometry(geometry_type="POINT"),
+            nullable=True,
         ),
         sa.PrimaryKeyConstraint("station_id"),
     )
@@ -136,7 +140,9 @@ def downgrade() -> None:
         sa.Column("latitude", sa.Numeric(10, 6), nullable=False),
         sa.Column("longitude", sa.Numeric(10, 6), nullable=False),
         sa.Column(
-            "location_coord", Geometry(geometry_type="POINT"), nullable=True,
+            "location_coord",
+            Geometry(geometry_type="POINT"),
+            nullable=True,
         ),
         sa.PrimaryKeyConstraint("station_id"),
     )

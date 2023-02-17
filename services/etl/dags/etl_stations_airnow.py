@@ -43,17 +43,16 @@ def etl_stations_airnow():
     @task
     def load_temp_table():
         """get airnow stations and load everything into temp table"""
-        file_path = '/opt/airflow/dags/files/stations_airnow.csv'
-        with get_db() as db, open(file_path, mode='r') as file:
-            load_stmt = read_sql('/opt/airflow/dags/sql/load_stations_airnow_temp.sql')
+        file_path = "/opt/airflow/dags/files/stations_airnow.csv"
+        with get_db() as db, open(file_path, mode="r") as file:
+            load_stmt = read_sql("/opt/airflow/dags/sql/load_stations_airnow_temp.sql")
             cursor = db.connection().connection.cursor()
             cursor.copy_expert(load_stmt[0], file)
             db.commit()
 
     @task
     def load_prod():
-        load_stmt = read_sql(
-            '/opt/airflow/dags/sql/load_stations_airnow.sql')
+        load_stmt = read_sql("/opt/airflow/dags/sql/load_stations_airnow.sql")
         exec_sql(load_stmt)
 
     a = create_table_stations_airnow_temp()

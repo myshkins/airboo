@@ -17,7 +17,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute('create extension if not exists postgis')
+    op.execute("create extension if not exists postgis")
     op.create_table(
         "readings_airnow",
         sa.Column(
@@ -135,7 +135,9 @@ def upgrade() -> None:
         sa.Column("latitude", sa.Numeric(10, 6), nullable=False),
         sa.Column("longitude", sa.Numeric(10, 6), nullable=False),
         sa.Column(
-            "location_coord", Geometry(geometry_type="POINT"), nullable=True,
+            "location_coord",
+            Geometry(geometry_type="POINT"),
+            nullable=True,
         ),
         sa.PrimaryKeyConstraint("station_id"),
     )
@@ -151,7 +153,9 @@ def upgrade() -> None:
         sa.Column("latitude", sa.Numeric(10, 6), nullable=False),
         sa.Column("longitude", sa.Numeric(10, 6), nullable=False),
         sa.Column(
-            "location_coord", Geometry(geometry_type="POINT"), nullable=True,
+            "location_coord",
+            Geometry(geometry_type="POINT"),
+            nullable=True,
         ),
         sa.PrimaryKeyConstraint("station_id"),
     )

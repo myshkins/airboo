@@ -7,12 +7,12 @@ AIRNOW_URL = "https://www.airnowapi.org/aq/data/"
 STATION_URL = "https://s3-us-west-1.amazonaws.com//files.airnowtech.org/airnow/"
 
 settings = Settings()
-yesterday = (pendulum.now() - pendulum.duration(days=2)).format('YMMDD')
-now = pendulum.now(tz='UTC')
+yesterday = (pendulum.now() - pendulum.duration(days=2)).format("YMMDD")
+now = pendulum.now(tz="UTC")
 year = now.year
 params = {
-    "startDate": (now - pendulum.duration(hours=2)).format('Y-MM-DDTH'),
-    "endDate": (now.format('Y-MM-DDTH')),
+    "startDate": (now - pendulum.duration(hours=2)).format("Y-MM-DDTH"),
+    "endDate": (now.format("Y-MM-DDTH")),
     "parameters": "OZONE,PM25,PM10,CO,NO2,SO2",
     "BBOX": "-167.716404,3.233406,-63.653904,70.867976",
     "dataType": "B",
@@ -34,8 +34,7 @@ def get_readings_airnow():
 
 
 def get_stations_airnow():
-    station_url = (
-        f"{STATION_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat")
+    station_url = f"{STATION_URL}{year}/{yesterday}/Monitoring_Site_Locations_V2.dat"
     try:
         response = requests.get(station_url)
         return response.text
