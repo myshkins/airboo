@@ -11,7 +11,10 @@ from sqlalchemy import select
 
 
 def get_station_list():
-    """query database for list of all WAQI station and returns list of all station ids"""
+    """
+    query database for list of all WAQI station and returns list of all station
+    ids
+    """
     sql_stmt = select(Waqi_Stations.station_id)
     with get_db() as db:
         stations_result = db.execute(sql_stmt).all()
@@ -35,7 +38,10 @@ def init_urls():
 
 
 async def create_task_list(session: ClientSession):
-    """loops through all waqi stations and create an asynchronous task to fetch data for each."""
+    """
+    loops through all waqi stations and create an asynchronous task to fetch
+    data for each.
+    """
     task_list = []
     url_list = init_urls()
     for url in url_list:
