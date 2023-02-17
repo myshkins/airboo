@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routers import router_stations
 from routers import router_readings
 from shared_models import Base
+from shared_models import readings_airnow, stations_airnow
 
 
 settings = Settings()
