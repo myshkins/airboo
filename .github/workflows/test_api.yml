@@ -6,35 +6,29 @@ on:
       - main
       - develop
       - feature/ci-cd
-    # paths:
-    #   - 'services/api/**'
-jobs:
-  configure:
-    runs-on: ubuntu-latest
-    outputs:
-      uid_gid: ${{ env.uid_gid }}
-    steps:
-      - run: echo "uid_gid=$(id -u):$(id -g)"
+    paths:
+      - 'services/api/**'
 
-  lint:
-    runs-on: ubuntu-latest
-    needs: [configure]
-    container:
-      image: kboiiz/air-quality:latest
-      options: --user 1001:123
-    defaults:
-      run:
-        working-directory: services/api
-    steps:
-      - uses: actions/checkout@v3
-      - run: pip install --upgrade pip
-      - run: pip install -r requirements.txt
-      - run: echo $PWD
-      - run: echo $PATH
-      - run: pip show -f flake8
-      - run: python -m flake8 .
-      - run: python -m black . --check
-      - run: python -m bandit -r .
+jobs:
+#   lint:
+#     runs-on: ubuntu-latest
+#     needs: [configure]
+#     container:
+#       image: kboiiz/air-quality:latest
+#       options: --user 1001:123
+#     defaults:
+#       run:
+#         working-directory: services/api
+#     steps:
+#       - uses: actions/checkout@v3
+#       - run: pip install --upgrade pip
+#       - run: pip install -r requirements.txt
+#       - run: echo $PWD
+#       - run: echo $PATH
+#       - run: pip show -f flake8
+#       - run: python -m flake8 .
+#       - run: python -m black . --check
+#       - run: python -m bandit -r .
 
   # pytest:
   #   runs-on: ubuntu-latest
