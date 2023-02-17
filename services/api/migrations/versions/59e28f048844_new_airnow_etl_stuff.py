@@ -39,7 +39,12 @@ def upgrade() -> None:
     )
     op.create_table(
         "stations_airnow_temp",
-        sa.Column("station_temp_pk", sa.Integer(), primary_key=True, autoincrement=True, nullable=False),
+        sa.Column(
+            "station_temp_pk",
+            sa.Integer(),
+            primary_key=True,
+            autoincrement=True,
+            nullable=False),
         sa.Column("station_id", sa.String(), nullable=False),
         sa.Column("aqs_id", sa.String(), nullable=True),
         sa.Column("full_aqs_id", sa.String(), nullable=True),
