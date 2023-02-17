@@ -20,7 +20,7 @@ jobs:
     needs: [configure]
     container:
       image: kboiiz/air-quality:latest
-      options: --user ${{ env.uid_gid }}
+      options: --user "${{ env.uid_gid }}"
     defaults:
       run:
         working-directory: services/api
