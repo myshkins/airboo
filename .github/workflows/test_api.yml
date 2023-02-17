@@ -21,7 +21,7 @@ jobs:
     needs: [configure]
     container:
       image: kboiiz/air-quality:latest
-      options: --user ${{ needs.configure.outputs.uid_gid }}
+      options: --user "${{ needs.configure.outputs.uid_gid }}"
     defaults:
       run:
         working-directory: services/api
