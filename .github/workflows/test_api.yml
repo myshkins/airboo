@@ -12,11 +12,9 @@ jobs:
   configure:
     runs-on: ubuntu-latest
     outputs:
-      uid_gid: ${{ steps.get-user.outputs.uid_gid }}
+      uid_gid: ${{ env.uid_gid }}
     steps:
-      - id: get-user
-        run: echo "::set-output name=uid_gid::$(id -u):$(id -g)"
-      - run: echo "userid=$(id -u):$(id -g)"
+      - run: echo "uid_gid=$(id -u):$(id -g)"
 
   lint:
     runs-on: ubuntu-latest
@@ -28,7 +26,6 @@ jobs:
       run:
         working-directory: services/api
     steps:
-      - run: echo ${{ needs.configure.outputs.uid_gid }}
       - uses: actions/checkout@v3
       - run: pip install --upgrade pip
       - run: pip install -r requirements.txt
