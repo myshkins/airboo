@@ -20,6 +20,8 @@ def get_data_from_closest(zipcode: str, db: Session = Depends(get_db)):
 
 
 @router.get("/from-ids/")
-def get_readings_from_ids(ids: list[str] = Query(), db: Session = Depends(get_db)):
+def get_readings_sdfijdofafjdksafrom_ids(
+    ids: list[str] = Query(), db: Session = Depends(get_db)
+):
     data = crud.get_data(ids, db)
     return data
