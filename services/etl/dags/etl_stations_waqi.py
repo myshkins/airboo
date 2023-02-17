@@ -57,8 +57,8 @@ def etl_stations_waqi():
                     Waqi_Stations.station_name: insert_stmt.excluded.station_name,
                     Waqi_Stations.latitude: insert_stmt.excluded.latitude,
                     Waqi_Stations.longitude: insert_stmt.excluded.longitude,
-                    Waqi_Stations.request_datetime:
-                        insert_stmt.excluded.request_datetime,
+                    # Waqi_Stations.request_datetime:
+                    # Waqi_Stations... insert_stmt.excluded.request_datetime,
                     Waqi_Stations.data_datetime: insert_stmt.excluded.data_datetime,
                 },
             )
