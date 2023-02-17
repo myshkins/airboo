@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "ci_cd/api/Dockerfile"
+      - "services/api/requirements.txt"
 
 jobs:
   build-image:
