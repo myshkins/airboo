@@ -28,6 +28,8 @@ jobs:
         working-directory: services/api
     steps:
       - uses: actions/checkout@v3
+      - run: pip install --upgrade pip
+      - run: pip install -r requirements.txt
       - run: flake8 .
       - run: black . --check
       - run: bandit -r .
