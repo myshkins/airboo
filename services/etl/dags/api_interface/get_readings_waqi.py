@@ -23,10 +23,14 @@ def get_station_list():
 
 def init_urls():
     station_list = get_station_list()
-    url_list = [Settings().WAQI_BASE_URL
-                + "feed/@" + str(station)
-                + "/?token=" + Settings().WAQI_TOKEN
-                for station in station_list]
+    url_list = [
+        Settings().WAQI_BASE_URL
+        + "feed/@"
+        + str(station)
+        + "/?token="
+        + Settings().WAQI_TOKEN
+        for station in station_list
+    ]
     return url_list
 
 
@@ -35,34 +39,32 @@ async def create_task_list(session: ClientSession):
     task_list = []
     url_list = init_urls()
     for url in url_list:
-        new_task = asyncio.create_task(
-            fetch_readings_urls(session, url)
-        )
+        new_task = asyncio.create_task(fetch_readings_urls(session, url))
         task_list.append(new_task)
     return task_list
 
 
 async def format_waqi_response(response: dict) -> dict:
-    aq_json = response['data']
+    aq_json = response["data"]
     time_now = str(dt.now())
     result_json = {
-        'station_id': aq_json.get('idx', None),
-        'station_name': aq_json.get('city', {}).get('name', None),
-        'longitude': aq_json.get('city', {}).get('geo', [])[0],
-        'latitude': aq_json.get('city', {}).get('geo', [])[1],
-        'reading_datetime': aq_json.get('time', {}).get('iso', None),
-        'request_datetime': time_now,
-        'co': aq_json.get('iaqi', {}).get('co', {}).get('v', None),
-        'h': aq_json.get('iaqi', {}).get('h', {}).get('v', None),
-        'no2': aq_json.get('iaqi', {}).get('no2', {}).get('v', None),
-        'o3': aq_json.get('iaqi', {}).get('o3', {}).get('v', None),
-        'p': aq_json.get('iaqi', {}).get('p', {}).get('v', None),
-        'pm_10': aq_json.get('iaqi', {}).get('pm10', {}).get('v', None),
-        'pm_25': aq_json.get('iaqi', {}).get('pm25', {}).get('v', None),
-        'so2': aq_json.get('iaqi', {}).get('so2', {}).get('v', None),
-        't': aq_json.get('iaqi', {}).get('t', {}).get('v', None),
-        'w': aq_json.get('iaqi', {}).get('w', {}).get('v', None),
-        'wg': aq_json.get('iaqi', {}).get('wg', {}).get('v', None)
+        "station_id": aq_json.get("idx", None),
+        "station_name": aq_json.get("city", {}).get("name", None),
+        "longitude": aq_json.get("city", {}).get("geo", [])[0],
+        "latitude": aq_json.get("city", {}).get("geo", [])[1],
+        "reading_datetime": aq_json.get("time", {}).get("iso", None),
+        "request_datetime": time_now,
+        "co": aq_json.get("iaqi", {}).get("co", {}).get("v", None),
+        "h": aq_json.get("iaqi", {}).get("h", {}).get("v", None),
+        "no2": aq_json.get("iaqi", {}).get("no2", {}).get("v", None),
+        "o3": aq_json.get("iaqi", {}).get("o3", {}).get("v", None),
+        "p": aq_json.get("iaqi", {}).get("p", {}).get("v", None),
+        "pm_10": aq_json.get("iaqi", {}).get("pm10", {}).get("v", None),
+        "pm_25": aq_json.get("iaqi", {}).get("pm25", {}).get("v", None),
+        "so2": aq_json.get("iaqi", {}).get("so2", {}).get("v", None),
+        "t": aq_json.get("iaqi", {}).get("t", {}).get("v", None),
+        "w": aq_json.get("iaqi", {}).get("w", {}).get("v", None),
+        "wg": aq_json.get("iaqi", {}).get("wg", {}).get("v", None),
     }
     return result_json
 
@@ -71,7 +73,7 @@ async def fetch_readings_urls(session: ClientSession, url: str) -> dict:
     try:
         async with session.get(url) as response:
             response_json = await response.json()
-            if response_json.get('status') != 'ok':
+            if response_json.get("status") != "ok":
                 result_json = None
                 raise HTTPException(text=f"No WAQI station data returned for {url}")
             else:
