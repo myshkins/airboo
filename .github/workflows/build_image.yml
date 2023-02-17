@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} is running image-rebuild
 on:
   push:
     paths:
-      - "ci_cd/api/Dockerfile"
+      - "ci_cd/Dockerfile"
       - "services/api/requirements.txt"
 
 jobs:
@@ -23,6 +23,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./
-          file: ./ci_cd/api/Dockerfile
+          file: ./ci_cd/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/air-quality:latest
