@@ -28,9 +28,9 @@ jobs:
         working-directory: services/api
     steps:
       - uses: actions/checkout@v3
-      - run: flake8 .
-      - run: black . --check
-      - run: bandit -r .
+      - run: python -m flake8 .
+      - run: python -m black . --check
+      - run: python -m bandit -r .
 
   # pytest:
   #   runs-on: ubuntu-latest
