@@ -18,8 +18,7 @@ def get_stations_waqi():
     station_params = {
         "latlng": us_lat_long,  # "32.000000,-125.000000,47.500000,-69.000000",
         "networks": "all",
-        "token": settings.WAQI_TOKEN  # "bb10d851797e497b46823a5b4f984354c6ff4d9a"
-        # "token": "bb10d851797e497b46823a5b4f984354c6ff4d9a"
+        "token": settings.WAQI_TOKEN
     }
     try:
         response = requests.get(station_url, params=station_params)

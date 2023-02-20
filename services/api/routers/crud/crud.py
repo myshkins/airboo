@@ -48,8 +48,8 @@ def get_data(ids: list[str], db: Session):
         SELECT
             station_id,
             reading_datetime,
-            pm_25
-        FROM readings_waqi
+            pm25_aqi
+        FROM readings_airnow
         WHERE station_id = :x
         ORDER BY reading_datetime"""
     )
