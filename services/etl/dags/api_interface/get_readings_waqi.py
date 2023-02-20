@@ -81,8 +81,7 @@ async def fetch_readings_urls(session: ClientSession, url: str) -> dict:
             response_json = await response.json()
             if response_json.get("status") != "ok":
                 result_json = None
-                raise HTTPException(
-                    text=f"No WAQI station data returned for {url}")
+                raise HTTPException(text=f"No WAQI station data returned for {url}")
             else:
                 result_json = await format_waqi_response(response_json)
     except HTTPException as e:
