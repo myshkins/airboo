@@ -1,6 +1,7 @@
 version: '3'
 x-airflow-common:
   &airflow-common
+  image: 
   build: ./services/etl
   env_file: ./.env
   volumes:
