@@ -1,13 +1,7 @@
 import pytest
 from starlette.testclient import TestClient
 from services.api.routers.crud import crud
-from services.api.database import get_db
 from services.api.main import app
-
-
-@pytest.fixture
-def get_test_db():
-    return get_db()
 
 
 @pytest.fixture
