@@ -13,9 +13,7 @@ def compile_assets(assets):
         output="dist/css/style.css",
         extra={"rel": "stylesheet/css"},
     )
-    main_js_bundle = Bundle(
-        "src/js/*.js", filters="jsmin", output="dist/js/main.min.js"
-    )
+    main_js_bundle = Bundle("src/js/*.js", filters="jsmin", output="dist/js/main.min.js")
 
     home_style_bundle = Bundle(
         "src/css/*.css",
@@ -25,9 +23,7 @@ def compile_assets(assets):
         extra={"rel": "stylesheet/css"},
     )
 
-    home_js_bundle = Bundle(
-        "home_bp/home.js", filters="jsmin", output="dist/js/home.min.js"
-    )
+    home_js_bundle = Bundle("home_bp/home.js", filters="jsmin", output="dist/js/home.min.js")
 
     auth_style_bundle = Bundle(
         "src/css/*.css",

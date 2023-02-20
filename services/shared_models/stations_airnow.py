@@ -22,9 +22,7 @@ class AirnowStations(Base):
 class AirnowStationsTemp(Base):
     __tablename__ = "stations_airnow_temp"
 
-    station_temp_pk = Column(
-        Integer, primary_key=True, autoincrement=True, nullable=False
-    )
+    station_temp_pk = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     station_id = Column(String, nullable=True)
     aqs_id = Column(String, nullable=True)
     full_aqs_id = Column(String, nullable=True)
