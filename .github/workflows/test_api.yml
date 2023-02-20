@@ -25,9 +25,9 @@ jobs:
       options: --user 1001:123
     defaults:
       run:
-        working-directory: ./
+        working-directory: ./services/api
     steps:
       - uses: actions/checkout@v3
       - run: pip install --upgrade pip
-      - run: pip install -r services/api/requirements.txt
+      - run: pip install -r requirements.txt
       - run: python -m pytest
