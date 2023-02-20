@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 
 def zipcode_to_latlong(zipcode: str):
-    """helper function, returns tuple of lat long"""
+    """helper func, returns tuple of lat long"""
     geo = pgeocode.Nominatim("us")
     loc = geo.query_postal_code(zipcode)
     return loc["latitude"], loc["longitude"]
