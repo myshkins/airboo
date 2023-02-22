@@ -1,6 +1,6 @@
 """app factory for creating the app"""
 from flask import Flask
-from flask_assets import Environment, Bundle
+from flask_assets import Environment
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
 

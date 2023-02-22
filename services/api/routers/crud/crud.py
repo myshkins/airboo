@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 
 def zipcode_to_latlong(zipcode: str):
-    """helper func, returns tuple of lat long"""
-    geo = pgeocode.Nominatim('us')
+    """helper func returns tuple of lat long"""
+    geo = pgeocode.Nominatim("us")
     loc = geo.query_postal_code(zipcode)
     return loc["latitude"], loc["longitude"]
 
@@ -22,7 +22,7 @@ def get_nearby_stations(zipcode: str, db: Session):
         LIMIT 5
         """
     )
-    result = db.execute(stmt, {'x': loc[0], 'y': loc[1]}).all()
+    result = db.execute(stmt, {"x": loc[0], "y": loc[1]}).all()
     return result
 
 
@@ -38,7 +38,7 @@ def get_closest_station(zipcode: str, db: Session):
         LIMIT 1
         """
     )
-    result = db.execute(stmt, {'x': loc[0], 'y': loc[1]}).all()
+    result = db.execute(stmt, {"x": loc[0], "y": loc[1]}).all()
     return result
 
 

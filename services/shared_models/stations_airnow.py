@@ -5,7 +5,7 @@ from . import Base
 
 
 class AirnowStations(Base):
-    __tablename__ = 'stations_airnow'
+    __tablename__ = "stations_airnow"
 
     full_aqs_id = Column(String, primary_key=True, nullable=False)
     station_id = Column(String, nullable=False)
@@ -16,11 +16,11 @@ class AirnowStations(Base):
     longitude = Column(Numeric(10, 6), nullable=False)
     elevation = Column(Numeric(10, 6), nullable=True)
     country_fips = Column(String, nullable=True)
-    location_coord = Column(Geometry(geometry_type='POINT'), nullable=True)
+    location_coord = Column(Geometry(geometry_type="POINT"), nullable=True)
 
 
 class AirnowStationsTemp(Base):
-    __tablename__ = 'stations_airnow_temp'
+    __tablename__ = "stations_airnow_temp"
 
     station_temp_pk = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     station_id = Column(String, nullable=True)

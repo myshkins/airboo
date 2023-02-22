@@ -1,7 +1,7 @@
 """init tables
 
 Revision ID: 55036a2dee06
-Revises: 
+Revises:
 Create Date: 2023-02-04 19:35:11.180413
 
 """
@@ -17,18 +17,11 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute('create extension if not exists postgis')
+    op.execute("create extension if not exists postgis")
     op.create_table(
         "readings_airnow",
-        sa.Column(
-            "station_id", sa.String(), autoincrement=False, nullable=False
-            ),
-        sa.Column(
-            "reading_datetime",
-            sa.DateTime(),
-            autoincrement=False,
-            nullable=False
-            ),
+        sa.Column("station_id", sa.String(), autoincrement=False, nullable=False),
+        sa.Column("reading_datetime", sa.DateTime(), autoincrement=False, nullable=False),
         sa.Column("request_datetime", sa.DateTime(), nullable=False),
         sa.Column("pm_10_conc", sa.Numeric(7, 3), nullable=True),
         sa.Column("pm_10_aqi", sa.Numeric(7, 3), nullable=True),
@@ -40,18 +33,8 @@ def upgrade() -> None:
     )
     op.create_table(
         "readings_airnow_temp",
-        sa.Column(
-            "station_id",
-            sa.String(),
-            autoincrement=False,
-            nullable=False
-            ),
-        sa.Column(
-            "reading_datetime",
-            sa.DateTime(),
-            autoincrement=False,
-            nullable=False
-            ),
+        sa.Column("station_id", sa.String(), autoincrement=False, nullable=False),
+        sa.Column("reading_datetime", sa.DateTime(), autoincrement=False, nullable=False),
         sa.Column("request_datetime", sa.DateTime(), nullable=False),
         sa.Column("pm_10_conc", sa.Numeric(7, 3), nullable=True),
         sa.Column("pm_10_aqi", sa.Numeric(7, 3), nullable=True),
@@ -63,19 +46,9 @@ def upgrade() -> None:
     )
     op.create_table(
         "readings_waqi",
-        sa.Column(
-            "station_id",
-            sa.Integer(),
-            autoincrement=False,
-            nullable=False
-            ),
+        sa.Column("station_id", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("station_name", sa.String(), nullable=False),
-        sa.Column(
-            "reading_datetime",
-            sa.DateTime(),
-            autoincrement=False,
-            nullable=False
-            ),
+        sa.Column("reading_datetime", sa.DateTime(), autoincrement=False, nullable=False),
         sa.Column("request_datetime", sa.DateTime(), nullable=False),
         sa.Column("latitude", sa.Numeric(10, 6), nullable=True),
         sa.Column("longitude", sa.Numeric(10, 6), nullable=True),
@@ -94,12 +67,7 @@ def upgrade() -> None:
     )
     op.create_table(
         "readings_waqi_temp",
-        sa.Column(
-            "station_id",
-            sa.Integer(),  
-            autoincrement=False,
-            nullable=False
-            ),
+        sa.Column("station_id", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("station_name", sa.String(), nullable=False),
         sa.Column("latitude", sa.Numeric(10, 6), nullable=True),
         sa.Column("longitude", sa.Numeric(10, 6), nullable=True),
@@ -114,54 +82,41 @@ def upgrade() -> None:
         sa.Column("t", sa.Numeric(7, 3), nullable=True),
         sa.Column("w", sa.Numeric(7, 3), nullable=True),
         sa.Column("wg", sa.Numeric(7, 3), nullable=True),
-        sa.Column(
-            "reading_datetime",
-            sa.DateTime(),
-            autoincrement=False,
-            nullable=False
-            ),
+        sa.Column("reading_datetime", sa.DateTime(), autoincrement=False, nullable=False),
         sa.Column("request_datetime", sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint("station_id", "reading_datetime"),
     )
     op.create_table(
         "stations_airnow",
-        sa.Column(
-            "station_id",
-            sa.String(),
-            autoincrement=False,
-            nullable=False),
+        sa.Column("station_id", sa.String(), autoincrement=False, nullable=False),
         sa.Column("station_name", sa.String(), nullable=False),
         sa.Column("agency_name", sa.String(), nullable=False),
         sa.Column("latitude", sa.Numeric(10, 6), nullable=False),
         sa.Column("longitude", sa.Numeric(10, 6), nullable=False),
         sa.Column(
-            "location_coord", Geometry(geometry_type="POINT"), nullable=True,
+            "location_coord",
+            Geometry(geometry_type="POINT"),
+            nullable=True,
         ),
         sa.PrimaryKeyConstraint("station_id"),
     )
     op.create_table(
         "stations_airnow_temp",
-        sa.Column(
-            "station_id",
-            sa.String(),
-            autoincrement=False,
-            nullable=False),
+        sa.Column("station_id", sa.String(), autoincrement=False, nullable=False),
         sa.Column("station_name", sa.String(), nullable=False),
         sa.Column("agency_name", sa.String(), nullable=False),
         sa.Column("latitude", sa.Numeric(10, 6), nullable=False),
         sa.Column("longitude", sa.Numeric(10, 6), nullable=False),
         sa.Column(
-            "location_coord", Geometry(geometry_type="POINT"), nullable=True,
+            "location_coord",
+            Geometry(geometry_type="POINT"),
+            nullable=True,
         ),
         sa.PrimaryKeyConstraint("station_id"),
     )
     op.create_table(
         "stations_waqi",
-        sa.Column(
-            "station_id",
-            sa.Integer(),
-            autoincrement=False,
-            nullable=False),
+        sa.Column("station_id", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("station_name", sa.String(), nullable=False),
         sa.Column("latitude", sa.Numeric(10, 6), nullable=False),
         sa.Column("longitude", sa.Numeric(10, 6), nullable=False),
@@ -171,11 +126,7 @@ def upgrade() -> None:
     )
     op.create_table(
         "stations_waqi_temp",
-        sa.Column(
-            "station_id",
-            sa.Integer(),
-            autoincrement=False,
-            nullable=False),
+        sa.Column("station_id", sa.Integer(), autoincrement=False, nullable=False),
         sa.Column("station_name", sa.String(), nullable=False),
         sa.Column("latitude", sa.Numeric(10, 6), nullable=False),
         sa.Column("longitude", sa.Numeric(10, 6), nullable=False),
