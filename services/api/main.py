@@ -31,4 +31,4 @@ app.include_router(router_stations.router)
 
 @app.get("/")
 def root():
-    return {"message": "ah poopy"}
+    return {"message": "ah poop"}
