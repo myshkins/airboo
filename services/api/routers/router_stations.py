@@ -5,10 +5,7 @@ from sqlalchemy.orm import Session
 from .crud import crud
 from database import get_db
 
-router = APIRouter(
-    prefix='/stations',
-    tags=['stations']
-)
+router = APIRouter(prefix="/stations", tags=["stations"])
 
 
 @router.get("/all-nearby/")

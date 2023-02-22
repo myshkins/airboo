@@ -1,0 +1,8 @@
+[flake8]
+# for compatibility with Black see 
+# https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#line-length
+max-line-length = 120
+
+per-file-ignores =
+    # ignore unused imports cuz of unused imports used by alembic in main.py
+    services/api/main.py: F401

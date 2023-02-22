@@ -1,4 +1,3 @@
-
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -63,7 +62,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    url = {'url': settings.POSTGRES_URI}
+    url = {"url": settings.POSTGRES_URI}
     connectable = engine_from_config(
         url,
         prefix="",
@@ -71,9 +70,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
