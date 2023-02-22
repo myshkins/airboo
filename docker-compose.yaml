@@ -8,7 +8,7 @@ x-airflow-common:
     - ./services/etl/logs:/opt/airflow/logs
     - ./services/etl/plugins:/opt/airflow/plugins
     - ./services/shared_models:/opt/airflow/dags/shared_models
-  user: "${AIRFLOW_UID:-50000}:0"
+  user: "${AIRFLOW_UID}:0"
   depends_on:
     &airflow-common-depends-on
     redis:
@@ -47,8 +47,6 @@ services:
       postgres:
         condition: service_healthy
   
-
-
   postgres:
     profiles: ["air_app", "api", "airflow", "full"]
     build: ./services/postgres
@@ -59,6 +57,7 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
+      - ./services/postgres/dump:/dump
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 15s
@@ -149,7 +148,6 @@ services:
     profiles: ["airflow", "full"]
     <<: *airflow-common
     entrypoint: /bin/bash
-    # yamllint disable rule:line-length
     command:
       - -c
       - |
@@ -209,8 +207,6 @@ services:
           echo "   https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#before-you-begin"
           echo
         fi
-        mkdir -p /sources/logs /sources/dags /sources/plugins
-        chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
         exec /entrypoint airflow version
     # yamllint enable rule:line-length
     environment:
@@ -233,24 +229,6 @@ services:
       - bash
       - -c
       - airflow
-
-  flower:
-    <<: *airflow-common
-    command: celery flower
-    profiles:
-      - flower
-    ports:
-      - 5555:5555
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:5555/"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-    restart: always
-    depends_on:
-      <<: *airflow-common-depends-on
-      airflow-init:
-        condition: service_completed_successfully
 
 volumes:
   postgres-db-volume:
