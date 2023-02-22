@@ -1,0 +1,51 @@
+version: '3'
+services:
+  api:
+    profiles: ["api", "full"]
+    container_name: air_api
+    build: ./services/api
+    command: ./startup.sh
+    ports:
+      - 8100:8100
+    volumes:
+      - ./services/api:/api
+      - ./services/shared_models:/api/shared_models
+    env_file: ./.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    profiles: ["air_app", "full"]
+    container_name: air_app
+    build: ./services/air_app
+    command: python wsgi.py
+    ports:
+      - 8000:5000
+    volumes:
+      - ./services/air_app:/air_app
+      - ./services/shared_models:/air_app/shared_models
+    env_file: ./.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+  
+  postgres:
+    profiles: ["air_app", "api", "airflow", "full"]
+    build: 
+      context: ./services/postgres
+      dockerfile: Dockerfile.dev
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 15s
+      retries: 5
+    restart: always
+
+volumes:
+  postgres-db-volume:
