@@ -26,8 +26,8 @@ const Home = () => {
   const [stationDropVisible, setStationDropVisible] = useState(true);
   const [editStationPopupVisible, setEditStationPopupVisible] = useState(false);
   const [timeDropVisible, setTimeDropVisible] = useState(true);
-  const [zipcode, setZipcode] = useState("80304");
-  const [zipQuery, setZipQuery] = useState("80304");
+  const [zipcode, setZipcode] = useState("11206");
+  const [zipQuery, setZipQuery] = useState("11206");
   const [rawReadings, setRawReadings] = useState({});
   const [dates, setDates] = useState([]);
   const [aqiData, setAqiData] = useState([]);
@@ -116,6 +116,14 @@ const Home = () => {
     setTempStations(updatedTempStations);
   };
 
+  // const findStationPollutants = async (stationID) => {
+  //   const response = await fetch(`${config.urls.READINGS_URL}${stationID}`, {
+  //     mode: "cors",
+  //   })
+  //   let pollutants = {}
+  //   return
+  // }
+
   useEffect(() => {
     const findStations = async () => {
       const response = await fetch(`${config.urls.STATIONS_URL}${zipcode}`, {
@@ -146,15 +154,15 @@ const Home = () => {
 
       const response = await fetch(`${config.urls.READINGS_URL}${qParam}`);
       const data = await response.json();
-      console.log('data')
-      console.log(data)
-      const dates = data[0]["data"].map(
-        (reading) => reading["reading_datetime"]
+      console.log('data[0]')
+      console.log(data[0])
+      const dates = data[0].map(
+        (reading) => reading["ReadingsAirnow"]["reading_datetime"]
       );
 
       const aqiData = data.map((station) => ({
-        station_id: station["station_id"],
-        data: station["data"].map((reading) => reading["pm25_aqi"]),
+        station_id: station[0]["ReadingsAirnow"]["station_id"],
+        data: station.map((reading) => reading["ReadingsAirnow"]["pm25_aqi"]),
       }));
 
       setRawReadings(data);

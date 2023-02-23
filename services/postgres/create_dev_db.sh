@@ -3,7 +3,6 @@
 set -e
 set -u
 
-ls
 echo "  Creating user and database air_quality"
 psql -v ON_ERROR_STOP=1 <<-EOSQL
     CREATE DATABASE air_quality;

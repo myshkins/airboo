@@ -4,7 +4,7 @@ from sqlalchemy import Column, Integer, Numeric, String
 from . import Base
 
 
-class AirnowStations(Base):
+class StationsAirnow(Base):
     __tablename__ = "stations_airnow"
 
     full_aqs_id = Column(String, primary_key=True, nullable=False)
@@ -19,7 +19,7 @@ class AirnowStations(Base):
     location_coord = Column(Geometry(geometry_type="POINT"), nullable=True)
 
 
-class AirnowStationsTemp(Base):
+class StationsAirnowTemp(Base):
     __tablename__ = "stations_airnow_temp"
 
     station_temp_pk = Column(Integer, primary_key=True, autoincrement=True, nullable=False)

@@ -14,7 +14,7 @@ from sqlalchemy import (
 class ReadingsAirnow(Base):
     __tablename__ = "readings_airnow"
 
-    full_aqs_id = Column(String, primary_key=True, nullable=False)
+    station_id = Column(String, primary_key=True, nullable=False)
     reading_datetime = Column(DateTime, primary_key=True, nullable=False)
     data_datetime = Column(TIMESTAMP(), server_default=text("now()"), nullable=False)
     pm25_conc = Column(Numeric(7, 3))

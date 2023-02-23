@@ -1,7 +1,8 @@
 """crud functions"""
 import pgeocode
-from sqlalchemy import text
+from sqlalchemy import text, select
 from sqlalchemy.orm import Session
+from shared_models.readings_airnow import ReadingsAirnow
 
 
 def zipcode_to_latlong(zipcode: str):
@@ -43,18 +44,44 @@ def get_closest_station(zipcode: str, db: Session):
 
 
 def get_data(ids: list[str], db: Session):
-    stmt = text(
-        """
-        SELECT
-            station_id,
-            reading_datetime,
-            pm25_aqi
-        FROM readings_airnow
-        WHERE station_id = :x
-        ORDER BY reading_datetime"""
-    )
-    result = []
+    response = []
     for id in ids:
-        data = db.execute(stmt, {"x": id}).all()
-        result.append({"station_id": id, "data": data})
-    return result
+        stmt = select(ReadingsAirnow).where(ReadingsAirnow.station_id == id).order_by(ReadingsAirnow.reading_datetime)
+        result = db.execute(stmt)
+        data = [thing for thing in result]
+        response.append(data)
+    return response
+
+
+# def get_data(ids: list[str], db: Session):
+#     stmt = text(
+#         """
+#         SELECT
+#             station_id,
+#             reading_datetime,
+#             pm25_conc,
+#             pm25_aqi,
+#             pm25_cat,
+#             pm10_conc,
+#             pm10_aqi,
+#             pm10_cat,
+#             o3_conc,
+#             o3_aqi,
+#             o3_cat,
+#             co_conc,
+#             no2_conc,
+#             no2_aqi,
+#             no2_cat,
+#             so2_conc,
+#             so2_aqi,
+#             so2_cat
+#         FROM readings_airnow
+#         WHERE station_id = :x
+#         ORDER BY reading_datetime
+#         """
+#     )
+#     result = []
+#     for id in ids:
+#         data = db.execute(stmt, {"x": id}).all()
+#         result.append({"station_id": id, "data": data})
+#     return result
