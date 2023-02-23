@@ -11,7 +11,7 @@ from sqlalchemy.dialects.postgresql import insert
     schedule="@daily",
     start_date=pendulum.datetime(2023, 1, 1, tz="UTC"),
     catchup=False,
-    tags=["stations"]
+    tags=["stations"],
 )
 def etl_stations_waqi():
     """This dag retrieves all stations from the World Air Quality Index
@@ -21,7 +21,7 @@ def etl_stations_waqi():
     def create_stations_temp():
         with get_db() as db:
             engine = db.get_bind()
-            if engine.has_table('stations_waqi_temp'):
+            if engine.has_table("stations_waqi_temp"):
                 Waqi_Stations_Temp.__table__.drop(db.get_bind())
             Waqi_Stations_Temp.__table__.create(db.get_bind())
 
@@ -39,14 +39,17 @@ def etl_stations_waqi():
     @task()
     def load_stations():
         with get_db() as db:
-            insert_stmt = insert(Waqi_Stations).from_select((
-                Waqi_Stations.station_id,
-                Waqi_Stations.station_name,
-                Waqi_Stations.latitude,
-                Waqi_Stations.longitude,
-                Waqi_Stations.request_datetime,
-                Waqi_Stations.data_datetime),
-                select(Waqi_Stations_Temp))
+            insert_stmt = insert(Waqi_Stations).from_select(
+                (
+                    Waqi_Stations.station_id,
+                    Waqi_Stations.station_name,
+                    Waqi_Stations.latitude,
+                    Waqi_Stations.longitude,
+                    Waqi_Stations.request_datetime,
+                    Waqi_Stations.data_datetime,
+                ),
+                select(Waqi_Stations_Temp),
+            )
 
             upsert = insert_stmt.on_conflict_do_update(
                 index_elements=[Waqi_Stations.station_id],
@@ -54,9 +57,10 @@ def etl_stations_waqi():
                     Waqi_Stations.station_name: insert_stmt.excluded.station_name,
                     Waqi_Stations.latitude: insert_stmt.excluded.latitude,
                     Waqi_Stations.longitude: insert_stmt.excluded.longitude,
-                    Waqi_Stations.request_datetime: insert_stmt.excluded.request_datetime,
-                    Waqi_Stations.data_datetime: insert_stmt.excluded.data_datetime
-                }
+                    # Waqi_Stations.request_datetime:
+                    # Waqi_Stations... insert_stmt.excluded.request_datetime,
+                    Waqi_Stations.data_datetime: insert_stmt.excluded.data_datetime,
+                },
             )
             db.execute(upsert)
             db.commit()

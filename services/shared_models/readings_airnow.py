@@ -1,6 +1,14 @@
 from shared_models import Base
-from sqlalchemy import (TIMESTAMP, Column, DateTime, Identity, Integer,
-                        Numeric, String, text)
+from sqlalchemy import (
+    TIMESTAMP,
+    Column,
+    DateTime,
+    Identity,
+    Integer,
+    Numeric,
+    String,
+    text,
+)
 
 
 class ReadingsAirnow(Base):
@@ -8,10 +16,7 @@ class ReadingsAirnow(Base):
 
     full_aqs_id = Column(String, primary_key=True, nullable=False)
     reading_datetime = Column(DateTime, primary_key=True, nullable=False)
-    data_datetime = Column(
-        TIMESTAMP(),
-        server_default=text("now()"),
-        nullable=False)
+    data_datetime = Column(TIMESTAMP(), server_default=text("now()"), nullable=False)
     pm25_conc = Column(Numeric(7, 3))
     pm25_aqi = Column(Integer, nullable=True)
     pm25_cat = Column(Integer, nullable=True)
@@ -35,10 +40,7 @@ class ReadingsAirnow(Base):
 class ReadingsAirnowTemp(Base):
     __tablename__ = "readings_airnow_temp"
 
-    readings_temp_pk = Column(
-        Integer,
-        Identity(start=1, cycle=False),
-        primary_key=True)
+    readings_temp_pk = Column(Integer, Identity(start=1, cycle=False), primary_key=True)
     latitude = Column(String, nullable=False)
     longitude = Column(String, nullable=False)
     timestamp_utc = Column(String, nullable=False)

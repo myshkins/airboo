@@ -1,6 +1,6 @@
 insert into readings_airnow
 (
-	full_aqs_id,
+	station_id,
 	reading_datetime,
 	pm10_conc,
 	pm10_aqi,
@@ -45,7 +45,7 @@ select
 from readings_airnow_temp
 group by
   full_aqs_id, timestamp_utc
-on conflict (full_aqs_id, reading_datetime) do update
+on conflict (station_id, reading_datetime) do update
 set
 	pm10_conc = excluded.pm10_conc,
 	pm10_aqi = excluded.pm10_aqi,

@@ -60,7 +60,8 @@ def create_logger() -> custom_logger:
         "/opt/airflow/logs/app_logs/file_{time:YYYY_MM_DD}.log",
         rotation="12:00",
         retention="14 days",
-        format=formatter)
+        format=formatter,
+    )
     return custom_logger
 
 

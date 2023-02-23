@@ -13,10 +13,8 @@ import pendulum
 from airflow.decorators import dag, task
 from api_interface import get_readings_airnow as gad
 from db.db_engine import get_db
-from logger import LOGGER
 from shared_models.readings_airnow import ReadingsAirnowTemp
 from util.util_sql import read_sql
-
 
 
 @dag(
@@ -30,6 +28,7 @@ def etl_airnow_readings():
     """
     This dag retrieves air quality data from airnow.org for all of USA for
     current hour."""
+
     @task
     def create_table_readings_airnow_temp():
         with get_db() as db:
@@ -51,7 +50,7 @@ def etl_airnow_readings():
     def load_temp():
         """loads everything to temp, data is very normalized here"""
         file_path = "/opt/airflow/dags/files/raw_readings_airnow.csv"
-        with get_db() as db, open(file_path, mode='r') as file:
+        with get_db() as db, open(file_path, mode="r") as file:
             load_stmt = read_sql("dags/sql/load_readings_airnow_temp.sql")
             cursor = db.connection().connection.cursor()
             cursor.copy_expert(load_stmt[0], file)
