@@ -116,7 +116,7 @@ const Home = () => {
     setTempStations(updatedTempStations);
   };
 
-  // const findStationPollutants = async (stationID) => {
+  // const getTempStationPollutants = async (stationIDs) => {
   //   const response = await fetch(`${config.urls.READINGS_URL}${stationID}`, {
   //     mode: "cors",
   //   })
@@ -145,31 +145,54 @@ const Home = () => {
     findStations();
   }, [zipQuery]);
 
+  const getReadings = async (ids) => {
+    let qParam = ids.reduce((prev, id) => prev + `ids=${id}&`, "?");
+    if (qParam.slice(-1) === "&") {
+      qParam = qParam.slice(0, -1);
+    }
+
+    const response = await fetch(`${config.urls.READINGS_URL}${qParam}`);
+    const data = await response.json();
+    console.log("data[0]");
+    console.log(data[0]);
+
+    return data;
+  };
+
+  // const getTempStationPollutants = async () => {
+  //   const ids = tempStations.map(station => station["station_id"])
+  //   const data = await getReadings(ids)
+  //   const pollutants = data.map((station) => {
+  //     const plts = {station["station_id"]: []}
+  //     for (const [key, value] of Object.entries(station["ReadingsAirnow"])) {
+  //       if (value != null && key.slice(-3) == "aqi") {
+  //         plts[station["station_id"]].push(key.slice(0, -3))
+  //       }
+  //     }
+  //   })
+  // }
+  const handleReadingDataChange = async () => {
+    const data = await getReadings(idsToGraph);
+    const dates = []
+    for (const [key, value] of Object.entries(data[0])) {
+      for 
+    }
+    const dates = data[0].map(
+      (reading) => reading["ReadingsAirnow"]["reading_datetime"]
+    );
+
+    const aqiData = data.map((station) => ({
+      station_id: station[0]["ReadingsAirnow"]["station_id"],
+      data: station.map((reading) => reading["ReadingsAirnow"]["pm25_aqi"]),
+    }));
+
+    setRawReadings(data);
+    setDates(dates);
+    setAqiData(aqiData);
+  };
+
   useEffect(() => {
-    const getReadings = async () => {
-      let qParam = idsToGraph.reduce((prev, id) => prev + `ids=${id}&`, "?");
-      if (qParam.slice(-1) === "&") {
-        qParam = qParam.slice(0, -1);
-      }
-
-      const response = await fetch(`${config.urls.READINGS_URL}${qParam}`);
-      const data = await response.json();
-      console.log('data[0]')
-      console.log(data[0])
-      const dates = data[0].map(
-        (reading) => reading["ReadingsAirnow"]["reading_datetime"]
-      );
-
-      const aqiData = data.map((station) => ({
-        station_id: station[0]["ReadingsAirnow"]["station_id"],
-        data: station.map((reading) => reading["ReadingsAirnow"]["pm25_aqi"]),
-      }));
-
-      setRawReadings(data);
-      setDates(dates);
-      setAqiData(aqiData);
-    };
-    getReadings();
+    handleReadingDataChange();
   }, [idsToGraph]);
 
   return (

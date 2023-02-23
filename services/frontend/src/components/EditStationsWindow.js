@@ -1,5 +1,5 @@
 import HomeButton from "./HomeButton";
-import SideDropDownInput from "./SideDropDownCheckbox";
+import SideDropDownCheckbox from "./SideDropDownCheckbox";
 
 const EditStationsWindow = (props) => {
   return (
@@ -22,9 +22,10 @@ const EditStationsWindow = (props) => {
       <div>
         <form onSubmit={props.updateStations}>
           {props.tempStations.map((station) => (
-            <SideDropDownInput
+            <SideDropDownCheckbox
               key={station["station_id"]}
               name={station["station_id"]}
+              pollutants={props.tempStationPollutants[station["station_id"]]}
               value={station["station_name"]}
               checked={station["checked"]}
               onChange={props.handleTempCheckChange}
