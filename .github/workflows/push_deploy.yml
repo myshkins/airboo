@@ -10,6 +10,7 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
       - name: Create SSH key
         run: |
           install -m 600 -D /dev/null ~/.ssh/id_rsa
@@ -17,4 +18,4 @@ jobs:
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
       - name: Deploy with rsync
         run: rsync -av --delete README.md huck@213.255.227.248:/air-quality
-        # testt
+        # testtt
