@@ -20,4 +20,4 @@ jobs:
         run: rsync -av ./ deploy-admin@213.255.227.248:~/air-quality
       - name: Compose Up
         run: docker compose --profile full up --build
-        # testttt
+        # testtttt
