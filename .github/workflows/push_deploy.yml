@@ -17,8 +17,12 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
       - name: push with rsync
-        run: rsync -av ./ deploy-admin@213.255.227.248:~/air-quality
-      - name: SSH to server
+        run: rsync -av --delete ./ deploy-admin@213.255.227.248:~/air-quality
+      - name: push with rsync
+        run: rsync -av --delete .env deploy-admin@213.255.227.248:~/air-quality
+      - name: push with rsync
+        run: rsync -av ./services/etl/dags/.env.airflow deploy-admin@213.255.227.248:~/air-quality/services/etl/dags/
+      - name: SSH and run it
         run: |
           ssh -t deploy-admin@213.255.227.248 "cd ~/air-quality && docker compose --profile full up --build ; bash"
         # testttttttt
