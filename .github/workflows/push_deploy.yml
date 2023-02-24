@@ -21,6 +21,6 @@ jobs:
       - name: SSH to server
         run: |
           ssh deploy-admin@213.255.227.248
-        #  cd ~/air-quality
+          cd ~/air-quality
         #  docker compose --profile full up --build
         # testttttt
