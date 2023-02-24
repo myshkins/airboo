@@ -1,13 +1,7 @@
 version: '3'
 x-airflow-common:
   &airflow-common
-  build: ./services/etl
-  env_file: ./.env
-  volumes:
-    - ./services/etl/dags:/opt/airflow/dags
-    - ./services/etl/logs:/opt/airflow/logs
-    - ./services/etl/plugins:/opt/airflow/plugins
-    - ./services/shared_models:/opt/airflow/dags/shared_models
+  image: kboiiz/air-quality-airflow:latest
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -18,29 +12,27 @@ x-airflow-common:
 
 services:
   api:
-    container_name: air_api
-    build: ./services/api
+    container_name: air-api
+    image: kboiiz/air-quality-api:latest
     command: ./startup.sh
     ports:
       - 8100:8100
-    env_file: ./.env
     depends_on:
       postgres:
         condition: service_healthy
 
   app:
-    container_name: air_app
-    build: ./services/air_app
+    container_name: air-app
+    image: kboiiz/air-quality-app:latest
     command: python wsgi.py
     ports:
       - 8000:5000
-    env_file: ./.env
     depends_on:
       postgres:
         condition: service_healthy
 
   postgres:
-    build: ./services/postgres
+    image: kboiiz/air-quality-postgres:latest
     environment:
       POSTGRES_MULTIPLE_DATABASES: "air_quality,airflow"
       POSTGRES_USER: airflow
