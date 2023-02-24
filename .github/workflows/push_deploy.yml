@@ -25,4 +25,4 @@ jobs:
       - name: SSH and run it
         run: |
           ssh -t deploy-admin@213.255.227.248 "cd ~/air-quality && docker compose up --build ; bash"
-        # testtttttttt
+        # testttttttttt
