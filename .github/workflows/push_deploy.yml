@@ -20,7 +20,6 @@ jobs:
         run: rsync -av ./ deploy-admin@213.255.227.248:~/air-quality
       - name: SSH to server
         run: |
-          ssh deploy-admin@213.255.227.248
-          cd ~/air-quality
+          ssh -t deploy-admin@213.255.227.248 "cd ~/air-quality && ls ; bash"
         #  docker compose --profile full up --build
         # testttttt
