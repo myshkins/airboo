@@ -18,8 +18,10 @@ jobs:
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
       - name: push with rsync
         run: rsync -av ./ deploy-admin@213.255.227.248:~/air-quality
-      # - name: SSH to server
-      # - run: ssh -t deploy-admin@213.255.227.248 'cd ~/air-quality ; bash'
+      - name: SSH to server
+      - run: |
+          ssh deploy-admin@213.255.227.248
+          cd ~/air-quality
       # - name: Compose Up
       #   run: docker compose --profile full up --build
         # testttttt
