@@ -19,8 +19,6 @@ jobs:
       - name: push with rsync
         run: rsync -av ./ deploy-admin@213.255.227.248:~/air-quality
       - name: SSH to server
-      - run: |
-          ssh deploy-admin@213.255.227.248 'cd ~/air-quality && ls'
-      # - name: Compose Up
-      #   run: docker compose --profile full up --build
+        run: |
+          ssh deploy-admin@213.255.227.248 'cd ~/air-quality && docker compose --profile full up --build'
         # testttttt
