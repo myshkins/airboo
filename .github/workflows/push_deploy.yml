@@ -16,5 +16,5 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
       - name: Deploy with rsync
-        run: rsync -av --delete ./README.md huck@213.255.227.248:/air-quality
-        # test
+        run: rsync -av --delete README.md huck@213.255.227.248:/air-quality
+        # testt
