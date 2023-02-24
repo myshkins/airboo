@@ -159,27 +159,22 @@ const Home = () => {
     return data;
   };
 
-  // const getTempStationPollutants = async () => {
-  //   const ids = tempStations.map(station => station["station_id"])
-  //   const data = await getReadings(ids)
-  //   const pollutants = data.map((station) => {
-  //     const plts = {station["station_id"]: []}
-  //     for (const [key, value] of Object.entries(station["ReadingsAirnow"])) {
-  //       if (value != null && key.slice(-3) == "aqi") {
-  //         plts[station["station_id"]].push(key.slice(0, -3))
-  //       }
-  //     }
-  //   })
-  // }
+  const getTempStationPollutants = async () => {
+    const ids = tempStations.map(station => station["station_id"])
+    const data = await getReadings(ids)
+    const pollutants = data.map((station) => {
+      plts = Object.entries(station["readings"][0]).map((key, value) => {
+        if (key.slice(-3) == "aqi" && value) {
+          return key
+        }
+      })
+      return {station["station_id"]: 2}
+    })
+  }
+
   const handleReadingDataChange = async () => {
     const data = await getReadings(idsToGraph);
-    const dates = []
-    for (const [key, value] of Object.entries(data[0])) {
-      for 
-    }
-    const dates = data[0].map(
-      (reading) => reading["ReadingsAirnow"]["reading_datetime"]
-    );
+    const dates = Object.keys(data[0])
 
     const aqiData = data.map((station) => ({
       station_id: station[0]["ReadingsAirnow"]["station_id"],

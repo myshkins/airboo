@@ -47,9 +47,30 @@ def get_closest_station(zipcode: str, db: Session):
 def get_data(ids: list[str], db: Session):
     response = []
     for id in ids:
-        stmt = select(ReadingsAirnow).where(ReadingsAirnow.station_id == id).order_by(ReadingsAirnow.reading_datetime)
+        stmt = (
+            select(
+                ReadingsAirnow.reading_datetime,
+                ReadingsAirnow.pm25_aqi,
+                ReadingsAirnow.pm25_conc,
+                ReadingsAirnow.pm25_cat,
+                ReadingsAirnow.pm10_aqi,
+                ReadingsAirnow.pm10_conc,
+                ReadingsAirnow.pm10_cat,
+                ReadingsAirnow.o3_aqi,
+                ReadingsAirnow.o3_conc,
+                ReadingsAirnow.o3_cat,
+                ReadingsAirnow.co_conc,
+                ReadingsAirnow.no2_aqi,
+                ReadingsAirnow.no2_conc,
+                ReadingsAirnow.no2_cat,
+                ReadingsAirnow.so2_aqi,
+                ReadingsAirnow.so2_conc,
+                ReadingsAirnow.so2_cat,
+            )
+            .where(ReadingsAirnow.station_id == id)
+            .order_by(ReadingsAirnow.reading_datetime)
+        )
         result = db.execute(stmt)
-        data = [thing for thing in result]
-        response.append({id:data})
+        data = [_ for _ in result]
+        response.append({"station_id": id, "readings": data})
     return response
-
