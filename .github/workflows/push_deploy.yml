@@ -16,10 +16,10 @@ jobs:
           install -m 600 -D /dev/null ~/.ssh/id_rsa
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-      - name: Deploy with rsync
+      - name: push with rsync
         run: rsync -av ./ deploy-admin@213.255.227.248:~/air-quality
-      - name: SSH to server
-      - run: ssh -t deploy-admin@213.255.227.248 'cd ~/air-quality ; bash'
-      - name: Compose Up
-        run: docker compose --profile full up --build
+      # - name: SSH to server
+      # - run: ssh -t deploy-admin@213.255.227.248 'cd ~/air-quality ; bash'
+      # - name: Compose Up
+      #   run: docker compose --profile full up --build
         # testttttt
