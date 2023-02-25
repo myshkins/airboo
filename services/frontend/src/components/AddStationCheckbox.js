@@ -1,19 +1,26 @@
-const SideDropDownCheckbox = (props) => {
+const AddStationCheckbox = (props) => {
   return (
-    <div className="dropdown-input-wrap" onClick={props.onChange}>
-      <input
-        type="checkbox"
-        name={props.name}
-        checked={props.checked}
-        onChange={props.onChange}/>
-      <label htmlFor={props.name}>{props.value}</label>
+    <div className="dropdown-input-wrap">
+      <label>
+        <input
+          type="checkbox"
+          name={props.name}
+          checked={props.checked}
+          onChange={props.onChange}
+        />
+        <span>{props.value}</span>
+      </label>
       <ul>
-        {props.pollutants.map((pollutant) => (
-          <li></li>
-        ))}
+        {props.pollutants ? (
+          <ul>
+            {props.pollutants.map((pollutant) => (
+              <li>{pollutant}</li>
+            ))}
+          </ul>
+        ) : null}
       </ul>
     </div>
-  )
-}
+  );
+};
 
-export default SideDropDownCheckbox
+export default AddStationCheckbox;

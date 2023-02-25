@@ -22,6 +22,7 @@ const Home = () => {
   });
   const [stations, setStations] = useState([]);
   const [tempStations, setTempStations] = useState(null);
+  const [tempTempStations, setTempTempStation] = useState(null);
   const [leftSideBarVisible, setLeftSideBarVisible] = useState(true);
   const [stationDropVisible, setStationDropVisible] = useState(true);
   const [editStationPopupVisible, setEditStationPopupVisible] = useState(false);
@@ -116,13 +117,62 @@ const Home = () => {
     setTempStations(updatedTempStations);
   };
 
-  // const getTempStationPollutants = async (stationIDs) => {
-  //   const response = await fetch(`${config.urls.READINGS_URL}${stationID}`, {
-  //     mode: "cors",
-  //   })
-  //   let pollutants = {}
-  //   return
-  // }
+  const getReadings = async (ids) => {
+    let qParam = ids.reduce((prev, id) => prev + `ids=${id}&`, "?");
+    if (qParam.slice(-1) === "&") {
+      qParam = qParam.slice(0, -1);
+    }
+
+    const response = await fetch(`${config.urls.READINGS_URL}${qParam}`);
+    const data = await response.json();
+
+    return data;
+  };
+
+  const handleReadingDataChange = async () => {
+    const data = await getReadings(idsToGraph);
+    const dates = Object.entries(data[0]["readings"]).map(
+      (reading) => reading["reading_datetime"]
+    );
+
+    const aqiData = data.map((station) => ({
+      station_id: station["station_id"],
+      data: station["readings"].map((reading) => reading["pm25_aqi"]),
+    }));
+
+    setRawReadings(data);
+    setDates(dates);
+    setAqiData(aqiData);
+  };
+
+  useEffect(() => {
+    handleReadingDataChange();
+  }, [idsToGraph]);
+
+  useEffect(() => {
+    const getTempStationPollutants = async () => {
+      if (!tempTempStations) return;
+      else {
+        const ids = tempTempStations.map((station) => station["station_id"]);
+        const data = await getReadings(ids);
+        const newTemps = tempTempStations.map((station) => {
+          const dReadings = data.filter((dstation) => {
+            return dstation["station_id"] === station["station_id"];
+          });
+          const dpollutants = dReadings[0]["readings"][0]
+            ? Object.entries(dReadings[0]["readings"][0]).filter(
+                ([key, value]) => key.slice(-3) === "aqi" && value
+              ).map(([key, value]) => key)
+            : null;
+          station["pollutants"] = dpollutants;
+          return station;
+        });
+        console.log(newTemps);
+        setTempStations(newTemps);
+      }
+    };
+    getTempStationPollutants();
+  }, [tempTempStations]);
 
   useEffect(() => {
     const findStations = async () => {
@@ -139,56 +189,10 @@ const Home = () => {
       );
       tempArrTwo.forEach((station) => (station["checked"] = false));
 
-      setTempStations(tempArrTwo);
+      setTempTempStation(tempArrTwo);
     };
-
     findStations();
   }, [zipQuery]);
-
-  const getReadings = async (ids) => {
-    let qParam = ids.reduce((prev, id) => prev + `ids=${id}&`, "?");
-    if (qParam.slice(-1) === "&") {
-      qParam = qParam.slice(0, -1);
-    }
-
-    const response = await fetch(`${config.urls.READINGS_URL}${qParam}`);
-    const data = await response.json();
-    console.log("data[0]");
-    console.log(data[0]);
-
-    return data;
-  };
-
-  const getTempStationPollutants = async () => {
-    const ids = tempStations.map(station => station["station_id"])
-    const data = await getReadings(ids)
-    const pollutants = data.map((station) => {
-      plts = Object.entries(station["readings"][0]).map((key, value) => {
-        if (key.slice(-3) == "aqi" && value) {
-          return key
-        }
-      })
-      return {station["station_id"]: 2}
-    })
-  }
-
-  const handleReadingDataChange = async () => {
-    const data = await getReadings(idsToGraph);
-    const dates = Object.keys(data[0])
-
-    const aqiData = data.map((station) => ({
-      station_id: station[0]["ReadingsAirnow"]["station_id"],
-      data: station.map((reading) => reading["ReadingsAirnow"]["pm25_aqi"]),
-    }));
-
-    setRawReadings(data);
-    setDates(dates);
-    setAqiData(aqiData);
-  };
-
-  useEffect(() => {
-    handleReadingDataChange();
-  }, [idsToGraph]);
 
   return (
     <div className="dashboard-container">
