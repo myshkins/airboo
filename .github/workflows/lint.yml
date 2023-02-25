@@ -14,6 +14,7 @@ jobs:
       uid_gid: ${{ env.uid_gid }}
     steps:
       - run: echo "uid_gid=$(id -u):$(id -g)" >> $GITHUB_OUTPUT
+      - run: echo ${{ env.uid_gid }}
 
   lint:
     runs-on: ubuntu-latest
