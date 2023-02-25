@@ -14,7 +14,7 @@ const AddStationCheckbox = (props) => {
         {props.pollutants ? (
           <ul>
             {props.pollutants.map((pollutant) => (
-              <li>{pollutant}</li>
+              <li key={pollutant}>{pollutant}</li>
             ))}
           </ul>
         ) : null}

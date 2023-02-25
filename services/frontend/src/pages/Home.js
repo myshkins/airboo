@@ -129,12 +129,14 @@ const Home = () => {
     return data;
   };
 
+  /**
+   * func (and hook below) for grabbing aqi data for selected stations
+   */
   const handleReadingDataChange = async () => {
     const data = await getReadings(idsToGraph);
-    const dates = Object.entries(data[0]["readings"]).map(
+    const dates = data[0]["readings"].map(
       (reading) => reading["reading_datetime"]
     );
-
     const aqiData = data.map((station) => ({
       station_id: station["station_id"],
       data: station["readings"].map((reading) => reading["pm25_aqi"]),
@@ -149,6 +151,10 @@ const Home = () => {
     handleReadingDataChange();
   }, [idsToGraph]);
 
+  /**
+   * hook for getting the pollutants that each station has available to plot
+   * sorry for the mess
+   */
   useEffect(() => {
     const getTempStationPollutants = async () => {
       if (!tempTempStations) return;
@@ -167,13 +173,15 @@ const Home = () => {
           station["pollutants"] = dpollutants;
           return station;
         });
-        console.log(newTemps);
         setTempStations(newTemps);
       }
     };
     getTempStationPollutants();
   }, [tempTempStations]);
 
+  /**
+   * hook for finding stations near zipcode, runs on button click from editStationWindow
+   */
   useEffect(() => {
     const findStations = async () => {
       const response = await fetch(`${config.urls.STATIONS_URL}${zipcode}`, {
