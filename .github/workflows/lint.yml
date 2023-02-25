@@ -10,18 +10,19 @@ on:
 jobs:
   configure:
     runs-on: ubuntu-latest
-    outputs:
-      uid_gid: ${{ env.uid_gid }}
     steps:
-      - run: echo "uid_gid=$(id -u):$(id -g)" >> $GITHUB_OUTPUT
-      - run: echo ${{ env.uid_gid }}
+      - id: id_grab
+        run: echo "uid_gid=$(id -u):$(id -g)" >> $GITHUB_OUTPUT
+        run: echo $GITHUB_OUTPUT
+    outputs:
+      uid_gid: ${{ steps.id_grab.outputs.uid_gid }}
 
   lint:
     runs-on: ubuntu-latest
     needs: [configure]
     container:
       image: kboiiz/air-quality:latest
-      # options: --user ${{ needs.configure.outputs.uid_gid }}
+      options: --user ${{ needs.configure.outputs.uid_gid }}
     defaults:
       run:
         working-directory: ./
