@@ -13,7 +13,7 @@ jobs:
     steps:
       - id: id_grab
         run: echo "uid_gid=$(id -u):$(id -g)" >> $GITHUB_OUTPUT
-        run: echo $GITHUB_OUTPUT
+      - run: echo $GITHUB_OUTPUT
     outputs:
       uid_gid: ${{ steps.id_grab.outputs.uid_gid }}
 
