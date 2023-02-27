@@ -1,13 +1,13 @@
 """api routes"""
-from config import Settings
+from services.api.config import Settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import router_stations
-from routers import router_readings
+from services.api.routers import router_stations
+from services.api.routers import router_readings
 
 # Base and models imported to be picked up by Alembic
-from shared_models import Base
-from shared_models import readings_airnow, stations_airnow
+from services.shared_models import Base
+from services.shared_models import readings_airnow, stations_airnow
 
 
 settings = Settings()
@@ -32,3 +32,8 @@ app.include_router(router_stations.router)
 @app.get("/")
 def root():
     return {"message": "ah poop"}
+
+
+@app.get("/health-check")
+def health_check():
+    return {"message": "OK"}

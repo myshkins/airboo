@@ -1,5 +1,5 @@
 """sqlalchemy dependency for api routes"""
-from config import Settings
+from services.api.config import Settings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 

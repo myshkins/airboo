@@ -1,4 +1,4 @@
-from shared_models import Base
+from services.shared_models import Base
 from sqlalchemy import (
     TIMESTAMP,
     Column,
