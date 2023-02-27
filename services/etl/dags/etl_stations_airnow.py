@@ -5,7 +5,7 @@ import pendulum
 from airflow.decorators import dag, task
 from api_interface import get_readings_airnow as gad
 from db.db_engine import get_db
-from shared_models.stations_airnow import AirnowStationsTemp
+from shared_models.stations_airnow import StationsAirnowTemp
 from util.util_sql import exec_sql, read_sql
 
 PATH = "/opt/airflow/dags/"
@@ -30,8 +30,8 @@ def etl_stations_airnow():
         with get_db() as db:
             engine = db.get_bind()
             if engine.has_table("stations_airnow_temp"):
-                AirnowStationsTemp.__table__.drop(db.get_bind())
-            AirnowStationsTemp.__table__.create(db.get_bind())
+                StationsAirnowTemp.__table__.drop(db.get_bind())
+            StationsAirnowTemp.__table__.create(db.get_bind())
 
     @task
     def get_stations_airnow():
