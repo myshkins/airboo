@@ -3,6 +3,7 @@ run-name: ${{ github.actor }} is running test-image-rebuild
 on:
   push:
     paths:
+      - ".github/workflows/build_test_image.yaml"
       - "ci_cd/Dockerfile"
       - "ci_cd/test/requirements.txt"
 
