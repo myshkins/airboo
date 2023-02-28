@@ -1,9 +1,9 @@
 """api data routes"""
+from database import get_db
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from .crud import crud
-from services.api.database import get_db
 
+from .crud import crud
 
 router = APIRouter(
     prefix="/air-readings",

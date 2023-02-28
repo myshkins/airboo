@@ -1,13 +1,13 @@
 """api routes"""
-from services.api.config import Settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from services.api.routers import router_stations
-from services.api.routers import router_readings
+
+from config import Settings
+from routers import router_readings, router_stations
 
 # Base and models imported to be picked up by Alembic
-from services.shared_models import Base
-from services.shared_models import readings_airnow, stations_airnow
+from shared_models import Base
+from shared_models import readings_airnow, stations_airnow
 
 
 settings = Settings()

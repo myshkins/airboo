@@ -1,6 +1,7 @@
 version: '3'
 x-airflow-common:
   &airflow-common
+  profiles: ["deploy", "full"]
   build: ./services/etl
   env_file: ./.env
   volumes:
@@ -8,7 +9,7 @@ x-airflow-common:
     - ./services/etl/logs:/opt/airflow/logs
     - ./services/etl/plugins:/opt/airflow/plugins
     - ./services/shared_models:/opt/airflow/dags/shared_models
-  user: "${AIRFLOW_UID}:0"
+  user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
     redis:
@@ -18,7 +19,7 @@ x-airflow-common:
 
 services:
   api:
-    profiles: ["api", "full"]
+    profiles: ["api", "full", "deploy", "test"]
     container_name: air_api
     build: ./services/api
     command: ./startup.sh
@@ -33,7 +34,7 @@ services:
         condition: service_healthy
 
   app:
-    profiles: ["air_app", "full"]
+    profiles: ["air_app", "full", "deploy", "test"]
     container_name: air_app
     build: ./services/air_app
     command: python wsgi.py
@@ -48,7 +49,7 @@ services:
         condition: service_healthy
   
   postgres:
-    profiles: ["air_app", "api", "airflow", "full"]
+    profiles: ["air_app", "api", "airflow", "full", "deploy", "test"]
     build: ./services/postgres
     environment:
       POSTGRES_MULTIPLE_DATABASES: "air_quality,airflow"
@@ -57,7 +58,6 @@ services:
       POSTGRES_DB: airflow
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
-      - ./services/postgres/dump:/dump
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 15s
@@ -148,6 +148,7 @@ services:
     profiles: ["airflow", "full"]
     <<: *airflow-common
     entrypoint: /bin/bash
+    # yamllint disable rule:line-length
     command:
       - -c
       - |
@@ -207,6 +208,8 @@ services:
           echo "   https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#before-you-begin"
           echo
         fi
+        mkdir -p /sources/logs /sources/dags /sources/plugins
+        chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
         exec /entrypoint airflow version
     # yamllint enable rule:line-length
     environment:

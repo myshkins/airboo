@@ -2,8 +2,7 @@
 import pgeocode
 from sqlalchemy import text, select
 from sqlalchemy.orm import Session
-from services.shared_models.readings_airnow import ReadingsAirnow
-from services.shared_models.stations_airnow import StationsAirnow
+from shared_models.readings_airnow import ReadingsAirnow
 
 
 def zipcode_to_latlong(zipcode: str):

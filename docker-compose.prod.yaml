@@ -1,14 +1,7 @@
 version: '3'
 x-airflow-common:
   &airflow-common
-  profiles: ["deploy"]
-  build: ./services/etl
-  env_file: ./.env
-  volumes:
-    - ./services/etl/dags:/opt/airflow/dags
-    - ./services/etl/logs:/opt/airflow/logs
-    - ./services/etl/plugins:/opt/airflow/plugins
-    - ./services/shared_models:/opt/airflow/dags/shared_models
+  image: kboiiz/air-quality-airflow:latest
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:
     &airflow-common-depends-on
@@ -19,38 +12,27 @@ x-airflow-common:
 
 services:
   api:
-    profiles: ["api", "full", "deploy"]
-    container_name: air_api
-    build: ./services/api
+    container_name: air-api
+    image: kboiiz/air-quality-api:latest
     command: ./startup.sh
     ports:
       - 8100:8100
-    volumes:
-      - ./services/api:/api
-      - ./services/shared_models:/api/shared_models
-    env_file: ./.env
     depends_on:
       postgres:
         condition: service_healthy
 
   app:
-    profiles: ["air_app", "full", "deploy"]
-    container_name: air_app
-    build: ./services/air_app
+    container_name: air-app
+    image: kboiiz/air-quality-app:latest
     command: python wsgi.py
     ports:
       - 8000:5000
-    volumes:
-      - ./services/air_app:/air_app
-      - ./services/shared_models:/air_app/shared_models
-    env_file: ./.env
     depends_on:
       postgres:
         condition: service_healthy
-  
+
   postgres:
-    profiles: ["air_app", "api", "airflow", "full", "deploy"]
-    build: ./services/postgres
+    image: kboiiz/air-quality-postgres:latest
     environment:
       POSTGRES_MULTIPLE_DATABASES: "air_quality,airflow"
       POSTGRES_USER: airflow
@@ -65,7 +47,6 @@ services:
     restart: always
 
   redis:
-    profiles: ["airflow", "full"]
     image: redis:latest
     expose:
       - 6379
@@ -77,7 +58,6 @@ services:
     restart: always
 
   airflow-webserver:
-    profiles: ["airflow", "full"]
     <<: *airflow-common
     command: webserver
     ports:
@@ -94,7 +74,6 @@ services:
         condition: service_completed_successfully
 
   airflow-scheduler:
-    profiles: ["airflow", "full"]
     <<: *airflow-common
     command: scheduler
     healthcheck:
@@ -109,7 +88,6 @@ services:
         condition: service_completed_successfully
 
   airflow-worker:
-    profiles: ["airflow", "full"]
     <<: *airflow-common
     command: celery worker
     healthcheck:
@@ -130,7 +108,6 @@ services:
         condition: service_completed_successfully
 
   airflow-triggerer:
-    profiles: ["airflow", "full"]
     <<: *airflow-common
     command: triggerer
     healthcheck:
@@ -145,10 +122,8 @@ services:
         condition: service_completed_successfully
 
   airflow-init:
-    profiles: ["airflow", "full"]
     <<: *airflow-common
     entrypoint: /bin/bash
-    # yamllint disable rule:line-length
     command:
       - -c
       - |
@@ -211,7 +186,6 @@ services:
         mkdir -p /sources/logs /sources/dags /sources/plugins
         chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
         exec /entrypoint airflow version
-    # yamllint enable rule:line-length
     environment:
       _AIRFLOW_DB_UPGRADE: 'true'
       _AIRFLOW_WWW_USER_CREATE: 'true'
@@ -219,37 +193,6 @@ services:
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "0:0"
-    volumes:
-      - .:/sources
-
-  airflow-cli:
-    profiles: ["airflow", "full", "debug"]
-    <<: *airflow-common
-    environment:
-      CONNECTION_CHECK_MAX_COUNT: "0"
-    # Workaround for entrypoint issue. See: https://github.com/apache/airflow/issues/16252
-    command:
-      - bash
-      - -c
-      - airflow
-
-  flower:
-    <<: *airflow-common
-    command: celery flower
-    profiles:
-      - flower
-    ports:
-      - 5555:5555
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:5555/"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-    restart: always
-    depends_on:
-      <<: *airflow-common-depends-on
-      airflow-init:
-        condition: service_completed_successfully
 
 volumes:
   postgres-db-volume:

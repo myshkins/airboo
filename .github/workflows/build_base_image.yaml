@@ -1,10 +1,9 @@
-name: image-rebuild
+name: base-image-rebuild
 run-name: ${{ github.actor }} is running image-rebuild
 on:
   push:
     paths:
       - "ci_cd/Dockerfile"
-      - "services/api/requirements.txt"
 
 jobs:
   build-image:
