@@ -3,6 +3,6 @@ RUN mkdir -p /home/github && addgroup github && useradd -d /home/github -g githu
 USER github
 WORKDIR /home/github
 ENV PATH=/github/home/.local/bin:$PATH
-COPY requirements.txt .
+COPY ci_cd/test/requirements.txt .
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
