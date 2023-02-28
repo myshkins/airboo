@@ -2,7 +2,11 @@ version: '3'
 services:
   test:
     build: ./ci_cd
-    image: 
+    image: kboiiz/air-quality-test:latest
+    volumes:
+      - ./:/home/github
+    command: tail -f /dev/null
+
   postgres:
     build: 
       context: ./services/postgres
