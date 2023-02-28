@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - ".github/workflows/build_test_image.yaml"
-      - "ci_cd/Dockerfile"
+      - "ci_cd/test/Dockerfile"
       - "ci_cd/test/requirements.txt"
 
 jobs:
