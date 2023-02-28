@@ -24,6 +24,6 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: ./
-          file: ./ci_cd/Dockerfile
+          file: ./ci_cd/test/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/air-quality-test:latest
