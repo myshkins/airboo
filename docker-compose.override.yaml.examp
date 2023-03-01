@@ -1,0 +1,81 @@
+version: '3'
+
+services:
+  api:
+    profiles: ["api", "full", "debug", "pushable"]
+    build: ./services/api
+    volumes:
+      - ./services/api:/api
+      - ./services/shared_models:/api/shared_models
+    env_file: ./.env
+
+  app:
+    profiles: ["air_app", "full", "debug", "pushable"]
+    build: ./services/air_app
+    volumes:
+      - ./services/air_app:/air_app
+      - ./services/shared_models:/air_app/shared_models
+    env_file: ./.env
+
+  postgres:
+    profiles: ["air_app", "api", "full", "debug", "pushable"]
+    build: ./services/postgres
+
+  redis:
+    profiles: ["airflow", "full", "debug", "pushable"]
+
+  # This service is not deployed, but it is used to push the common airflow image to docker hub
+  airflow-common:
+    image: kboiiz/air-quality-airflow:latest
+    profiles: ["airflow", "full", "pushable"]
+    build: ./services/etl
+    env_file: ./.env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    user: "${AIRFLOW_UID:-50000}:${AIRFLOW_GID:-0}"
+    volumes:
+      - ./services/etl/dags:/opt/airflow/dags
+      - ./services/etl/logs:/opt/airflow/logs
+      - ./services/etl/plugins:/opt/airflow/plugins
+      - ./services/shared_models:/opt/airflow/dags/shared_models
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  airflow-webserver:
+    image: kboiiz/air-quality-airflow-webserver:latest
+    extends: airflow-common
+    profiles: ["airflow", "full", "debug"]
+
+  airflow-scheduler:
+    image: kboiiz/air-quality-airflow-schedule:latest
+    extends: airflow-common
+    profiles: ["airflow", "full", "debug"]
+
+  airflow-worker:
+    image: kboiiz/air-quality-airflow-worker:latest
+    extends: airflow-common
+    profiles: ["airflow", "full", "debug"]
+
+  airflow-init:
+    image: kboiiz/air-quality-airflow-init:latest
+    extends: airflow-common
+    profiles: ["airflow", "full", "debug"]
+
+  airflow-cli:
+    image: kboiiz/air-quality-airflow-cli:latest
+    profiles: ["airflow", "debug"]
+    extends: airflow-common
+    environment:
+      CONNECTION_CHECK_MAX_COUNT: "0"
+    # Workaround for entrypoint issue. See: https://github.com/apache/airflow/issues/16252
+    command:
+      - bash
+      - -c
+      - airflow
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
