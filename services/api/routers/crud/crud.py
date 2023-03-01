@@ -1,45 +1,48 @@
 """crud functions"""
 import pgeocode
-from sqlalchemy import text, select
-from sqlalchemy.orm import Session
+from shared_models.pydantic_models import Location
 from shared_models.readings_airnow import ReadingsAirnow
+from shared_models.stations_airnow import StationsAirnowPydantic
+from sqlalchemy import select, text
+from sqlalchemy.orm import Session
 
 
-def zipcode_to_latlong(zipcode: str):
+def zipcode_to_latlong(zipcode: str) -> Location:
     """helper func returns tuple of lat long"""
     geo = pgeocode.Nominatim("us")
     loc = geo.query_postal_code(zipcode)
-    return loc["latitude"], loc["longitude"]
+    location = Location(lat=loc["latitude"], long=loc["longitude"])
+    return location
 
 
-def get_nearby_stations(zipcode: str, db: Session):
+def get_nearby_stations(zipcode: str, db: Session) -> list:
     """given zipcode, returns the 5 nearest stations"""
     loc = zipcode_to_latlong(zipcode)
     stmt = text(
         """
-        SELECT station_id, station_name, latitude, longitude, location_coord
+        SELECT station_id, station_name, agency_name, status, latitude, longitude, elevation, country
         FROM stations_airnow
         ORDER BY location_coord <-> 'SRID=4326;POINT(:y :x)'::geometry
         LIMIT 5
         """
     )
-    result = db.execute(stmt, {"x": loc[0], "y": loc[1]}).all()
+    result = db.execute(stmt, {"x": loc.lat, "y": loc.long}).all()
     return result
 
 
 def get_closest_station(zipcode: str, db: Session):
-    """given zipcode, returns the closest station. note srid=4326 signifies
-    that the data is of the latitude/longitude type."""
+    """returns closest station to zipcode. note srid=4326 signifies data is of
+    the latitude/longitude type."""
     loc = zipcode_to_latlong(zipcode)
     stmt = text(
         """
-        SELECT station_id, station_name, latitude, longitude, location_coord
+        SELECT station_id, station_name, agency_name, status, latitude, longitude, elevation, country
         FROM stations_airnow
         ORDER BY location_coord <-> 'SRID=4326;POINT(:y :x)'::geometry
         LIMIT 1
         """
     )
-    result = db.execute(stmt, {"x": loc[0], "y": loc[1]}).all()
+    result = db.execute(stmt, {"x": loc.lat, "y": loc.long}).all()
     return result
 
 

@@ -1,4 +1,6 @@
+from datetime import datetime
 from . import Base
+from pydantic import BaseModel
 from sqlalchemy import (
     TIMESTAMP,
     Column,
@@ -53,3 +55,26 @@ class ReadingsAirnowTemp(Base):
     site_agency = Column(String, nullable=True)
     aqs_id = Column(String, nullable=True)
     full_aqs_id = Column(String, nullable=True)
+
+
+class ReadingsAirnowPydantic(BaseModel):
+    station_id: str
+    reading_datetime: datetime
+    data_datetime: datetime
+    pm25_conc: float
+    pm25_aqi: int
+    pm25_cat: int
+    pm10_conc: float
+    pm10_aqi: int
+    pm10_cat: int
+    o3_conc: float
+    o3_aqi: int
+    o3_cat: int
+    co_conc: float
+    # note not co_aqi or co_cat because it's always null for co
+    no2_conc: float
+    no2_aqi: int
+    no2_cat: int
+    so2_conc: float
+    so2_aqi: int
+    so2_cat: int

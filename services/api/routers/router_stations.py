@@ -4,11 +4,13 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from .crud import crud
+from shared_models.stations_airnow import StationsAirnowPydantic
+
 
 router = APIRouter(prefix="/stations", tags=["stations"])
 
 
-@router.get("/all-nearby/")
+@router.get("/all-nearby/", response_model=list[StationsAirnowPydantic])
 def get_nearby_stations(zipcode: str, db: Session = Depends(get_db)):
     """given zipcode, returns the 5 nearest stations"""
     return crud.get_nearby_stations(zipcode, db)
