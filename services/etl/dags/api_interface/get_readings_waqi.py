@@ -9,6 +9,8 @@ from logger import LOGGER
 from shared_models.stations_waqi import Waqi_Stations
 from sqlalchemy import select
 
+WAQI_BASE_URL = "https://api.waqi.info/"
+
 
 def get_station_list():
     """
@@ -27,7 +29,7 @@ def get_station_list():
 def init_urls():
     station_list = get_station_list()
     url_list = [
-        Settings().WAQI_BASE_URL + "feed/@" + str(station) + "/?token=" + Settings().WAQI_TOKEN
+        WAQI_BASE_URL + "feed/@" + str(station) + "/?token=" + Settings().WAQI_TOKEN
         for station in station_list
     ]
     return url_list
