@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Build n Push
-        run: docker compose --profile full build --push 
+        run: docker compose --profile pushable build --push 
       - name: Create SSH key
         run: |
           install -m 600 -D /dev/null ~/.ssh/id_rsa
@@ -22,7 +22,6 @@ jobs:
         run: 
           |
           rsync -av ./docker-compose.yaml deploy-admin@213.255.227.248:~/air-quality
-          rsync -av ./docker-airflow-common.yaml deploy-admin@213.255.227.248:~/air-quality
       - name: SSH and run it
         run: |
           ssh -t deploy-admin@213.255.227.248 "cd ~/air-quality && docker compose up -d"
