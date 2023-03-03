@@ -1,12 +1,9 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-
 from alembic import context
-
-from main import Base
 from config import Settings
+from main import Base
+from sqlalchemy import engine_from_config, pool
 
 settings = Settings()
 
@@ -62,7 +59,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    url = {"url": settings.POSTGRES_URI}
+    url = {"url": settings.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
     connectable = engine_from_config(
         url,
         prefix="",

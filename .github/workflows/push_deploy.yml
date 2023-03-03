@@ -20,7 +20,7 @@ jobs:
           envkey_DEV_MODE: ${{ secrets.DEV_MODE}}
           envkey_POSTGRES_DB: ${{ secrets.POSTGRES_DB}}
           envkey_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD}}
-          envkey_POSTGRES_URI: ${{ secrets.POSTGRES_URI}}
+          envkey_AQ_POSTGRES_URI: ${{ secrets.AQ_POSTGRES_URI}}
           envkey_POSTGRES_USER: ${{ secrets.POSTGRES_USER}}
           envkey_WAQI_TOKEN: ${{ secrets.WAQI_TOKEN}}
       - name: Build the containers and push the images to dockerhub

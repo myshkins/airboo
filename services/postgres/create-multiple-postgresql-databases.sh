@@ -1,22 +1,18 @@
 #!/bin/bash
 
 set -e
-set -u
 
-function create_user_and_database() {
-	local database=$(echo $1 | tr ',' ' ' | awk  '{print $1}')
-	local owner=$(echo $1 | tr ',' ' ' | awk  '{print $2}')
-	echo "  Creating user and database '$database'"
-	psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
-	    CREATE DATABASE $database;
-	    GRANT ALL PRIVILEGES ON DATABASE $database TO $owner;
+echo "Creating airflow db and user"
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+	CREATE ROLE $POSTGRES_AIRFLOW_USER WITH SUPERUSER LOGIN PASSWORD '$POSTGRES_AIRFLOW_USER_PW';
+	ALTER USER $POSTGRES_AIRFLOW_USER SET search_path = public;
+	CREATE DATABASE airflow;
+	GRANT ALL PRIVILEGES ON DATABASE airflow TO $POSTGRES_AIRFLOW_USER;
 EOSQL
-}
 
-if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
-	echo "Multiple database creation requested: $POSTGRES_MULTIPLE_DATABASES"
-	for db in $(echo $POSTGRES_MULTIPLE_DATABASES | tr ':' ' '); do
-		create_user_and_database $db
-	done
-	echo "Multiple databases created"
-fi
+echo "Creating air_quality db and user"
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
+	CREATE USER $POSTGRES_AIR_QUALITY_USER WITH PASSWORD '$POSTGRES_AIR_QUALITY_USER_PW';
+	CREATE DATABASE air_quality;
+	GRANT ALL PRIVILEGES ON DATABASE air_quality TO $POSTGRES_AIR_QUALITY_USER;
+EOSQL
