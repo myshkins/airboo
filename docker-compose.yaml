@@ -32,18 +32,17 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-
   app:
     profiles: ["air_app", "full", "deploy", "test"]
-    container_name: air_app
-    build: ./services/air_app
-    command: python wsgi.py
+    container_name: app
+    build: ./services/frontend
+    environment:
+      - NODE_ENV=development
+    command: node serveApp.js
     ports:
-      - 8000:5000
+      - 9000:9000
     volumes:
-      - ./services/air_app:/air_app
-      - ./services/shared_models:/air_app/shared_models
-    env_file: ./.env
+      - ./services/frontend/:/app
     depends_on:
       postgres:
         condition: service_healthy

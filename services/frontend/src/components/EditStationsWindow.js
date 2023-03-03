@@ -5,14 +5,16 @@ const EditStationsWindow = (props) => {
   return (
     <div className="edit-station-window">
       <h3>Add/Remove Stations</h3>
-      <div>
-        <label htmlFor="zipcode-input">zipcode</label>
-        <input
-          type="text"
-          name="zipcode-input"
-          value={props.zipcode}
-          onChange={props.handleZipcodeChange}
-        />
+      <div className={"add-remove-wrap"}>
+        <div className="add-remove-zip-entry">
+          <label htmlFor="zipcode-input">zipcode:</label>
+          <input
+            type="text"
+            name="zipcode-input"
+            value={props.zipcode}
+            onChange={props.handleZipcodeChange}
+          />
+        </div>
         <HomeButton
           value={"find stations"}
           onClick={props.handleZipQueryChange}

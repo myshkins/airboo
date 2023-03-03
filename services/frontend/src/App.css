@@ -1,8 +1,10 @@
 :root {
   --bg-color: rgb(38, 36, 43);
   --default-text-color: rgb(181, 219, 207);
+  --light-text-color: rgb(172, 187, 182);
   --grey: rgb(56, 53, 63);
   --light-grey: rgb(94, 89, 105);
+  --light-light-grey: rgb(165, 161, 172);
   --blue: rgb(69, 92, 177);
   --pink: rgb(204, 170, 198);
 }

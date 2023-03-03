@@ -1,16 +1,29 @@
 """crud functions"""
+import math
+from enum import Enum
+
 import pgeocode
 from shared_models.pydantic_models import Location
 from shared_models.readings_airnow import ReadingsAirnow
-from shared_models.stations_airnow import StationsAirnowPydantic
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
+
+
+class TimePeriod(str, Enum):
+    twelve_hr = "12hr"
+    twenty_four_hr = "24hr"
+    forty_eight_hr = "48hr"
+    five_day = "5day"
+    ten_day = "10day"
+    one_month = "1month"
 
 
 def zipcode_to_latlong(zipcode: str) -> Location:
     """helper func returns tuple of lat long"""
     geo = pgeocode.Nominatim("us")
     loc = geo.query_postal_code(zipcode)
+    if math.isnan(loc["latitude"]):
+        return 1
     location = Location(lat=loc["latitude"], long=loc["longitude"])
     return location
 
@@ -18,10 +31,13 @@ def zipcode_to_latlong(zipcode: str) -> Location:
 def get_nearby_stations(zipcode: str, db: Session) -> list:
     """given zipcode, returns the 5 nearest stations"""
     loc = zipcode_to_latlong(zipcode)
+    if loc == 1:
+        return 1
     stmt = text(
         """
         SELECT station_id, station_name, agency_name, status, latitude, longitude, elevation, country
         FROM stations_airnow
+        WHERE station_id IN (select station_id FROM readings_airnow)
         ORDER BY location_coord <-> 'SRID=4326;POINT(:y :x)'::geometry
         LIMIT 5
         """
@@ -38,6 +54,7 @@ def get_closest_station(zipcode: str, db: Session):
         """
         SELECT station_id, station_name, agency_name, status, latitude, longitude, elevation, country
         FROM stations_airnow
+        WHERE station_id IN (select station_id FROM readings_airnow)
         ORDER BY location_coord <-> 'SRID=4326;POINT(:y :x)'::geometry
         LIMIT 1
         """

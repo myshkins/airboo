@@ -67,4 +67,37 @@
   left: 90%;
   background-color: var(--grey);
   padding: 2rem;
+  width: fit-content;
+  white-space: nowrap
+}
+
+.add-remove-wrap {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: .5rem;
+  border: solid 1px red;
+}
+
+.add-remove-zip-entry {
+  margin: .5rem 0;
+}
+
+label[for="zipcode-input"] {
+  margin-right: .5rem;
+}
+
+input[name="zipcode-input"] {
+  width: 4rem
+}
+
+ul.add-station-pollutant {
+  display: flex;
+  flex-direction: row;
+  gap: .7rem
+}
+
+li.add-station-pollutant {
+  font-size: .8rem;
+  color: var(--light-text-color);
+  list-style: none;
 }

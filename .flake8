@@ -8,4 +8,4 @@ per-file-ignores =
     services/api/main.py: F401
 
     # need to append to sys.path before importing
-    ci_cd/test/test_api_unit: E402
+    ci_cd/test/test_api_unit.py: E402

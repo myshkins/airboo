@@ -12,7 +12,6 @@ import { config } from "../Constants";
 
 const Home = () => {
   const [timePeriods, setTimePeriod] = useState({
-    "6hr": true,
     "12hr": false,
     "24hr": false,
     "48hr": false,
@@ -32,7 +31,7 @@ const Home = () => {
   const [rawReadings, setRawReadings] = useState({});
   const [dates, setDates] = useState([]);
   const [aqiData, setAqiData] = useState([]);
-  const [idsToGraph, setIdsToGraph] = useState([""]);
+  const [idsToGraph, setIdsToGraph] = useState([]);
 
   const toggleSideBar = () => {
     setLeftSideBarVisible(!leftSideBarVisible);
@@ -122,7 +121,6 @@ const Home = () => {
     if (qParam.slice(-1) === "&") {
       qParam = qParam.slice(0, -1);
     }
-
     const response = await fetch(`${config.urls.READINGS_URL}${qParam}`);
     const data = await response.json();
 
@@ -148,7 +146,9 @@ const Home = () => {
   };
 
   useEffect(() => {
-    handleReadingDataChange();
+    if (idsToGraph.length > 0) {
+      handleReadingDataChange();
+    }
   }, [idsToGraph]);
 
   /**

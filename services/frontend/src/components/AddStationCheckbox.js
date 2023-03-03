@@ -10,15 +10,13 @@ const AddStationCheckbox = (props) => {
         />
         <span>{props.value}</span>
       </label>
-      <ul>
-        {props.pollutants ? (
-          <ul>
-            {props.pollutants.map((pollutant) => (
-              <li key={pollutant}>{pollutant}</li>
-            ))}
-          </ul>
-        ) : null}
-      </ul>
+      {props.pollutants ? (
+        <ul className={"add-station-pollutant"}>
+          {props.pollutants.map((pollutant) => (
+            <li key={pollutant} className={"add-station-pollutant"}>{pollutant.slice(0, -4)}</li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   );
 };
