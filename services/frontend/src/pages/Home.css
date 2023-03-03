@@ -68,31 +68,38 @@
   background-color: var(--grey);
   padding: 2rem;
   width: fit-content;
-  white-space: nowrap
+  white-space: nowrap;
+  display: grid;
+  grid-template-columns: 2 1fr;
+  grid-template-rows: repeat(5 1fr);
+  gap: .3rem;
 }
 
-.add-remove-wrap {
+.add-remove-zip-input-wrap {
   display: flex;
-  flex-direction: column;
-  margin-bottom: .5rem;
-  border: solid 1px red;
-}
-
-.add-remove-zip-entry {
-  margin: .5rem 0;
-}
-
-label[for="zipcode-input"] {
-  margin-right: .5rem;
+  flex-direction: row;
+  grid-area: 2 / 1 / 3 / 2;
+  align-items: center;
 }
 
 input[name="zipcode-input"] {
-  width: 4rem
+  width: 4rem;
+  margin-left: .5rem;
 }
+
+.edit-station-window h5 {
+  margin: .7rem 0 .3rem;
+}
+
+.edit-station-window input[type="submit"] {
+  margin-top: .3rem;
+}
+
 
 ul.add-station-pollutant {
   display: flex;
   flex-direction: row;
+  margin-left: 1.4rem;
   gap: .7rem
 }
 
