@@ -8,7 +8,7 @@ const AddStationCheckbox = (props) => {
           checked={props.checked}
           onChange={props.onChange}
         />
-        <span>{props.value}</span>
+        {props.value}
       </label>
       {props.pollutants ? (
         <ul className={"add-station-pollutant"}>

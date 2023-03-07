@@ -1,5 +1,15 @@
 import pytest
 import requests
+import sys
+import os
+
+root = os.path.realpath(os.path.dirname(__file__) + "/../..")
+api_path = root + "/services/api"
+
+sys.path.append(os.path.realpath(root))
+sys.path.append(os.path.realpath(api_path))
+
+from services.api.routers.crud import crud
 
 
 ZIPCODES = ["11206", 80304, "01913", 99723, "96712"]
@@ -15,6 +25,16 @@ def test_health_check():
     response = requests.get("http://air_api:8100/health-check")
     assert response.status_code == 200
     assert response.json() == {"message": "OK"}
+
+
+class TestCrud:
+    def test_create_dfs():
+        """
+        given   a valid response object containing reading data
+        when    create_dfs is called
+        then    a list of dfs is returned
+        """
+        response = requests.get('http://air_api:8100/air-readings/from-ids/}')
 
 
 @pytest.mark.parametrize("zipcode", ZIPCODES)
@@ -61,3 +81,17 @@ def test_pos_get_readings_from_ids(station_ids):
     query = "".join(id_lst).removesuffix('&')
     response = requests.get(f'http://air_api:8100/air-readings/from-ids/{query}')
     assert response.status_code == 200
+
+
+@pytest.fixture
+def invalid_station_ids():
+    return ["not and id", "", 0, 1, "0000", 000000000000, "000000000000"]
+
+
+def test_neg_get_readings_from_ids():
+    """
+    GIVEN   invalid station id arguments and valid time period argument
+    WHEN    get_readings_from_ids enpoint is called
+    THEN    response status is 400 and response body is error message
+    """
+    pass

@@ -1,21 +1,12 @@
 """crud functions"""
 import math
-from enum import Enum
 
 import pgeocode
-from shared_models.pydantic_models import Location
+import pandas as pd
+from shared_models.pydantic_models import Location, TimePeriod
 from shared_models.readings_airnow import ReadingsAirnow
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
-
-
-class TimePeriod(str, Enum):
-    twelve_hr = "12hr"
-    twenty_four_hr = "24hr"
-    forty_eight_hr = "48hr"
-    five_day = "5day"
-    ten_day = "10day"
-    one_month = "1month"
 
 
 def zipcode_to_latlong(zipcode: str) -> Location:
@@ -63,7 +54,7 @@ def get_closest_station(zipcode: str, db: Session):
     return result
 
 
-def get_data(ids: list[str], db: Session):
+def get_data(ids: list[str], db: Session) -> list[dict]:
     response = []
     for id in ids:
         stmt = (
@@ -93,3 +84,16 @@ def get_data(ids: list[str], db: Session):
         data = [_ for _ in result]
         response.append({"station_id": id, "readings": data})
     return response
+
+
+def create_dfs(response: list[dict]):
+    dfs = []
+    for station in response:
+        df = pd.DataFrame.from_records(station["readings"])
+        df["reading_datetime"] = pd.to_datetime(df["reading_datetime"])
+        dfs.append(df)
+    return dfs
+
+
+def select_for_time_period(response: list[dict], period: TimePeriod) -> list[dict]:
+    dfs = create_dfs(response)

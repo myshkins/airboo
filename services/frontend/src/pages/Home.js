@@ -69,15 +69,15 @@ const Home = () => {
 
   const updateStations = (e) => {
     e.preventDefault();
-    const trueStations = tempStations.map((station) =>
-      station["checked"] === true
+    const trueStations = tempStations.map((stn) =>
+      stn["checked"] === true
         ? {
-            station_id: station["station_id"],
-            station_name: station["station_name"],
+            station_id: stn["station_id"],
+            station_name: stn["station_name"],
             checked: true,
-            latitude: station["latitude"],
-            longitude: station["longitude"],
-            location_coord: station["location_coord"],
+            latitude: stn["latitude"],
+            longitude: stn["longitude"],
+            location_coord: stn["location_coord"],
           }
         : null
     );
@@ -88,9 +88,9 @@ const Home = () => {
 
   const updateIds = () => {
     const newIds = [];
-    stations.forEach((station) => {
-      if (station["checked"]) {
-        newIds.push(station["station_id"]);
+    stations.forEach((stn) => {
+      if (stn["checked"]) {
+        newIds.push(stn["station_id"]);
       }
     });
     setIdsToGraph(newIds);
@@ -98,9 +98,9 @@ const Home = () => {
 
   const handleStationCheckChange = (e) => {
     const updatedStations = [...stations];
-    updatedStations.forEach((station) => {
-      if (station["station_id"] === e.target.name) {
-        station["checked"] = !station["checked"];
+    updatedStations.forEach((stn) => {
+      if (stn["station_id"] === e.target.name) {
+        stn["checked"] = !stn["checked"];
       }
     });
     setStations(updatedStations);
@@ -108,9 +108,9 @@ const Home = () => {
 
   const handleTempCheckChange = (e) => {
     const updatedTempStations = [...tempStations];
-    updatedTempStations.forEach((station) => {
-      if (station["station_id"] === e.target.name) {
-        station["checked"] = !station["checked"];
+    updatedTempStations.forEach((stn) => {
+      if (stn["station_id"] === e.target.name) {
+        stn["checked"] = !stn["checked"];
       }
     });
     setTempStations(updatedTempStations);
@@ -127,17 +127,30 @@ const Home = () => {
     return data;
   };
 
+  const getStationName = (stationID) => {
+    const stn = stations.filter((s) => (s["station_id"] === stationID))
+    const stnName = stn["station_name"]
+    return stnName
+  }
+
+  /**
+   * takes object station_ids and requested pollutants for each station
+   * returns aqiData obj to be passed to HomeGraph
+   */
+  const transformAQIData = (stationPollutantObj) => {
+  }
   /**
    * func (and hook below) for grabbing aqi data for selected stations
    */
   const handleReadingDataChange = async () => {
     const data = await getReadings(idsToGraph);
+    console.log(data)
     const dates = data[0]["readings"].map(
       (reading) => reading["reading_datetime"]
     );
-    const aqiData = data.map((station) => ({
-      station_id: station["station_id"],
-      data: station["readings"].map((reading) => reading["pm25_aqi"]),
+    const aqiData = data.map((stn) => ({
+      station_id: stn["station_id"],
+      data: stn["readings"].map((reading) => reading["pm25_aqi"]),
     }));
 
     setRawReadings(data);
@@ -159,19 +172,19 @@ const Home = () => {
     const getTempStationPollutants = async () => {
       if (!tempTempStations) return;
       else {
-        const ids = tempTempStations.map((station) => station["station_id"]);
+        const ids = tempTempStations.map((stn) => stn["station_id"]);
         const data = await getReadings(ids);
-        const newTemps = tempTempStations.map((station) => {
-          const dReadings = data.filter((dstation) => {
-            return dstation["station_id"] === station["station_id"];
+        const newTemps = tempTempStations.map((stn) => {
+          const dReadings = data.filter((dstn) => {
+            return dstn["station_id"] === stn["station_id"];
           });
           const dpollutants = dReadings[0]["readings"][0]
             ? Object.entries(dReadings[0]["readings"][0]).filter(
                 ([key, value]) => key.slice(-3) === "aqi" && value
               ).map(([key, value]) => key)
             : null;
-          station["pollutants"] = dpollutants;
-          return station;
+          stn["pollutants"] = dpollutants;
+          return stn;
         });
         setTempStations(newTemps);
       }
@@ -195,7 +208,7 @@ const Home = () => {
           index ===
           arr.findIndex((item) => item["station_id"] === value["station_id"])
       );
-      tempArrTwo.forEach((station) => (station["checked"] = false));
+      tempArrTwo.forEach((stn) => (stn["checked"] = false));
 
       setTempTempStation(tempArrTwo);
     };

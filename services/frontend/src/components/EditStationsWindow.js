@@ -28,7 +28,6 @@ const EditStationsWindow = (props) => {
             value={station["station_name"]}
             checked={station["checked"]}
             onChange={props.handleTempCheckChange}
-            type="checkbox"
           />
         ))}
         <input type="submit" value="update stations" />
