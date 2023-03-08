@@ -5,6 +5,8 @@ services:
     image: kboiiz/air-quality-test:latest
     volumes:
       - ./:/home/github/air-quality
+    env_file:
+      - ./.env
     command: tail -f /dev/null
 
   postgres:

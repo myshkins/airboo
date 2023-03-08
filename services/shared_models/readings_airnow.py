@@ -69,7 +69,7 @@ class ReadingsAirnowPydantic(BaseModel):
     o3_conc: float | None = None
     o3_cat: int | None = None
     co_conc: float | None = None
-    # note not co_aqi or co_cat because it's always null for co 
+    # note not co_aqi or co_cat because it's always null for co
     no2_aqi: int | None = None
     no2_conc: float | None = None
     no2_cat: int | None = None

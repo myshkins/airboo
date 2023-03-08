@@ -2,6 +2,8 @@ import pytest
 import requests
 import sys
 import os
+from pandas import DataFrame
+from sqlalchemy import create_engine
 
 root = os.path.realpath(os.path.dirname(__file__) + "/../..")
 api_path = root + "/services/api"
@@ -10,10 +12,28 @@ sys.path.append(os.path.realpath(root))
 sys.path.append(os.path.realpath(api_path))
 
 from services.api.routers.crud import crud
-
+from services.api.database import get_db
+from services.api.config import Settings
 
 ZIPCODES = ["11206", 80304, "01913", 99723, "96712"]
 ZIPCODES_INVALID = ["Brooklyn, NY", 112060, "11206-1839", "00000", "-----"]
+POSTGRES_URI = os.environ["POSTGRES_URI"]
+
+
+@pytest.fixture
+def station_ids():
+    return ["840360470118", "840360610134", "840360810120"]
+
+
+@pytest.fixture
+def invalid_station_ids():
+    return ["not and id", "", 0, 1, "0000", 000000000000, "000000000000"]
+
+
+@pytest.fixture
+def engine():
+    engine = create_engine(POSTGRES_URI)
+    return engine
 
 
 def test_health_check():
@@ -27,14 +47,26 @@ def test_health_check():
     assert response.json() == {"message": "OK"}
 
 
-class TestCrud:
-    def test_create_dfs():
-        """
-        given   a valid response object containing reading data
-        when    create_dfs is called
-        then    a list of dfs is returned
-        """
-        response = requests.get('http://air_api:8100/air-readings/from-ids/}')
+def test_create_dfs(station_ids, engine):
+    """
+    GIVEN   a list of valid station ids
+    WHEN    create_dfs is called
+    THEN    a list of dfs is returned
+    """
+    with engine.connect() as conn:
+        dfs = crud.get_pandas(station_ids, conn)
+    assert len(dfs) == 3
+    assert all([isinstance(df, DataFrame) for df in dfs])
+
+
+def test_filter_data_time(ids, period, db):
+    """
+    given   a list of ids and valid time period argument
+    when    filter_data_time is called
+    then    the data is filtered for the given time period
+    """
+    result = crud.filter_data(ids, period, db)
+    assert 
 
 
 @pytest.mark.parametrize("zipcode", ZIPCODES)
@@ -64,10 +96,6 @@ def test_neg_get_nearby_stations(zipcode):
     assert response.json() == {"detail": "invalid zipcode"}
 
 
-@pytest.fixture
-def station_ids():
-    return ["840360470118", "840360610134", "840360810120"]
-
 
 def test_pos_get_readings_from_ids(station_ids):
     """
@@ -81,11 +109,6 @@ def test_pos_get_readings_from_ids(station_ids):
     query = "".join(id_lst).removesuffix('&')
     response = requests.get(f'http://air_api:8100/air-readings/from-ids/{query}')
     assert response.status_code == 200
-
-
-@pytest.fixture
-def invalid_station_ids():
-    return ["not and id", "", 0, 1, "0000", 000000000000, "000000000000"]
 
 
 def test_neg_get_readings_from_ids():
