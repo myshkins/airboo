@@ -1,4 +1,5 @@
-from sqlalchemy import Column, DateTime, Integer, Numeric, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, Numeric, String
+from sqlalchemy.orm import relationship
 
 from . import Base
 
@@ -27,6 +28,9 @@ class Readings_Waqi_Common(Base):
 
 class Reading_Waqi(Readings_Waqi_Common):
     __tablename__ = "readings_waqi"
+    station_id = Column(Integer, ForeignKey("stations_waqi.station_id"), primary_key=True, nullable=False)
+
+    station_rel = relationship("Stations_Waqi", backref='readings_waqi')
 
 
 class Readings_Waqi_Temp(Readings_Waqi_Common):

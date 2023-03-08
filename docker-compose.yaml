@@ -2,7 +2,7 @@ version: '3'
 
 x-airflow-common:
   &airflow-common
-  env_file: ./.env
+  env_file: .env
   volumes:
     - airflow_dags:/opt/airflow/dags
     - airflow_logs:/opt/airflow/logs
@@ -12,25 +12,14 @@ services:
   api:
     container_name: air-api
     image: kboiiz/air-quality-api:latest
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}
     command: ./startup.sh
     ports:
       - 8100:8100
     volumes:
       - shared_models:/api/shared_models
-    env_file: ./.env
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  app:
-    container_name: air-app
-    image: kboiiz/air-quality-app:latest
-    command: python wsgi.py
-    ports:
-      - 8000:5000
-    volumes:
-      - shared_models:/air_app/shared_models
-    env_file: ./.env
+    env_file: .env
     depends_on:
       postgres:
         condition: service_healthy
