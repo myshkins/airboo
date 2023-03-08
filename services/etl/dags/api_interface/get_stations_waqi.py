@@ -10,11 +10,12 @@ from config import Settings
 # https://api.waqi.info/v2/map/bounds?latlng=-90.000000,-180.000000,90.000000,180.000000&networks=all&token=bb10d851797e497b46823a5b4f984354c6ff4d9a
 
 settings = Settings()
+WAQI_BASE_URL = "https://api.waqi.info/"
 
 
 def get_stations_waqi():
     us_lat_long = "32.000000,-125.000000,47.500000,-69.000000"
-    station_url = settings.WAQI_BASE_URL + "map/bounds/"
+    station_url = WAQI_BASE_URL + "map/bounds/"
     station_params = {
         "latlng": us_lat_long,  # "32.000000,-125.000000,47.500000,-69.000000",
         "networks": "all",

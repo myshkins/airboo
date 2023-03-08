@@ -3,6 +3,9 @@ logs/
 node_modules
 services/etl/logs/scheduler/latest
 
+# docker override file
+docker-compose.override.yaml
+
 # .csv data files
 aqi_data.csv
 merged_airnow_data.csv
