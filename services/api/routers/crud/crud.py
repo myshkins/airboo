@@ -83,7 +83,7 @@ def get_data(ids: list[str], db: Session, period: TimeEnum = TimeEnum("all_time"
             j = df.to_dict(orient="records")
             response.append({"station_id": id, "readings": j})
     return response
-   
+
 
 def filter_data_pollutant(ids: list[str], pollutants: PollutantEnum, db: Session) -> list[dict]:
     pass

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Union, List
 from . import Base
 from pydantic import BaseModel
 from sqlalchemy import (
@@ -58,26 +59,26 @@ class ReadingsAirnowTemp(Base):
 
 
 class ReadingsAirnowPydantic(BaseModel):
-    reading_datetime: datetime | None = None
-    pm25_aqi: int | None = None
-    pm25_conc: float | None = None
-    pm25_cat: int | None = None
-    pm10_aqi: int | None = None
-    pm10_conc: float | None = None
-    pm10_cat: int | None = None
-    o3_aqi: int | None = None
-    o3_conc: float | None = None
-    o3_cat: int | None = None
-    co_conc: float | None = None
+    reading_datetime: Union[datetime, None] = None
+    pm25_aqi: Union[int, None] = None
+    pm25_conc: Union[float, None] = None
+    pm25_cat: Union[int, None] = None
+    pm10_aqi: Union[int, None] = None
+    pm10_conc: Union[float, None] = None
+    pm10_cat: Union[int, None] = None
+    o3_aqi: Union[int, None] = None
+    o3_conc: Union[float, None] = None
+    o3_cat: Union[int, None] = None
+    co_conc: Union[float, None] = None
     # note not co_aqi or co_cat because it's always null for co
-    no2_aqi: int | None = None
-    no2_conc: float | None = None
-    no2_cat: int | None = None
-    so2_aqi: int | None = None
-    so2_conc: float | None = None
-    so2_cat: int | None = None
+    no2_aqi: Union[int, None] = None
+    no2_conc: Union[float, None] = None
+    no2_cat: Union[int, None] = None
+    so2_aqi: Union[int, None] = None
+    so2_conc: Union[float, None] = None
+    so2_cat: Union[int, None] = None
 
 
 class ReadingsResponseModel(BaseModel):
     station_id: str
-    readings: list[ReadingsAirnowPydantic] | list = []
+    readings: Union[List[ReadingsAirnowPydantic], List] = None

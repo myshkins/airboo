@@ -2,6 +2,7 @@ from pydantic import BaseModel, confloat
 from enum import Enum
 from datetime import timedelta, datetime as dt
 
+
 class Location(BaseModel):
     lat: confloat(ge=-90, le=90)
     long: confloat(ge=-180, le=180)
@@ -26,10 +27,10 @@ class TimeEnum(str, Enum):
             "all_time": "H",
             "ten_day": "10H",
             "one_month": "M",
-            "one_year": "A"
-            }
+            "one_year": "A",
+        }
         return code_dict[self.value]
-        
+
     def start(self):
         start_dict = {
             "twelve_hr": dt.now() - timedelta(hours=12),
@@ -38,7 +39,7 @@ class TimeEnum(str, Enum):
             "all_time": dt(2023, 1, 1),
             "ten_day": dt.now() - timedelta(days=10),
             "one_month": dt.now() - timedelta(days=30),
-            "one_year":dt.now() - timedelta(days=365) 
+            "one_year": dt.now() - timedelta(days=365),
         }
         return start_dict[self.value]
 

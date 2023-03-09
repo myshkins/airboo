@@ -4,38 +4,44 @@ x-airflow-common:
   &airflow-common
   env_file: ./.env
   volumes:
-    - airflow_dags:/opt/airflow/dags
-    - airflow_logs:/opt/airflow/logs
-    - shared_models:/opt/airflow/dags/shared_models
+    - ./services/etl/dags:/opt/airflow/dags
+    - ./services/etl/logs:/opt/airflow/logs
+    - ./services/shared_models:/opt/airflow/dags/shared_models
 
 services:
   api:
-    container_name: air-api
-    image: kboiiz/air-quality-api:latest
+    profiles: ["api", "full", "debug", "pushable", "test"]
+    container_name: air_api
+    build: ./services/api
     command: ./startup.sh
     ports:
       - 8100:8100
     volumes:
-      - shared_models:/api/shared_models
+      - ./services/api:/api
+      - ./services/shared_models:/api/shared_models
     env_file: ./.env
     depends_on:
       postgres:
         condition: service_healthy
+
   app:
-    container_name: air-app
-    image: kboiiz/air-quality-app:latest
-    command: python wsgi.py
+    profiles: ["air_app", "full", "debug", "pushable", "test"]
+    container_name: app
+    build: ./services/frontend
+    environment:
+      - NODE_ENV=development
+    command: node serveApp.js
     ports:
       - 9000:9000
     volumes:
-      - shared_models:/air_app/shared_models
-    env_file: ./.env
+      - ./services/frontend/:/app
     depends_on:
       postgres:
         condition: service_healthy
 
   postgres:
-    image: kboiiz/air-quality-postgres:latest
+    profiles: ["air_app", "api", "full", "debug", "pushable", "test"]
+    build: ./services/postgres
     environment:
       POSTGRES_MULTIPLE_DATABASES: "air_quality,airflow"
       POSTGRES_USER: airflow
@@ -52,6 +58,7 @@ services:
     restart: always
 
   redis:
+    profiles: ["airflow", "full", "debug", "pushable"]
     image: redis:latest
     expose:
       - 6379
@@ -62,8 +69,35 @@ services:
       retries: 50
     restart: always
 
-  airflow-webserver:
+  # `shared_model_common` and `airflow_common` are not deployed, but they are 
+  # used to push the common airflow image to docker hub
+  shared_model_common:
+    profiles: ["pushable"]
+    image: kboiiz/air-quality-shared-models:latest
+    build: ./services/shared_models
+  airflow-common:
     image: kboiiz/air-quality-airflow:latest
+    profiles: ["pushable"]
+    build: ./services/etl
+    env_file: ./.env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    user: "${AIRFLOW_UID:-1000}:${AIRFLOW_GID:-0}"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./services/shared_models:/opt/airflow/dags/shared_models
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+  
+  airflow-webserver:
+    profiles: ["airflow", "full", "debug", "pushable"]
+    build: ./services/etl
     command: webserver
     <<: *airflow-common
     ports:
@@ -79,7 +113,8 @@ services:
         condition: service_completed_successfully
 
   airflow-scheduler:
-    image: kboiiz/air-quality-airflow:latest
+    profiles: ["airflow", "full", "debug", "pushable"]
+    build: ./services/etl
     <<: *airflow-common
     command: scheduler
     restart: always
@@ -88,7 +123,8 @@ services:
         condition: service_completed_successfully
 
   airflow-worker:
-    image: kboiiz/air-quality-airflow:latest
+    profiles: ["airflow", "full", "debug", "pushable"]
+    build: ./services/etl
     <<: *airflow-common
     command: celery worker
     restart: always
@@ -97,7 +133,8 @@ services:
         condition: service_completed_successfully
 
   airflow-init:
-    image: kboiiz/air-quality-airflow:latest
+    profiles: ["airflow", "full", "debug", "pushable"]
+    build: ./services/etl
     <<: *airflow-common
     command: version
     environment:
@@ -106,10 +143,21 @@ services:
       _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
       _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
 
+  airflow-cli:
+    profiles: ["airflow", "full", "debug"]
+    build: ./services/etl
+    extends: airflow-common
+    environment:
+      CONNECTION_CHECK_MAX_COUNT: "0"
+    # Workaround for entrypoint issue. See: https://github.com/apache/airflow/issues/16252
+    command:
+      - bash
+      - -c
+      - airflow
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
 volumes:
   postgres-db-volume:
-  airflow_dags:
   airflow_logs:
-  shared_models:
-
-# test

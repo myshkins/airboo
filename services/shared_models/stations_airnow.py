@@ -1,3 +1,4 @@
+from typing import Union
 from geoalchemy2 import Geometry
 from pydantic import BaseModel
 from sqlalchemy import Column, Integer, Numeric, String
@@ -51,8 +52,8 @@ class StationsAirnowPydantic(BaseModel):
     station_id: str
     station_name: str
     agency_name: str
-    status: str | None = None
+    status: Union[str, None] = None
     latitude: float
     longitude: float
-    elevation: float | None = None
-    country: str | None = None
+    elevation: Union[float, None] = None
+    country: Union[str, None] = None
