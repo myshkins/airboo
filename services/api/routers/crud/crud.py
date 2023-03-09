@@ -1,12 +1,14 @@
 """crud functions"""
 import math
 from datetime import datetime
-import pgeocode
+
 import pandas as pd
-from shared_models.pydantic_models import Location, TimeEnum, PollutantEnum
+import pgeocode
+from logger import LOGGER
+from shared_models.pydantic_models import Location, PollutantEnum, TimeEnum
 from shared_models.readings_airnow import ReadingsAirnow
 from sqlalchemy import select, text
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, load_only
 
 
 def zipcode_to_latlong(zipcode: str) -> Location:
@@ -68,20 +70,29 @@ def get_closest_station(zipcode: str, db: Session):
 #     return response
 
 
-def get_data(ids: list[str], db: Session, period: TimeEnum = TimeEnum("all_time")) -> list[dict]:
+def get_data(ids: list[str], db: Session, period: TimeEnum, pollutants: list[PollutantEnum]) -> list[dict]:
     """uses sqlalchemy select query and connection obj to build a pandas dataframe for each station"""
     response = []
+    columns = [pollutant.column() for pollutant in pollutants]
     with db.connection() as conn:
         for id in ids:
             stmt = (
                 select(ReadingsAirnow)
+                .options(load_only(*columns))
                 .where(ReadingsAirnow.station_id == id and ReadingsAirnow.reading_datetime > period.start())
                 .order_by(ReadingsAirnow.reading_datetime)
             )
             df = pd.read_sql_query(stmt, conn)
-            df = df.resample(period.letter(), on="reading_datetime").mean(numeric_only=True).reset_index()
+            df = (
+                df.resample(period.letter(), on="reading_datetime")
+                .mean(numeric_only=True)
+                .round(decimals=0)
+                .reset_index()
+                .fillna(value=0)
+            )
             j = df.to_dict(orient="records")
             response.append({"station_id": id, "readings": j})
+    LOGGER.info(f"response = {response}")
     return response
 
 

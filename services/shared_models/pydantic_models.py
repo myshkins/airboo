@@ -1,6 +1,9 @@
-from pydantic import BaseModel, confloat
+from datetime import datetime as dt
+from datetime import timedelta
 from enum import Enum
-from datetime import timedelta, datetime as dt
+
+from pydantic import BaseModel, confloat
+from shared_models.readings_airnow import ReadingsAirnow
 
 
 class Location(BaseModel):
@@ -51,3 +54,14 @@ class PollutantEnum(str, Enum):
     co = "co"
     no2 = "no2"
     so2 = "so2"
+
+    def column(self):
+        col_dict = {
+            "pm25": ReadingsAirnow.pm25_aqi,
+            "pm10": ReadingsAirnow.pm10_aqi,
+            "o3": ReadingsAirnow.o3_aqi,
+            "co": ReadingsAirnow.co_conc,
+            "no2": ReadingsAirnow.no2_aqi,
+            "so2": ReadingsAirnow.so2_aqi
+        }
+        return col_dict[self.value]
