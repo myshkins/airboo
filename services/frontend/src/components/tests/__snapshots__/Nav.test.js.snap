@@ -6,6 +6,7 @@ exports[`navbar renders the navbar 1`] = `
     class="nav-bar"
   >
     <img
+      alt="a logo shaped like a cloud"
       class="logo"
       src="cloud.png"
     />

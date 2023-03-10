@@ -12,14 +12,16 @@ import { config } from "../Constants";
 
 const Home = () => {
   const [timePeriods, setTimePeriod] = useState({
-    "12hr": false,
-    "24hr": false,
-    "48hr": false,
-    "5day": false,
-    "10day": false,
-    "1month": false,
+    "12 hr": true,
+    "24 hr": false,
+    "48 hr": false,
+    "5 day": false,
+    "10 day": false,
+    "1 month": false,
+    "1 year": false,
+    "all time": false,
   });
-  const [stations, setStations] = useState([]);
+  const [stations, setStations] = useState([{station_id: "840360470118", station_name: "Bklyn - PS274", checked: true}]);
   const [tempStations, setTempStations] = useState(null);
   const [tempTempStations, setTempTempStation] = useState(null);
   const [leftSideBarVisible, setLeftSideBarVisible] = useState(true);
@@ -31,7 +33,7 @@ const Home = () => {
   const [rawReadings, setRawReadings] = useState({});
   const [dates, setDates] = useState([]);
   const [aqiData, setAqiData] = useState([]);
-  const [idsToGraph, setIdsToGraph] = useState([]);
+  const [idsToGraph, setIdsToGraph] = useState(["840360470118"]);
 
   const toggleSideBar = () => {
     setLeftSideBarVisible(!leftSideBarVisible);
@@ -116,7 +118,7 @@ const Home = () => {
     setTempStations(updatedTempStations);
   };
 
-  const getReadings = async (ids) => {
+  const getReadings = async (ids, period) => {
     let qParam = ids.reduce((prev, id) => prev + `ids=${id}&`, "?");
     if (qParam.slice(-1) === "&") {
       qParam = qParam.slice(0, -1);
@@ -139,6 +141,8 @@ const Home = () => {
    */
   const transformAQIData = (stationPollutantObj) => {
   }
+
+  
   /**
    * func (and hook below) for grabbing aqi data for selected stations
    */

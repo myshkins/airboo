@@ -56,22 +56,8 @@ def get_closest_station(zipcode: str, db: Session):
     return result
 
 
-# def get_data(ids: list[str], db: Session, period: TimeEnum = TimeEnum("all_time")) -> list[dict]:
-#     response = []
-#     for id in ids:
-#         stmt = (
-#             select(ReadingsAirnow)
-#             .where(ReadingsAirnow.station_id == id)
-#             .order_by(ReadingsAirnow.reading_datetime)
-#         )
-#         result = db.scalars(stmt)
-#         data = [_ for _ in result]
-#         response.append({"station_id": id, "readings": data})
-#     return response
-
-
 def get_data(ids: list[str], db: Session, period: TimeEnum, pollutants: list[PollutantEnum]) -> list[dict]:
-    """uses sqlalchemy select query and connection obj to build a pandas dataframe for each station"""
+    """returns data for given station_ids, time period, and pollutants"""
     response = []
     columns = [pollutant.column() for pollutant in pollutants]
     with db.connection() as conn:
@@ -92,9 +78,5 @@ def get_data(ids: list[str], db: Session, period: TimeEnum, pollutants: list[Pol
             )
             j = df.to_dict(orient="records")
             response.append({"station_id": id, "readings": j})
-    LOGGER.info(f"response = {response}")
     return response
 
-
-def filter_data_pollutant(ids: list[str], pollutants: PollutantEnum, db: Session) -> list[dict]:
-    pass
