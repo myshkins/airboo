@@ -1,9 +1,12 @@
 from datetime import datetime as dt
 from datetime import timedelta
 from enum import Enum
+import os
 
 from pydantic import BaseModel, confloat
 from shared_models.readings_airnow import ReadingsAirnow
+
+TESTING_START_DATE = dt(2023, 2, 27, 13)
 
 
 class Location(BaseModel):
@@ -35,14 +38,17 @@ class TimeEnum(str, Enum):
         return code_dict[self.value]
 
     def start(self):
+        time_zero = dt.now()
+        if os.environ["DEV_MODE"] == "true":
+            time_zero = TESTING_START_DATE
         start_dict = {
-            "twelve_hr": dt.now() - timedelta(hours=12),
-            "twenty_four_hr": dt.now() - timedelta(hours=24),
-            "forty_eight_hr": dt.now() - timedelta(hours=48),
+            "twelve_hr": time_zero - timedelta(hours=13),
+            "twenty_four_hr": time_zero - timedelta(hours=25),
+            "forty_eight_hr": time_zero - timedelta(hours=49),
             "all_time": dt(2023, 1, 1),
-            "ten_day": dt.now() - timedelta(days=10),
-            "one_month": dt.now() - timedelta(days=30),
-            "one_year": dt.now() - timedelta(days=365),
+            "ten_day": time_zero - timedelta(days=10),
+            "one_month": time_zero - timedelta(days=30),
+            "one_year": time_zero - timedelta(days=365),
         }
         return start_dict[self.value]
 
@@ -62,6 +68,6 @@ class PollutantEnum(str, Enum):
             "o3": ReadingsAirnow.o3_aqi,
             "co": ReadingsAirnow.co_conc,
             "no2": ReadingsAirnow.no2_aqi,
-            "so2": ReadingsAirnow.so2_aqi
+            "so2": ReadingsAirnow.so2_aqi,
         }
         return col_dict[self.value]

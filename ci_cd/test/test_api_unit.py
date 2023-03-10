@@ -3,10 +3,10 @@ import sys
 import os
 
 root = os.path.realpath(os.path.dirname(__file__) + "/../..")
-api_path = root + "/services/api"
+services = root + "/services"
 
 sys.path.append(os.path.realpath(root))
-sys.path.append(os.path.realpath(api_path))
+sys.path.append(os.path.realpath(services))
 
 from services.api.routers.crud import crud
 from services.api.routers.crud.crud import Location

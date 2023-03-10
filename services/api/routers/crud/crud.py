@@ -1,12 +1,11 @@
 """crud functions"""
 import math
-from datetime import datetime
-
 import pandas as pd
 import pgeocode
-from logger import LOGGER
-from shared_models.pydantic_models import Location, PollutantEnum, TimeEnum
+
+# from logger import LOGGER
 from shared_models.readings_airnow import ReadingsAirnow
+from shared_models.pydantic_models import Location, PollutantEnum, TimeEnum
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session, load_only
 
@@ -65,7 +64,8 @@ def get_data(ids: list[str], db: Session, period: TimeEnum, pollutants: list[Pol
             stmt = (
                 select(ReadingsAirnow)
                 .options(load_only(*columns))
-                .where(ReadingsAirnow.station_id == id and ReadingsAirnow.reading_datetime > period.start())
+                .where(ReadingsAirnow.station_id == id)
+                .where(ReadingsAirnow.reading_datetime > period.start())
                 .order_by(ReadingsAirnow.reading_datetime)
             )
             df = pd.read_sql_query(stmt, conn)
@@ -79,4 +79,3 @@ def get_data(ids: list[str], db: Session, period: TimeEnum, pollutants: list[Pol
             j = df.to_dict(orient="records")
             response.append({"station_id": id, "readings": j})
     return response
-

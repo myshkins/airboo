@@ -9,18 +9,11 @@ import EditStationsWindow from "../components/EditStationsWindow";
 import React, { useEffect, useState } from "react";
 import HomeButton from "../components/HomeButton";
 import { config } from "../Constants";
+import TimePeriod from "../components/timePeriodEnum";
+
 
 const Home = () => {
-  const [timePeriods, setTimePeriod] = useState({
-    "12 hr": true,
-    "24 hr": false,
-    "48 hr": false,
-    "5 day": false,
-    "10 day": false,
-    "1 month": false,
-    "1 year": false,
-    "all time": false,
-  });
+  const [timePeriod, setTimePeriod] = useState(new TimePeriod("12hr"));
   const [stations, setStations] = useState([{station_id: "840360470118", station_name: "Bklyn - PS274", checked: true}]);
   const [tempStations, setTempStations] = useState(null);
   const [tempTempStations, setTempTempStation] = useState(null);
@@ -60,13 +53,7 @@ const Home = () => {
   };
 
   const pickTimePeriod = (e) => {
-    const newPeriods = {};
-    for (const key of Object.keys(timePeriods)) {
-      key === e.target.name
-        ? (newPeriods[key] = true)
-        : (newPeriods[key] = false);
-    }
-    setTimePeriod(newPeriods);
+    setTimePeriod(new TimePeriod(e.target.name));
   };
 
   const updateStations = (e) => {
@@ -118,12 +105,17 @@ const Home = () => {
     setTempStations(updatedTempStations);
   };
 
-  const getReadings = async (ids, period) => {
-    let qParam = ids.reduce((prev, id) => prev + `ids=${id}&`, "?");
-    if (qParam.slice(-1) === "&") {
-      qParam = qParam.slice(0, -1);
+  const formQuery = (ids, period) => {
+    let qParams = ids.reduce((prev, id) => prev + `ids=${id}&`, "?");
+    let timeParam = `period=${period.query()}`
+    console.log(timeParam)
+    qParams = qParams + timeParam
+    return qParams
     }
-    const response = await fetch(`${config.urls.READINGS_URL}${qParam}`);
+
+  const getReadings = async (ids, period) => {
+   let params = formQuery(ids, period)
+   const response = await fetch(`${config.urls.READINGS_URL}${params}`);
     const data = await response.json();
 
     return data;
@@ -147,7 +139,7 @@ const Home = () => {
    * func (and hook below) for grabbing aqi data for selected stations
    */
   const handleReadingDataChange = async () => {
-    const data = await getReadings(idsToGraph);
+    const data = await getReadings(idsToGraph, timePeriod);
     console.log(data)
     const dates = data[0]["readings"].map(
       (reading) => reading["reading_datetime"]
@@ -177,7 +169,7 @@ const Home = () => {
       if (!tempTempStations) return;
       else {
         const ids = tempTempStations.map((stn) => stn["station_id"]);
-        const data = await getReadings(ids);
+        const data = await getReadings(ids, (new TimePeriod("12hr")));
         const newTemps = tempTempStations.map((stn) => {
           const dReadings = data.filter((dstn) => {
             return dstn["station_id"] === stn["station_id"];
@@ -262,11 +254,11 @@ const Home = () => {
           contentVisible={timeDropVisible}
           hasBtn={false}
         >
-          {Object.entries(timePeriods).map((item) => (
+          {Object.entries(timePeriod.table).map((item) => (
             <SideDropDownRadio
               key={item[0]}
               name={item[0]}
-              checked={item[1]}
+              checked={item[0] === timePeriod.key? true : false}
               onChange={pickTimePeriod}
             />
           ))}

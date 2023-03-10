@@ -11,7 +11,7 @@ class TimePeriod {
   constructor(key) {
     this.key = key
     this.table = {
-      "12hr": "twenty_four_hr",
+      "12hr": "twelve_hr",
       "24hr": "twenty_four_hr",
       "48hr": "forty_eight_hr",
       "5day": "five_day",
