@@ -1,5 +1,5 @@
+from functools import lru_cache
 from pydantic import BaseSettings
-from datetime import datetime
 
 
 class Settings(BaseSettings):

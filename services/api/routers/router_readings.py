@@ -6,7 +6,6 @@ from shared_models.readings_airnow import ReadingsResponseModel
 from sqlalchemy.orm import Session
 
 from .crud import crud
-from logger import LOGGER
 
 router = APIRouter(
     prefix="/air-readings",

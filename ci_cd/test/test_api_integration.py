@@ -16,13 +16,14 @@ ZIPCODES = ["11206", 80304, "01913", 99723, "96712"]
 ZIPCODES_INVALID = ["Brooklyn, NY", 112060, "11206-1839", "00000", "-----"]
 POSTGRES_URI = os.environ["POSTGRES_URI"]
 STATION_IDS = ["840360470118", "840360610134", "840360810120"]
-STATION_IDS_INVALID = []
-
 
 @pytest.fixture
 def invalid_station_ids():
     return ["not and id", "", 0, 1, "0000", 000000000000, "000000000000"]
 
+@pytest.fixture
+def station_ids():
+    return ["840360470118", "840360610134", "840360810120"]
 
 @pytest.fixture
 def engine():
@@ -68,18 +69,18 @@ def test_neg_get_nearby_stations(zipcode):
     assert response.json() == {"detail": "invalid zipcode"}
 
 
-@pytest.mark.parametrize("ids,period,length", [(STATION_IDS, "twelve_hr", 12), (STATION_IDS, "twenty_four_hr", 23)])
-def test_pos_get_readings_from_ids(ids, period, length):
+@pytest.mark.parametrize("period,length", [("twelve_hr", 12), ("twenty_four_hr", 24)])
+def test_pos_get_readings_from_ids(station_ids, period, length):
     """
-    GIVEN   valid station id arguments & valid time period argument
+    GIVEN   valid station id, time period, and pollutant arguments
     WHEN    get_readings_from_ids endpoint is called
     THEN    response status is 200 and
             response body is list of readings conforming to ReadingsAirnowPydantic model
             and length of list corresponds to the time period argument passed
     """
-    id_lst = [f"?ids={id}&" for id in ids]
-    query = "".join(id_lst)
-    query += f"period={period}"
+    id_lst = [f"?ids={id}&" for id in station_ids]
+    id_str = "".join(id_lst)
+    query = id_str + f"period={period}"
     response = requests.get(f"http://air_api:8100/air-readings/from-ids/{query}")
     assert response.status_code == 200
     assert len(response.json()[0]["readings"]) == length

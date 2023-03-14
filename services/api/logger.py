@@ -53,9 +53,9 @@ def create_logger() -> custom_logger:
     custom_logger.remove()
     custom_logger.add(stdout, colorize=True, format=formatter)
     custom_logger.add(
-        "/api/logs/file_{time:YYYY_MM_DD}.log",
+        "/api/logs/api_{time:YYYY_MM_DD}.log",
         rotation="12:00",
-        retention="14 days",
+        retention="1 days",
         format=formatter,
     )
     return custom_logger

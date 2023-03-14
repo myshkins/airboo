@@ -79,6 +79,13 @@ class ReadingsAirnowPydantic(BaseModel):
     so2_cat: Union[int, None] = None
 
 
+class Reading(BaseModel):
+    reading_datetime: datetime
+    pollutant: str
+    value: int
+
+
 class ReadingsResponseModel(BaseModel):
     station_id: str
-    readings: Union[List[ReadingsAirnowPydantic], List] = None
+    pollutant: str
+    readings: Union[List[Reading], List] = None

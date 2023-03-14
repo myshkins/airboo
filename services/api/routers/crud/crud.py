@@ -3,7 +3,7 @@ import math
 import pandas as pd
 import pgeocode
 
-# from logger import LOGGER
+from logger import LOGGER
 from shared_models.readings_airnow import ReadingsAirnow
 from shared_models.pydantic_models import Location, PollutantEnum, TimeEnum
 from sqlalchemy import select, text
@@ -55,27 +55,30 @@ def get_closest_station(zipcode: str, db: Session):
     return result
 
 
+# TODO: remove pollutant parameter?
 def get_data(ids: list[str], db: Session, period: TimeEnum, pollutants: list[PollutantEnum]) -> list[dict]:
     """returns data for given station_ids, time period, and pollutants"""
     response = []
-    columns = [pollutant.column() for pollutant in pollutants]
     with db.connection() as conn:
         for id in ids:
-            stmt = (
-                select(ReadingsAirnow)
-                .options(load_only(*columns))
-                .where(ReadingsAirnow.station_id == id)
-                .where(ReadingsAirnow.reading_datetime > period.start())
-                .order_by(ReadingsAirnow.reading_datetime)
-            )
-            df = pd.read_sql_query(stmt, conn)
-            df = (
-                df.resample(period.letter(), on="reading_datetime")
-                .mean(numeric_only=True)
-                .round(decimals=0)
-                .reset_index()
-                .fillna(value=0)
-            )
-            j = df.to_dict(orient="records")
-            response.append({"station_id": id, "readings": j})
+            for pol in pollutants:
+                stmt = (
+                    select(ReadingsAirnow)
+                    .options(load_only(pol.column()))
+                    .where(ReadingsAirnow.station_id == id)
+                    .where(ReadingsAirnow.reading_datetime > period.start())
+                    .order_by(ReadingsAirnow.reading_datetime)
+                )
+                df = pd.read_sql_query(stmt, conn)
+                df = (
+                    df.resample(period.letter(), on="reading_datetime")
+                    .mean(numeric_only=True)
+                    .round(decimals=0)
+                    .reset_index()
+                    .fillna(value=0)
+                )
+                if df.empty or len(df.columns) == 1:
+                    continue
+                j = df.to_dict(orient="records")
+                response.append({"station_id": id, "pollutant": pol, "readings": j})
     return response

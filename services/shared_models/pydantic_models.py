@@ -6,7 +6,7 @@ import os
 from pydantic import BaseModel, confloat
 from shared_models.readings_airnow import ReadingsAirnow
 
-TESTING_START_DATE = dt(2023, 2, 27, 13)
+TESTING_START_DATE = dt(2023, 3, 13, 14)
 
 
 class Location(BaseModel):
