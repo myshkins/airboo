@@ -3,7 +3,6 @@ import math
 import pandas as pd
 import pgeocode
 
-from logger import LOGGER
 from shared_models.readings_airnow import ReadingsAirnow
 from shared_models.pydantic_models import Location, PollutantEnum, TimeEnum
 from sqlalchemy import select, text
