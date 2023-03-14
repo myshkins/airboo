@@ -17,13 +17,16 @@ ZIPCODES_INVALID = ["Brooklyn, NY", 112060, "11206-1839", "00000", "-----"]
 POSTGRES_URI = os.environ["POSTGRES_URI"]
 STATION_IDS = ["840360470118", "840360610134", "840360810120"]
 
+
 @pytest.fixture
 def invalid_station_ids():
     return ["not and id", "", 0, 1, "0000", 000000000000, "000000000000"]
 
+
 @pytest.fixture
 def station_ids():
     return ["840360470118", "840360610134", "840360810120"]
+
 
 @pytest.fixture
 def engine():
