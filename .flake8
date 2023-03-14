@@ -4,5 +4,8 @@
 max-line-length = 120
 
 per-file-ignores =
-    # ignore unused imports cuz of unused imports used by alembic in main.py
+    # unused imports used by alembic in main.py
     services/api/main.py: F401
+
+    # need to append to sys.path before importing
+    ci_cd/test/test_api_unit.py: E402

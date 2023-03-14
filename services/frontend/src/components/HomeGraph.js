@@ -7,6 +7,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  Colors,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
@@ -17,7 +18,8 @@ Chart.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Colors,
 );
 
 const HomeGraph = (props) => {
@@ -25,6 +27,9 @@ const HomeGraph = (props) => {
     responsive: true,
     maintainAspectRatio: true,
     plugins: {
+      colors: {
+        forceOverride: true
+      },
       legend: {
         position: "top",
       },
@@ -38,13 +43,10 @@ const HomeGraph = (props) => {
   const labels = props.dates;
   const data = {
     labels,
-    datasets: aqiData.map((station) => {
-      const randm = Math.floor(Math.random() * 220 + 30);
+    datasets: aqiData.map((pollut) => {
       return {
-        label: station["station_id"],
-        data: station["data"],
-        borderColor: `rgb(255, ${randm - 30}, ${randm}`,
-        backgroundColor: `rgb(255, 99, ${randm}, 0.5)`,
+        label: pollut["datasetName"],
+        data: pollut["data"],
       };
     }),
   };

@@ -1,9 +1,9 @@
 """api routes"""
-from config import Settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import router_stations
-from routers import router_readings
+
+from config import Settings
+from routers import router_readings, router_stations
 
 # Base and models imported to be picked up by Alembic
 from shared_models import Base
@@ -14,9 +14,7 @@ settings = Settings()
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:3000",
-]
+origins = ["http://localhost:3000", "http://localhost:9000"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,3 +30,8 @@ app.include_router(router_stations.router)
 @app.get("/")
 def root():
     return {"message": "ah poop"}
+
+
+@app.get("/health-check")
+def health_check():
+    return {"message": "OK"}

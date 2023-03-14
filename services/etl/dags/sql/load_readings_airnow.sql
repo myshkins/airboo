@@ -2,12 +2,12 @@ insert into readings_airnow
 (
 	station_id,
 	reading_datetime,
-	pm10_conc,
-	pm10_aqi,
-	pm10_cat,
 	pm25_conc,
 	pm25_aqi,
 	pm25_cat,
+	pm10_conc,
+	pm10_aqi,
+	pm10_cat,
 	no2_conc,
 	no2_aqi,
 	no2_cat,
@@ -47,12 +47,12 @@ group by
   full_aqs_id, timestamp_utc
 on conflict (station_id, reading_datetime) do update
 set
-	pm10_conc = excluded.pm10_conc,
-	pm10_aqi = excluded.pm10_aqi,
-	pm10_cat = excluded.pm10_cat,
 	pm25_conc = excluded.pm25_conc,
 	pm25_aqi = excluded.pm25_aqi,
 	pm25_cat = excluded.pm25_cat,
+	pm10_conc = excluded.pm10_conc,
+	pm10_aqi = excluded.pm10_aqi,
+	pm10_cat = excluded.pm10_cat,
 	no2_conc = excluded.no2_conc,
 	no2_aqi = excluded.no2_aqi,
 	no2_cat = excluded.no2_cat,

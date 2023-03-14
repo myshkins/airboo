@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`navbar renders the navbar 1`] = `
+<div>
+  <header
+    class="nav-bar"
+  >
+    <img
+      alt="a logo shaped like a cloud"
+      class="logo"
+      src="cloud.png"
+    />
+    <nav
+      class="navigation"
+    >
+      <ul
+        class="nav-links"
+      >
+        <li>
+          <a
+            aria-current="page"
+            class="active"
+            href="/"
+          >
+            home
+          </a>
+        </li>
+        <li>
+          <a
+            class=""
+            href="/contact"
+          >
+            contact
+          </a>
+        </li>
+        <li>
+          <a
+            class=""
+            href="/about"
+          >
+            about
+          </a>
+        </li>
+        <li>
+          <a
+            class=""
+            href="/profile"
+          >
+            profile
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+</div>
+`;
