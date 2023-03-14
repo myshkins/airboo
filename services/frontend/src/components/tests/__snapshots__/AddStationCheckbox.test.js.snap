@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddStationCheckbox renders a checkbox input with the given name 1`] = `
+<div>
+  <div
+    class="dropdown-input-wrap"
+  >
+    <label>
+      <input
+        checked=""
+        name="01234"
+        type="checkbox"
+      />
+      Santa's Workshop
+    </label>
+    <ul
+      class="add-station-pollutant"
+    >
+      <li
+        class="add-station-pollutant"
+      >
+        pm25
+      </li>
+      <li
+        class="add-station-pollutant"
+      >
+        pm10
+      </li>
+    </ul>
+  </div>
+</div>
+`;

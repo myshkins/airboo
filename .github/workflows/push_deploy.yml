@@ -1,0 +1,39 @@
+name: build-push-deploy
+run-name: ${{ github.actor }} is running deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: make env file with def not sketchy SpicyPizza action
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_AIRFLOW_HOME: ${{ secrets.AIRFLOW_HOME}}
+          envkey_AIRFLOW_UID: ${{ secrets.AIRFLOW_UID}}
+          envkey_AIRFLOW__CORE__EXECUTOR: ${{ secrets.AIRFLOW__CORE__EXECUTOR}}
+          envkey_AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${{ secrets.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}}
+          envkey_DEV_MODE: ${{ secrets.DEV_MODE}}
+          envkey_POSTGRES_DB: ${{ secrets.POSTGRES_DB}}
+          envkey_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD}}
+          envkey_POSTGRES_URI: ${{ secrets.POSTGRES_URI}}
+          envkey_POSTGRES_USER: ${{ secrets.POSTGRES_USER}}
+          envkey_WAQI_TOKEN: ${{ secrets.WAQI_TOKEN}}
+      - name: Build the containers and push the images to dockerhub
+        run: docker compose --profile pushable build --push 
+      - name: Create SSH key on the runner
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+      - name: push the compose file with rsync
+        run: 
+          |
+          rsync -av ./docker-compose.yaml deploy-admin@213.255.227.248:~/air-quality
+      - name: SSH and compose it up!
+        run: |
+          ssh -t deploy-admin@213.255.227.248 "cd ~/air-quality && docker compose up -d"
