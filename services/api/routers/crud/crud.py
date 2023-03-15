@@ -14,16 +14,17 @@ def zipcode_to_latlong(zipcode: str) -> Location:
     geo = pgeocode.Nominatim("us")
     loc = geo.query_postal_code(zipcode)
     if math.isnan(loc["latitude"]):
-        return 1
+        raise ValueError("invalid zipcode")
     location = Location(lat=loc["latitude"], long=loc["longitude"])
     return location
 
 
 def get_nearby_stations(zipcode: str, db: Session) -> list:
     """given zipcode, returns the 5 nearest stations"""
-    loc = zipcode_to_latlong(zipcode)
-    if loc == 1:
-        return 1
+    try:
+        loc = zipcode_to_latlong(zipcode)
+    except ValueError as e:
+        raise ValueError from e
     stmt = text(
         """
         SELECT station_id, station_name, agency_name, status, latitude, longitude, elevation, country

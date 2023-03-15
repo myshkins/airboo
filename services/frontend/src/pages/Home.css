@@ -43,7 +43,7 @@
 
 .graph-container {
   padding: 1rem;
-  width: 600px;
+  width: clamp(600px, 70vw, 1000px);
   border: 1px solid var(--pink);
   grid-area: 1 / 2 / 2 / 3;
 }

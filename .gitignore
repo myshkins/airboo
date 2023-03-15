@@ -1,9 +1,9 @@
+.vscode
+
 #logs
 logs/
 node_modules
 services/etl/logs/scheduler/latest
-
-.vscode
 
 # docker override file
 docker-compose.override.yaml

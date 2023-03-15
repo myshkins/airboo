@@ -96,7 +96,7 @@ services:
         condition: service_healthy
   
   airflow-webserver:
-    profiles: ["airflow", "full", "debug", "pushable"]
+    profiles: ["airflow", "full", "debug"]
     build: ./services/etl
     command: webserver
     <<: *airflow-common
@@ -113,7 +113,7 @@ services:
         condition: service_completed_successfully
 
   airflow-scheduler:
-    profiles: ["airflow", "full", "debug", "pushable"]
+    profiles: ["airflow", "full", "debug"]
     build: ./services/etl
     <<: *airflow-common
     command: scheduler
@@ -123,7 +123,7 @@ services:
         condition: service_completed_successfully
 
   airflow-worker:
-    profiles: ["airflow", "full", "debug", "pushable"]
+    profiles: ["airflow", "full", "debug"]
     build: ./services/etl
     <<: *airflow-common
     command: celery worker
@@ -133,7 +133,7 @@ services:
         condition: service_completed_successfully
 
   airflow-init:
-    profiles: ["airflow", "full", "debug", "pushable"]
+    profiles: ["airflow", "full", "debug"]
     build: ./services/etl
     <<: *airflow-common
     command: version

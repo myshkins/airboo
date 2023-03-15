@@ -13,8 +13,9 @@ router = APIRouter(prefix="/stations", tags=["stations"])
 @router.get("/all-nearby/", response_model=list[StationsAirnowPydantic])
 def get_nearby_stations(zipcode: str, db: Session = Depends(get_db)):
     """given zipcode, returns the 5 nearest stations"""
-    station_list = crud.get_nearby_stations(zipcode, db)
-    if station_list == 1:
+    try:
+        station_list = crud.get_nearby_stations(zipcode, db)
+    except ValueError as e: 
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid zipcode")
     return station_list
 
