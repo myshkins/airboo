@@ -6,24 +6,24 @@ on:
       - main
 
 jobs:
-  docker:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: make env file with def not sketchy SpicyPizza action
-        uses: SpicyPizza/create-envfile@v1.3
-        with:
-          envkey_AIRFLOW_HOME: ${{ secrets.AIRFLOW_HOME}}
-          envkey_AIRFLOW_UID: ${{ secrets.AIRFLOW_UID}}
-          envkey_AIRFLOW__CORE__EXECUTOR: ${{ secrets.AIRFLOW__CORE__EXECUTOR}}
-          envkey_AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: ${{ secrets.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN}}
-          envkey_DEV_MODE: ${{ secrets.DEV_MODE}}
-          envkey_POSTGRES_DB: ${{ secrets.POSTGRES_DB}}
-          envkey_POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD}}
-          envkey_POSTGRES_URI: ${{ secrets.POSTGRES_URI}}
-          envkey_POSTGRES_USER: ${{ secrets.POSTGRES_USER}}
-          envkey_WAQI_TOKEN: ${{ secrets.WAQI_TOKEN}}
-      - name: Build the containers and push the images to dockerhub
+      - name: make env file
+        run:
+          echo "AIRFLOW_UID=${{ secrets.AIRFLOW_UID }}" >> .env
+          echo "AIRFLOW__CORE__EXECUTOR=${{ secrets.AIRFLOW__CORE__EXECUTOR }}" >> .env
+          echo "AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=${{ secrets.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN }}" >> .env
+          echo "DEV_MODE=${{ secrets.DEV_MODE }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "POSTGRES_URI=${{ secrets.POSTGRES_URI }}" >> .env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "SQLALCHEMY_DATABASE_URI=${{ secrets.SQLALCHEMY_DATABASE_URI }}
+      - name: login to github packages
+        run: echo ${{ secrets.PERSONAL_ACCESS_TOKEN }} | docker login ghcr.io -u ${{ secrets.NAMESPACE }}
+      - name: Build the containers and push the images to ghrc.io
         run: docker compose --profile pushable build --push 
       - name: Create SSH key on the runner
         run: |
@@ -31,9 +31,7 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
       - name: push the compose file with rsync
-        run: 
-          |
-          rsync -av ./docker-compose.yaml deploy-admin@213.255.227.248:~/air-quality
+        run: rsync -av ./docker-compose.prod.yaml {{ secrets.VPS_USER }}@{{ secrets.IPADDRESS }}:~/air-quality
       - name: SSH and compose it up!
         run: |
-          ssh -t deploy-admin@213.255.227.248 "cd ~/air-quality && docker compose up -d"
+          ssh -t {{ secrets.VPS_USER }}@{{ secrets.IPADDRESS }} "cd ~/air-quality && docker compose down && docker compose up -d"

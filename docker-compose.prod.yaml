@@ -10,6 +10,7 @@ x-airflow-common:
 services:
   api:
     container_name: air-api
+    user: 1000:1000
     image: kboiiz/air-quality-api:latest
     command: ./startup.sh
     ports:
@@ -22,6 +23,7 @@ services:
   app:
     profiles: ["air_app", "full", "deploy", "test"]
     container_name: app
+    user: 1000:1000
     build: ./services/frontend
     environment:
       - NODE_ENV=production
@@ -53,6 +55,7 @@ services:
 
   redis:
     image: redis:latest
+    user: 1000:1000
     expose:
       - 6379
     healthcheck:

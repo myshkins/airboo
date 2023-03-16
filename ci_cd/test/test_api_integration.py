@@ -53,7 +53,9 @@ def test_pos_get_nearby_stations(zipcode):
     THEN    response status is 200 and
             response body is a list of five stations that conform to the StationsAirnowPydantic model
     """
-    response = requests.get(f"http://air_api:8100/stations/all-nearby/?zipcode={zipcode}")
+    response = requests.get(
+        f"http://air_api:8100/stations/all-nearby/?zipcode={zipcode}"
+    )
     assert response.status_code == 200
     station_list = response.json()
     assert len(station_list) == 5
@@ -67,7 +69,9 @@ def test_neg_get_nearby_stations(zipcode):
     WHEN    get_nearby_stations endpoint is called
     THEN    response body is 400 and response body is error message
     """
-    response = requests.get(f"http://air_api:8100/stations/all-nearby/?zipcode={zipcode}")
+    response = requests.get(
+        f"http://air_api:8100/stations/all-nearby/?zipcode={zipcode}"
+    )
     assert response.status_code == 400
     assert response.json() == {"detail": "invalid zipcode"}
 
