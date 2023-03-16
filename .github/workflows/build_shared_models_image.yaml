@@ -3,7 +3,9 @@ run-name: ${{ github.actor }} is running shared-model image build
 on:
   push:
     branches:
+      - develop
       - main
+      - release
     paths:
       - "services/shared_models/*"
 
