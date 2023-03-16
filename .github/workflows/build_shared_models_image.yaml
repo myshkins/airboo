@@ -30,7 +30,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/myshkins/airboo
+          images: ${{ env.REGISTRY }}/${{ github.actor }}/airboo/shared-models
       
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
