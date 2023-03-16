@@ -1,5 +1,5 @@
 name: build-shared-models-image
-run-name: ${{ github.actor }} is running deploy
+run-name: ${{ github.actor }} is running shared-model image build
 on:
   push:
     paths:
@@ -16,6 +16,9 @@ jobs:
       packages: write
 
     steps:
+      - name: checkout repo
+        uses: actions/checkout@v3
+        
       - name: login to github packages
         uses: docker/login-action@v2
         with:
@@ -32,7 +35,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./services/shared_models
+          context: services/shared_models
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
