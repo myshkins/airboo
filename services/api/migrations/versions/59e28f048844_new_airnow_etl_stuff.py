@@ -21,7 +21,9 @@ def upgrade() -> None:
     op.drop_table("readings_airnow_temp")
     op.drop_table("readings_airnow")
     op.add_column("stations_airnow", sa.Column("status", sa.String(), nullable=True))
-    op.add_column("stations_airnow", sa.Column("elevation", sa.Numeric(11, 4), nullable=True))
+    op.add_column(
+        "stations_airnow", sa.Column("elevation", sa.Numeric(11, 4), nullable=True)
+    )
     op.add_column("stations_airnow", sa.Column("country", sa.String(), nullable=True))
     op.create_table(
         "stations_airnow_temp",
