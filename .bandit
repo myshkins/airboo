@@ -1,0 +1,2 @@
+[bandit]
+exclude = test,node_modules,env,__pycache__
