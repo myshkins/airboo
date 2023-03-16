@@ -6,8 +6,12 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-push-image:
     runs-on: ubuntu-latest
+    permisions:
+      contents: read
+      packages: write
+
     steps:
       - uses: actions/checkout@v3
       - name: make env file
@@ -27,7 +31,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build the containers and push the images to ghrc.io
+      - name: Build the images and push to ghrc.io
         run: docker compose --profile pushable build --push 
       - name: Create SSH key on the runner
         run: |
