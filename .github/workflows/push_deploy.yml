@@ -20,7 +20,7 @@ jobs:
           echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
           echo "POSTGRES_URI=${{ secrets.POSTGRES_URI }}" >> .env
           echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
-          echo "SQLALCHEMY_DATABASE_URI=${{ secrets.SQLALCHEMY_DATABASE_URI }}
+          echo "SQLALCHEMY_DATABASE_URI=${{ secrets.SQLALCHEMY_DATABASE_URI }}" >> .env
       - name: login to github packages
         run: echo ${{ secrets.PERSONAL_ACCESS_TOKEN }} | docker login ghcr.io -u ${{ secrets.NAMESPACE }}
       - name: Build the containers and push the images to ghrc.io
