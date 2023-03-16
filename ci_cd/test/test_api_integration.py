@@ -51,7 +51,8 @@ def test_pos_get_nearby_stations(zipcode):
     GIVEN   valid zipcode argument
     WHEN    get_nearby_stations endpoint is called
     THEN    response status is 200 and
-            response body is a list of five stations that conform to the StationsAirnowPydantic model
+            response body is a list of five stations that conform to the
+            StationsAirnowPydantic model
     """
     response = requests.get(
         f"http://air_api:8100/stations/all-nearby/?zipcode={zipcode}"
