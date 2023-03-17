@@ -44,4 +44,5 @@ jobs:
           context: services/shared_models
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: /airboo/shared-models
+          # labels: ${{ steps.meta.outputs.labels }}

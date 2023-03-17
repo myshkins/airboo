@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM kboiiz/air-quality-shared-models
+FROM ghcr.io/myshkins/airboo/shared-models:latest
 
 WORKDIR /
 
