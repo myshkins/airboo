@@ -2,8 +2,9 @@ name: build-shared-models-image
 run-name: ${{ github.actor }} is running shared-model image build
 on:
   push:
-    branches:
-      - main
+    tags:
+      - v1*
+      - v0*
     paths:
       - "services/shared_models/*"
 
@@ -24,7 +25,7 @@ jobs:
       - name: login to github packages
         uses: docker/login-action@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -33,6 +34,9 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ github.actor }}/airboo/shared-models
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
       
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
