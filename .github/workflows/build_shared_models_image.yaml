@@ -7,8 +7,8 @@ on:
       - main
       - release/release
     tags:
-      - v1.*
-      - v0.*
+      - v1*
+      - v0*
     paths:
       - "services/shared_models/*"
 
