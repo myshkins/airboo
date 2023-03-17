@@ -35,6 +35,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ github.actor }}/airboo/shared-models
           tags: |
+            type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
       
       - name: Build and push Docker image
