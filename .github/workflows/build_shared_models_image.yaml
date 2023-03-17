@@ -38,6 +38,9 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ github.actor }}/airboo/shared-models
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
       
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
