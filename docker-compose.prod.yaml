@@ -11,7 +11,7 @@ services:
   api:
     container_name: air-api
     user: 1000:1000
-    image: kboiiz/air-quality-api:latest
+    image: ghcr.io/myshkins/airboo/api:latest
     command: ./startup.sh
     ports:
       - 8100:8100
@@ -21,17 +21,14 @@ services:
         condition: service_healthy
 
   app:
-    profiles: ["air_app", "full", "deploy", "test"]
     container_name: app
     user: 1000:1000
-    build: ./services/frontend
+    image: ghcr.io/myshkins/airboo/app:latest
     environment:
       - NODE_ENV=production
     command: node serveApp.js
     ports:
       - 9000:9000
-    volumes:
-      - ./services/frontend/:/app
     depends_on:
       postgres:
         condition: service_healthy
@@ -65,7 +62,49 @@ services:
       retries: 50
     restart: always
 
+  airflow-webserver:
+    image: ghcr.io/myshkins/airboo/airflow:latest
+    command: webserver
+    <<: *airflow-common
+    ports:
+      - 8080:8080
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    image: ghcr.io/myshkins/airboo/airflow:latest
+    <<: *airflow-common
+    command: scheduler
+    restart: always
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-worker:
+    image: ghcr.io/myshkins/airboo/airflow:latest
+    <<: *airflow-common
+    command: celery worker
+    restart: always
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-init:
+    image: ghcr.io/myshkins/airboo/airflow:latest
+    <<: *airflow-common
+    command: version
+    environment:
+      _AIRFLOW_DB_UPGRADE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+
 volumes:
   postgres-db-volume:
-  airflow_dags:
-  airflow_logs:

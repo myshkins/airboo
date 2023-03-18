@@ -2,6 +2,8 @@ name: build-push-deploy
 run-name: ${{ github.actor }} is running deploy
 on:
   push:
+    tags:
+      - v*
     branches:
       - main
 
@@ -40,16 +42,48 @@ jobs:
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
- 
-      - name: Build the images and push to ghrc.io
-        run: docker compose --profile pushable build --push 
-      - name: Create SSH key on the runner
-        run: |
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-      - name: push the compose file with rsync
-        run: rsync -av ./docker-compose.prod.yaml {{ secrets.VPS_USER }}@{{ secrets.IPADDRESS }}:~/air-quality
-      - name: SSH and compose it up!
-        run: |
-          ssh -t {{ secrets.VPS_USER }}@{{ secrets.IPADDRESS }} "cd ~/air-quality && docker compose down && docker compose up -d"
+
+      - name: Build and push airboo/api
+        uses: docker/build-push-action@v4
+        with:
+          context: services/api
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: /airboo/api
+      
+      - name: Build and push airboo/app
+        uses: docker/build-push-action@v4
+        with:
+          context: services/frontend
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: /airboo/app
+
+      - name: Build and push airboo/postgres
+        uses: docker/build-push-action@v4
+        with:
+          context: services/postgres
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: /airboo/postgres
+
+      - name: Build and push airboo/airflow
+        uses: docker/build-push-action@v4
+        with:
+          context: services/etl
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: /airboo/airflow
+
+      # - name: Create SSH key on the runner
+      #   run: |
+      #     install -m 600 -D /dev/null ~/.ssh/id_rsa
+      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+      #     echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      # - name: push the compose file with rsync
+      #   run: rsync -av ./docker-compose.prod.yaml {{ secrets.VPS_USER }}@{{ secrets.IPADDRESS }}:~/air-quality
+
+      # - name: SSH and compose it up!
+      #   run: |
+      #     ssh -t {{ secrets.VPS_USER }}@{{ secrets.IPADDRESS }} "cd ~/air-quality && docker compose down && docker compose up -d"
