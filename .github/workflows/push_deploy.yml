@@ -10,7 +10,7 @@ on:
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
-    permisions:
+    permissions:
       contents: read
       packages: write
 
