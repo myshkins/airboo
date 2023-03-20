@@ -1,7 +1,8 @@
 [flake8]
 # for compatibility with Black see 
 # https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#line-length
-max-line-length = 120
+max-line-length = 88
+extend-ignore = E203
 
 per-file-ignores =
     # unused imports used by alembic in main.py
@@ -9,3 +10,9 @@ per-file-ignores =
 
     # need to append to sys.path before importing
     ci_cd/test/test_api_unit.py: E402
+
+exclude = 
+    env
+    node_modules
+    build
+    

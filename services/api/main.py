@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import Settings
 from routers import router_readings, router_stations
 
-# Base and models imported to be picked up by Alembic
+# Base and models imported to be picked up by Alembic 
 from shared_models import Base
 from shared_models import readings_airnow, stations_airnow
 

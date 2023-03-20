@@ -3,7 +3,6 @@ import math
 import pandas as pd
 import pgeocode
 
-from logger import LOGGER
 from shared_models.readings_airnow import ReadingsAirnow
 from shared_models.pydantic_models import Location, PollutantEnum, TimeEnum
 from sqlalchemy import select, text
@@ -27,7 +26,15 @@ def get_nearby_stations(zipcode: str, db: Session) -> list:
         return 1
     stmt = text(
         """
-        SELECT station_id, station_name, agency_name, status, latitude, longitude, elevation, country
+        SELECT
+            station_id,
+            station_name,
+            agency_name,
+            status,
+            latitude,
+            longitude,
+            elevation,
+            country
         FROM stations_airnow
         WHERE station_id IN (select station_id FROM readings_airnow)
         ORDER BY location_coord <-> 'SRID=4326;POINT(:y :x)'::geometry
@@ -44,7 +51,15 @@ def get_closest_station(zipcode: str, db: Session):
     loc = zipcode_to_latlong(zipcode)
     stmt = text(
         """
-        SELECT station_id, station_name, agency_name, status, latitude, longitude, elevation, country
+        SELECT
+            station_id,
+            station_name,
+            agency_name,
+            status,
+            latitude,
+            longitude,
+            elevation,
+            country
         FROM stations_airnow
         WHERE station_id IN (select station_id FROM readings_airnow)
         ORDER BY location_coord <-> 'SRID=4326;POINT(:y :x)'::geometry
@@ -56,7 +71,9 @@ def get_closest_station(zipcode: str, db: Session):
 
 
 # TODO: remove pollutant parameter?
-def get_data(ids: list[str], db: Session, period: TimeEnum, pollutants: list[PollutantEnum]) -> list[dict]:
+def get_data(
+    ids: list[str], db: Session, period: TimeEnum, pollutants: list[PollutantEnum]
+) -> list[dict]:
     """returns data for given station_ids, time period, and pollutants"""
     response = []
     with db.connection() as conn:

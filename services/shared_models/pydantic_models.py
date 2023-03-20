@@ -25,7 +25,8 @@ class TimeEnum(str, Enum):
     all_time = "all_time"
 
     def letter(self):
-        # use that chart.js (https://www.npmjs.com/package/chartjs-plugin-downsample) plugin if all_time selected?
+        # use that chart.js (https://www.npmjs.com/package/chartjs-plugin-downsample)
+        # plugin if all_time selected?
         code_dict = {
             "twelve_hr": "H",
             "twenty_four_hr": "H",

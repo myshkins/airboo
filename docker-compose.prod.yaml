@@ -10,7 +10,8 @@ x-airflow-common:
 services:
   api:
     container_name: air-api
-    image: kboiiz/air-quality-api:latest
+    user: 1000:1000
+    image: ghcr.io/myshkins/airboo/api:latest
     command: ./startup.sh
     ports:
       - 8100:8100
@@ -19,17 +20,15 @@ services:
       postgres:
         condition: service_healthy
 
-  app:
-    profiles: ["air_app", "full", "deploy", "test"]
-    container_name: app
-    build: ./services/frontend
+  frontend:
+    container_name: frontend
+    user: 1000:1000
+    image: ghcr.io/myshkins/airboo/frontend:latest
     environment:
       - NODE_ENV=production
     command: node serveApp.js
     ports:
       - 9000:9000
-    volumes:
-      - ./services/frontend/:/app
     depends_on:
       postgres:
         condition: service_healthy
@@ -53,6 +52,7 @@ services:
 
   redis:
     image: redis:latest
+    user: 1000:1000
     expose:
       - 6379
     healthcheck:
@@ -63,7 +63,7 @@ services:
     restart: always
 
   airflow-webserver:
-    image: kboiiz/air-quality-airflow:latest
+    image: ghcr.io/myshkins/airboo/airflow:latest
     command: webserver
     <<: *airflow-common
     ports:
@@ -79,7 +79,7 @@ services:
         condition: service_completed_successfully
 
   airflow-scheduler:
-    image: kboiiz/air-quality-airflow:latest
+    image: ghcr.io/myshkins/airboo/airflow:latest
     <<: *airflow-common
     command: scheduler
     restart: always
@@ -88,7 +88,7 @@ services:
         condition: service_completed_successfully
 
   airflow-worker:
-    image: kboiiz/air-quality-airflow:latest
+    image: ghcr.io/myshkins/airboo/airflow:latest
     <<: *airflow-common
     command: celery worker
     restart: always
@@ -97,7 +97,7 @@ services:
         condition: service_completed_successfully
 
   airflow-init:
-    image: kboiiz/air-quality-airflow:latest
+    image: ghcr.io/myshkins/airboo/airflow:latest
     <<: *airflow-common
     command: version
     environment:
@@ -108,5 +108,3 @@ services:
 
 volumes:
   postgres-db-volume:
-  airflow_dags:
-  airflow_logs:

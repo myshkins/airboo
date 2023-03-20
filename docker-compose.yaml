@@ -11,6 +11,7 @@ x-airflow-common:
 services:
   api:
     profiles: ["api", "full", "debug", "pushable", "test"]
+    user: 1000:1000
     container_name: air_api
     build: ./services/api
     command: ./startup.sh
@@ -24,8 +25,9 @@ services:
       postgres:
         condition: service_healthy
 
-  app:
+  frontend:
     profiles: ["air_app", "full", "debug", "pushable", "test"]
+    user: 1000:1000
     container_name: app
     build: ./services/frontend
     environment:
@@ -34,7 +36,7 @@ services:
     ports:
       - 9000:9000
     volumes:
-      - ./services/frontend/:/app
+      - ./services/frontend/:/frontend
     depends_on:
       postgres:
         condition: service_healthy
@@ -59,6 +61,7 @@ services:
 
   redis:
     profiles: ["airflow", "full", "debug", "pushable"]
+    user: 1000:1000
     image: redis:latest
     expose:
       - 6379
@@ -160,4 +163,3 @@ services:
 
 volumes:
   postgres-db-volume:
-  airflow_logs:
