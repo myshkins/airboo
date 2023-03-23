@@ -156,7 +156,6 @@ const Home = () => {
     return dates;
   };
 
-
   /**
    * Hook for grabbing aqi data for selected stations
    */
@@ -166,8 +165,11 @@ const Home = () => {
         const data = await getReadings(idsToGraph, timePeriod);
         const dates = getDates(data);
         const aqiData = data.map((pollut) => ({
-          datasetName: getStationName(pollut["station_id"]) + " : " + pollut["pollutant"],
-          data: pollut["readings"].map((reading) => reading[`${pollut["pollutant"]}_aqi`]),
+          datasetName:
+            getStationName(pollut["station_id"]) + " : " + pollut["pollutant"],
+          data: pollut["readings"].map(
+            (reading) => reading[`${pollut["pollutant"]}_aqi`]
+          ),
         }));
 
         setDates(dates);
@@ -212,9 +214,7 @@ const Home = () => {
    */
   useEffect(() => {
     const findStations = async () => {
-      const response = await fetch(`${config.urls.STATIONS_URL}${zipcode}`, {
-        mode: "cors",
-      });
+      const response = await fetch(`${config.urls.STATIONS_URL}${zipcode}`);
 
       const data = await response.json();
       const tempArr = [...data, ...stations];

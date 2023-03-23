@@ -8,8 +8,10 @@ FROM apache/airflow:2.5.1
 
 WORKDIR /opt/airflow
 
-COPY --from=0 /shared_models/ ./shared_models
+COPY --chown=1000: . .
 
-COPY requirements.txt requirements.txt
+COPY --chown=1000: --from=0 /shared_models/ dags/shared_models
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
+
+USER 1000

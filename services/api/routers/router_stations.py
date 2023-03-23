@@ -7,7 +7,7 @@ from .crud import crud
 from shared_models.stations_airnow import StationsAirnowPydantic
 
 
-router = APIRouter(prefix="/stations", tags=["stations"])
+router = APIRouter(prefix="/api/stations", tags=["stations"])
 
 
 @router.get("/all-nearby/", response_model=list[StationsAirnowPydantic])

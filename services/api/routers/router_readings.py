@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from .crud import crud
 
 router = APIRouter(
-    prefix="/air-readings",
+    prefix="/api/air-readings",
     tags=["air-readings"],
 )
 

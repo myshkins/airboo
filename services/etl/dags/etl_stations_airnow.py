@@ -13,7 +13,7 @@ PATH = "/opt/airflow/dags/"
 
 @dag(
     dag_id="etl_stations_airnow",
-    schedule=timedelta(hours=12),
+    schedule=timedelta(hours=1),
     start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     catchup=False,
     dagrun_timeout=pendulum.duration(minutes=5),

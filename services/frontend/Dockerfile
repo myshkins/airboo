@@ -4,6 +4,12 @@ FROM node:19-alpine
 
 WORKDIR /frontend
 
-COPY build .
+RUN npm install express --save
+
+COPY --chown=1000: build build
+
+COPY --chown=1000: serveApp.js .
+
+USER 1000
 
 ENV NODE_ENV=production

@@ -2,7 +2,7 @@
 
 FROM python:3.10.8-slim-buster
 
-RUN mkdir -p /home/github && addgroup github && useradd -d /home/github -g github github && chown github:github /home/github
+RUN useradd -rm -d /home/github -s /bin/bash -u 1000 github
 
 USER github
 
@@ -10,7 +10,7 @@ WORKDIR /home/github
 
 ENV PATH=/home/github/.local/bin:$PATH
 
-COPY ci_cd/test/requirements.txt .
+COPY requirements.txt .
 
 RUN pip install --upgrade pip
 

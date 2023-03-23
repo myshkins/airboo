@@ -4,6 +4,8 @@ FROM apache/airflow:2.5.1
 
 WORKDIR /opt/airflow
 
-COPY requirements.txt requirements.txt
+COPY --chown=1000: requirements.txt requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
+
+USER 1000
