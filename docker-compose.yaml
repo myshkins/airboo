@@ -79,10 +79,9 @@ services:
   redis:
     container_name: airboo_redis
     profiles: ["airflow", "full", "push"]
-    image: redis:7.0
+    build: ./services/redis
     expose:
       - 6379
-    # command: redis-server --save "" --appendonly no
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s

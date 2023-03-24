@@ -61,7 +61,6 @@ services:
   redis:
     container_name: airboo_redis
     image: redis:7.0
-    user: 1000:1000
     expose:
       - 6379
     healthcheck:
