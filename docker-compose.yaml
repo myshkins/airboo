@@ -79,7 +79,8 @@ services:
   redis:
     container_name: airboo_redis
     profiles: ["airflow", "full", "push"]
-    build: ./services/redis
+    image: redis:7.0
+    # build: ./services/redis
     expose:
       - 6379
     healthcheck:

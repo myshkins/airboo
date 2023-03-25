@@ -302,7 +302,6 @@ const Home = () => {
 
       <HomeGraph dates={dates} aqiData={aqiData} />
 
-      <HomeSideBarRight />
     </div>
   );
 };

@@ -2,7 +2,6 @@
 
 FROM ghcr.io/myshkins/airboo/shared-models:latest
 
-
 WORKDIR /
 
 FROM python:3.10.8-slim-buster
