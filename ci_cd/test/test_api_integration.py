@@ -40,7 +40,7 @@ def test_health_check():
     WHEN    health check endpoint is called with GET method
     THEN    response with status 200 and body OK is returned
     """
-    response = requests.get("http://air_api:8100/health-check")
+    response = requests.get("http://airboo_api:10100/health-check")
     assert response.status_code == 200
     assert response.json() == {"message": "OK"}
 
@@ -55,7 +55,7 @@ def test_pos_get_nearby_stations(zipcode):
             StationsAirnowPydantic model
     """
     response = requests.get(
-        f"http://air_api:8100/stations/all-nearby/?zipcode={zipcode}"
+        f"http://airboo_api:10100/api/stations/all-nearby/?zipcode={zipcode}"
     )
     assert response.status_code == 200
     station_list = response.json()
@@ -71,7 +71,7 @@ def test_neg_get_nearby_stations(zipcode):
     THEN    response body is 400 and response body is error message
     """
     response = requests.get(
-        f"http://air_api:8100/stations/all-nearby/?zipcode={zipcode}"
+        f"http://airboo_api:10100/api/stations/all-nearby/?zipcode={zipcode}"
     )
     assert response.status_code == 400
     assert response.json() == {"detail": "invalid zipcode"}
@@ -89,7 +89,7 @@ def test_pos_get_readings_from_ids(station_ids, period, length):
     id_lst = [f"?ids={id}&" for id in station_ids]
     id_str = "".join(id_lst)
     query = id_str + f"period={period}"
-    response = requests.get(f"http://air_api:8100/air-readings/from-ids/{query}")
+    response = requests.get(f"http://airboo_api:10100/api/air-readings/from-ids/{query}")
     assert response.status_code == 200
     assert len(response.json()[0]["readings"]) == length
 

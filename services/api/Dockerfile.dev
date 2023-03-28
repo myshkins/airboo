@@ -2,14 +2,10 @@
 
 FROM python:3.10.8-slim-buster
 
-RUN useradd -rm -d /home/api -s /bin/bash -u 1000 iceking
-
 WORKDIR /home/api
 
-COPY --chown=1000: requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-COPY --chown=1000: . .
-
-USER 1000
+COPY . .

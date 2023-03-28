@@ -2,8 +2,6 @@
 
 FROM node:19-alpine
 
-ENV NODE_ENV=production
+WORKDIR /frontend
 
-WORKDIR /app
-
-USER 1000
+# RUN npm install express --save
