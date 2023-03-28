@@ -5,7 +5,7 @@ x-airflow-common:
   build:
     context: services/etl
     dockerfile: Dockerfile.dev
-  env_file: ./.env
+  env_file: ./.env.dev
   volumes:
     - ./services/etl/dags:/opt/airflow/dags
     - ./services/etl/logs:/opt/airflow/logs
@@ -36,7 +36,7 @@ services:
     volumes:
       - ./services/api:/api
       - ./services/shared_models:/api/shared_models
-    env_file: ./.env
+    env_file: ./.env.dev
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,8 +46,6 @@ services:
     user: 1000:1000
     container_name: airboo_frontend
     build: ./services/frontend
-    environment:
-      - NODE_ENV=development
     command: node serveApp.js
     ports:
       - 9000:9000
