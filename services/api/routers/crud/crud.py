@@ -70,7 +70,6 @@ def get_closest_station(zipcode: str, db: Session):
     return result
 
 
-# TODO: remove pollutant parameter?
 def get_data(
     ids: list[str], db: Session, period: TimeEnum, pollutants: list[PollutantEnum]
 ) -> list[dict]:

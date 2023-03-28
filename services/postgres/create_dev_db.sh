@@ -10,4 +10,5 @@ psql -v ON_ERROR_STOP=1 <<-EOSQL
 EOSQL
 
 echo " Populating database air_quality"
-psql -v ON_ERROR_STOP=1 air_quality < /docker-entrypoint-initdb.d/air_quality_dev_dump.sql
+# psql -v ON_ERROR_STOP=1 air_quality < /docker-entrypoint-initdb.d/air_quality_dev_dump.sql
+psql -v ON_ERROR_STOP=1 air_quality < /docker-entrypoint-initdb.d/new_dump.sql

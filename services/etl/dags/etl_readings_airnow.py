@@ -48,7 +48,7 @@ def etl_airnow_readings():
 
     @task
     def load_temp():
-        """loads everything to temp, data is very normalized here"""
+        """loads everything to temp"""
         file_path = "/opt/airflow/dags/files/raw_readings_airnow.csv"
         with get_db() as db, open(file_path, mode="r") as file:
             load_stmt = read_sql("dags/sql/load_readings_airnow_temp.sql")
