@@ -15,7 +15,6 @@ import TimePeriod from "../components/util/timePeriodEnum";
 
 import "./Home.css";
 
-
 const Home = () => {
   const [aqiData, setAqiData] = useState([]);
   const [dates, setDates] = useState([]);
@@ -32,7 +31,7 @@ const Home = () => {
   });
   const [pollutantDropVisible, setPollutantDropVisible] = useState(true);
   const [tempStations, setTempStations] = useState(null);
-  const [tempTempStations, setTempTempStation] = useState(null);
+  const [tempTempStations, setTempTempStations] = useState(null);
   const [timeDropVisible, setTimeDropVisible] = useState(true);
   const [timePeriod, setTimePeriod] = useState(new TimePeriod("12hr"));
   const [stations, setStations] = useState([
@@ -133,33 +132,38 @@ const Home = () => {
     setTempStations(updatedTempStations);
   };
 
-  const makeQuery = (ids, period) => {
-    let qParams = ids.reduce((prev, id) => prev + `ids=${id}&`, "?");
-    let timeParam = `period=${period.query()}`;
-    const truePollutants = Object.entries(pollutants).reduce(
-      (prev, [key, value]) => {
-        if (value) {
-          prev.push(key);
-        }
-        return prev;
-      },
-      []
-    );
-
+  const makeQuery = (ids, period = 0, pollutants = "") => {
+    let qParams = ids.reduce((prev, id) => prev + `ids=${id}&`, "?").slice(0, -1)
+    let timeParam = "";
+    if (period !== 0) {
+      timeParam = `&period=${period.query()}`;
+    }
+    let truePollutants = [];
+    if (pollutants !== "") {
+      truePollutants = Object.entries(pollutants).reduce(
+        (prev, [key, value]) => {
+          if (value) {
+            prev.push(key);
+          }
+          return prev;
+        },
+        []
+      );
+    }
     const pollutantsParam =
       truePollutants.length === 0
         ? ""
         : `&pollutants=${truePollutants.join("&pollutants=")}`;
-
+    console.log(`pollutantsParam: ${pollutantsParam}`)
     qParams = qParams + timeParam + pollutantsParam;
+    console.log(qParams)
     return qParams;
   };
 
-  const getReadings = async (ids, period) => {
-    let params = makeQuery(ids, period);
+  const getReadings = async (ids, period, pollutants) => {
+    const params = makeQuery(ids, period, pollutants);
     const response = await fetch(`${config.urls.READINGS_URL}${params}`);
     const data = await response.json();
-
     return data;
   };
 
@@ -179,10 +183,11 @@ const Home = () => {
   /**
    * Hook for grabbing aqi data for selected stations
    */
+
   useEffect(() => {
     if (idsToGraph.length > 0) {
       const handleReadingDataChange = async () => {
-        const data = await getReadings(idsToGraph, timePeriod);
+        const data = await getReadings(idsToGraph, timePeriod, pollutants);
         const dates = getDates(data);
         const aqiData = data.map((pollut) => ({
           datasetName:
@@ -200,42 +205,33 @@ const Home = () => {
   }, [idsToGraph]);
 
   /**
-   * Hook for getting the pollutants that each station has available to plot
-   * sorry for the mess
-   */
-  useEffect(() => {
-    const getTempStationPollutants = async () => {
-      if (!tempTempStations) return;
-      else {
-        const ids = tempTempStations.map((stn) => stn["station_id"]);
-        const data = await getReadings(ids, new TimePeriod("12hr"));
-        const newTemps = tempTempStations.map((stn) => {
-          const dReadings = data.filter((dstn) => {
-            return dstn["station_id"] === stn["station_id"];
-          });
-          const dpollutants = dReadings[0]["readings"][0]
-            ? Object.entries(dReadings[0]["readings"][0])
-                .filter(([key, value]) => key.slice(-3) === "aqi" && value)
-                .map(([key, value]) => key)
-            : null;
-          stn["pollutants"] = dpollutants;
-          return stn;
-        });
-        setTempStations(newTemps);
-      }
-    };
-    getTempStationPollutants();
-  }, [tempTempStations]);
-
-  /**
    * Hook for finding stations near zipcode, runs on button click from
    * editStationWindow. getTempStationPollutants will run after this hook
    * updates tempTempStations.
    */
   useEffect(() => {
+    const getTempStationPollutants = async () => {
+      if (!tempTempStations) return
+      const ids = tempTempStations.map((stn) => stn["station_id"]);
+      const params = makeQuery(ids)
+      const response = await fetch(`${config.urls.POLLUTANTS_URL}${params}`)
+      const tempPollutants = await response.json()
+      let ttStations = [...tempTempStations ];
+      ttStations.forEach((stn) => {
+        stn["checked"] = false;
+        const stnPollutants = tempPollutants["pollutants"].find(
+          (s) => s["station_id"] === stn["station_id"]
+        );
+        stn["pollutants"] = stnPollutants["pollutants"];
+      });
+      setTempStations(ttStations)
+    };
+    getTempStationPollutants()
+  }, [tempTempStations]);
+
+  useEffect(() => {
     const findStations = async () => {
       const response = await fetch(`${config.urls.STATIONS_URL}${zipcode}`);
-
       const data = await response.json();
       const tempArr = [...data, ...stations];
       const tempArrTwo = tempArr.filter(
@@ -243,9 +239,7 @@ const Home = () => {
           index ===
           arr.findIndex((item) => item["station_id"] === value["station_id"])
       );
-      tempArrTwo.forEach((stn) => (stn["checked"] = false));
-
-      setTempTempStation(tempArrTwo);
+      setTempTempStations(tempArrTwo);
     };
     findStations();
   }, [zipQuery]);
@@ -257,8 +251,7 @@ const Home = () => {
         contentVisible={leftSideBarVisible}
       >
         {editStationPopupVisible ? (
-          <Foco
-            onClickOutside={toggleEditStationPopup}>
+          <Foco onClickOutside={toggleEditStationPopup}>
             <EditStationsWindow
               zipcode={zipcode}
               tempStations={tempStations}
