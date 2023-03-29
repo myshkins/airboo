@@ -1,5 +1,5 @@
 import HomeSideBarLeft from "../components/HomeSideBarLeft";
-import HomeSideBarRight from "../components/HomeSideBarRight";
+// import HomeSideBarRight from "../components/HomeSideBarRight";
 import HomeGraph from "../components/HomeGraph";
 import "./Home.css";
 import SideDropDown from "../components/SideDropDown";
@@ -131,7 +131,21 @@ const Home = () => {
   const makeQuery = (ids, period) => {
     let qParams = ids.reduce((prev, id) => prev + `ids=${id}&`, "?");
     let timeParam = `period=${period.query()}`;
-    qParams = qParams + timeParam;
+    const truePollutants = Object.entries(pollutants).reduce(
+      (prev, [key, value]) => {
+        if (value) {
+          prev.push(key);
+        }
+        return prev;
+      },
+      []
+    );
+
+    const pollutantsParam = `&pollutants=${truePollutants.join(
+      "&pollutants="
+    )}`;
+
+    qParams = qParams + timeParam + pollutantsParam
     return qParams;
   };
 
@@ -301,7 +315,6 @@ const Home = () => {
       </HomeSideBarLeft>
 
       <HomeGraph dates={dates} aqiData={aqiData} />
-
     </div>
   );
 };
