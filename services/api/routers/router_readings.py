@@ -21,11 +21,6 @@ def get_readings_from_ids(
     pollutants: list[PollutantEnum] = Query(
         [
             PollutantEnum("pm25"),
-            PollutantEnum("pm10"),
-            PollutantEnum("o3"),
-            PollutantEnum("co"),
-            PollutantEnum("no2"),
-            PollutantEnum("so2"),
         ]
     ),
 ):

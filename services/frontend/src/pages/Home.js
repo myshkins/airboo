@@ -1,3 +1,4 @@
+import Foco from "react-foco";
 import HomeSideBarLeft from "../components/HomeSideBarLeft";
 // import HomeSideBarRight from "../components/HomeSideBarRight";
 import HomeGraph from "../components/HomeGraph";
@@ -141,11 +142,12 @@ const Home = () => {
       []
     );
 
-    const pollutantsParam = `&pollutants=${truePollutants.join(
-      "&pollutants="
-    )}`;
+    const pollutantsParam =
+      truePollutants.length === 0
+        ? ""
+        : `&pollutants=${truePollutants.join("&pollutants=")}`;
 
-    qParams = qParams + timeParam + pollutantsParam
+    qParams = qParams + timeParam + pollutantsParam;
     return qParams;
   };
 
@@ -251,14 +253,17 @@ const Home = () => {
         contentVisible={leftSideBarVisible}
       >
         {editStationPopupVisible ? (
-          <EditStationsWindow
-            zipcode={zipcode}
-            tempStations={tempStations}
-            updateStations={updateStations}
-            handleTempCheckChange={handleTempCheckChange}
-            handleZipcodeChange={handleZipcodeChange}
-            handleZipQueryChange={handleZipQueryChange}
-          />
+          <Foco
+            onClickOutside={toggleEditStationPopup}>
+            <EditStationsWindow
+              zipcode={zipcode}
+              tempStations={tempStations}
+              updateStations={updateStations}
+              handleTempCheckChange={handleTempCheckChange}
+              handleZipcodeChange={handleZipcodeChange}
+              handleZipQueryChange={handleZipQueryChange}
+            />
+          </Foco>
         ) : null}
         <SideDropDown
           name={"stations"}
