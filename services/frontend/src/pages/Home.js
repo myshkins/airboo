@@ -1,16 +1,20 @@
 import Foco from "react-foco";
+import React, { useEffect, useState } from "react";
+
+import { config } from "../Constants";
+import EditStationsWindow from "../components/EditStationsWindow";
+import getReadings from "../components/hooks/GetReadings";
+import HomeButton from "../components/HomeButton";
+import HomeGraph from "../components/HomeGraph";
 import HomeSideBarLeft from "../components/HomeSideBarLeft";
 // import HomeSideBarRight from "../components/HomeSideBarRight";
-import HomeGraph from "../components/HomeGraph";
-import "./Home.css";
 import SideDropDown from "../components/SideDropDown";
 import SideDropDownCheckbox from "../components/SideDropDownCheckbox";
 import SideDropDownRadio from "../components/SideDropDownRadio";
-import EditStationsWindow from "../components/EditStationsWindow";
-import React, { useEffect, useState } from "react";
-import HomeButton from "../components/HomeButton";
-import { config } from "../Constants";
 import TimePeriod from "../components/util/timePeriodEnum";
+
+import "./Home.css";
+
 
 const Home = () => {
   const [aqiData, setAqiData] = useState([]);

@@ -89,7 +89,9 @@ def test_pos_get_readings_from_ids(station_ids, period, length):
     id_lst = [f"?ids={id}&" for id in station_ids]
     id_str = "".join(id_lst)
     query = id_str + f"period={period}"
-    response = requests.get(f"http://airboo_api:10100/api/air-readings/from-ids/{query}")
+    response = requests.get(
+        f"http://airboo_api:10100/api/air-readings/from-ids/{query}"
+    )
     assert response.status_code == 200
     assert len(response.json()[0]["readings"]) == length
 
