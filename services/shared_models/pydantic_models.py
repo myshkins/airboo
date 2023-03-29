@@ -72,3 +72,12 @@ class PollutantEnum(str, Enum):
             "so2": ReadingsAirnow.so2_aqi,
         }
         return col_dict[self.value]
+
+
+class PollutantStationList(BaseModel):
+    station_id: str
+    pollutants: list[PollutantEnum]
+
+
+class PollutantResponse(BaseModel):
+    pollutants: list[PollutantStationList]

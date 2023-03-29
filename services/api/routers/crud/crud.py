@@ -1,8 +1,10 @@
 """crud functions"""
+from datetime import timedelta, datetime as dt
 import math
 import pandas as pd
 import pgeocode
 
+from logger import LOGGER
 from shared_models.readings_airnow import ReadingsAirnow
 from shared_models.pydantic_models import Location, PollutantEnum, TimeEnum
 from sqlalchemy import select, text
@@ -97,4 +99,35 @@ def get_data(
                     continue
                 j = df.to_dict(orient="records")
                 response.append({"station_id": id, "pollutant": pol, "readings": j})
+    return response
+
+
+def get_not_null_pollutants(df: pd.DataFrame) -> list:
+    not_null_pollutants = []
+    plt_list = ["pm25_aqi", "pm10_aqi", "o3_aqi", "co_aqi", "no2_aqi", "so2_aqi"]
+    for col in df.columns:
+        if df[col][0] is not None and col in plt_list:
+            p = col.removesuffix("_aqi")
+            not_null_pollutants.append(p)
+    return not_null_pollutants
+
+
+def get_pollutants(ids: list[str], db: Session) -> list:
+    """returns pollutants for given station_ids"""
+    response = []
+    with db.connection() as conn:
+        for id in ids:
+            stmt = (
+                select(ReadingsAirnow)
+                .where(ReadingsAirnow.station_id == id)
+                .where(
+                    ReadingsAirnow.reading_datetime > (dt.now() - timedelta(hours=2))
+                )
+                .order_by(ReadingsAirnow.reading_datetime)
+            )
+            df = pd.read_sql_query(stmt, conn)
+            if df.empty or len(df.columns) == 1:
+                continue
+            not_null_pollutants = get_not_null_pollutants(df)
+            response.append({"station_id": id, "pollutants": not_null_pollutants})
     return response

@@ -103,3 +103,21 @@ def test_neg_get_readings_from_ids():
     THEN    response status is 400 and response body is error message
     """
     pass
+
+
+def test_get_pollutants(station_ids):
+    """
+    given   valid station ids
+    when    get_pollutants endpoint is called
+    then    response status is 200 and
+            response body is list of pollutants
+    """
+    id_lst = [f"?ids={id}&" for id in station_ids]
+    id_str = "".join(id_lst)
+    query = id_str.removesuffix("&")
+    response = requests.get(
+        f"http://airboo_api:10100/api/air-readings/from-ids/{query}"
+    )
+    pollutants = response.json()
+    assert response.status_code == 200
+    assert 1 >= len(pollutants) <= 6

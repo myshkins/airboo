@@ -13,7 +13,7 @@ const AddStationCheckbox = (props) => {
       {props.pollutants ? (
         <ul className={"add-station-pollutant"}>
           {props.pollutants.map((pollutant) => (
-            <li key={pollutant} className={"add-station-pollutant"}>{pollutant.slice(0, -4)}</li>
+            <li key={pollutant} className={"add-station-pollutant"}>{pollutant}</li>
           ))}
         </ul>
       ) : null}
