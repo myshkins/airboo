@@ -22,10 +22,12 @@ Chart.register(
   Colors,
 );
 
+Chart.defaults.color = '#A5A1AC'
+// Chart.defaults.elements.line.cubicInterpolationMode = 'default'
 const HomeGraph = (props) => {
   const options = {
     responsive: true,
-    maintainAspectRatio: true,
+    maintainAspectRatio: false,
     plugins: {
       colors: {
         forceOverride: true
@@ -38,6 +40,12 @@ const HomeGraph = (props) => {
         text: "aqi data",
       },
     },
+    scales: {
+      y: {
+        min: 0,
+        max: 80
+      }
+    }
   };
   const aqiData = props.aqiData;
   const labels = props.dates;

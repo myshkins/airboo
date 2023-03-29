@@ -154,9 +154,7 @@ const Home = () => {
       truePollutants.length === 0
         ? ""
         : `&pollutants=${truePollutants.join("&pollutants=")}`;
-    console.log(`pollutantsParam: ${pollutantsParam}`)
     qParams = qParams + timeParam + pollutantsParam;
-    console.log(qParams)
     return qParams;
   };
 
