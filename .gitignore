@@ -1,6 +1,7 @@
 #logs
 logs/
 node_modules
+services/frontend/build
 services/etl/logs/scheduler/latest
 
 .vscode
