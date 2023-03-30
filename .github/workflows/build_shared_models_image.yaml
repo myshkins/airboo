@@ -2,9 +2,9 @@ name: build-shared-models-image
 run-name: ${{ github.actor }} is running shared-model image build
 on:
   push:
-    # tags:
-    #   - v0*
-    #   - v1*
+    tags:
+      - v0*
+      - v1*
     paths:
       - "services/shared_models/*"
   pull_request:
