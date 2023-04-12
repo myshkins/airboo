@@ -31,7 +31,7 @@ class TimeEnum(str, Enum):
             "twelve_hr": "H",
             "twenty_four_hr": "H",
             "forty_eight_hr": "H",
-            "all_time": "H",
+            "all_time": "D",
             "ten_day": "10H",
             "one_month": "M",
             "one_year": "A",
