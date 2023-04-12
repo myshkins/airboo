@@ -87,7 +87,7 @@ def get_data(
                     .where(ReadingsAirnow.reading_datetime > period.start())
                     .order_by(ReadingsAirnow.reading_datetime)
                 )
-                df = pd.read_sql_query(stmt, conn)
+                df = pd.read_sql_query(stmt, conn, parse_dates="reading_datetime")
                 df = (
                     df.resample(period.letter(), on="reading_datetime")
                     .mean(numeric_only=True)

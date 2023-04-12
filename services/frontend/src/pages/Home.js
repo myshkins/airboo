@@ -133,7 +133,9 @@ const Home = () => {
   };
 
   const makeQuery = (ids, period = 0, pollutants = "") => {
-    let qParams = ids.reduce((prev, id) => prev + `ids=${id}&`, "?").slice(0, -1)
+    let qParams = ids
+      .reduce((prev, id) => prev + `ids=${id}&`, "?")
+      .slice(0, -1);
     let timeParam = "";
     if (period !== 0) {
       timeParam = `&period=${period.query()}`;
@@ -209,22 +211,30 @@ const Home = () => {
    */
   useEffect(() => {
     const getTempStationPollutants = async () => {
-      if (!tempTempStations) return
+      if (!tempTempStations) return;
       const ids = tempTempStations.map((stn) => stn["station_id"]);
-      const params = makeQuery(ids)
-      const response = await fetch(`${config.urls.POLLUTANTS_URL}${params}`)
-      const tempPollutants = await response.json()
-      let ttStations = [...tempTempStations ];
+      const params = makeQuery(ids);
+      const response = await fetch(`${config.urls.POLLUTANTS_URL}${params}`);
+      const tempPollutants = await response.json();
+      let ttStations = [...tempTempStations];
       ttStations.forEach((stn) => {
         stn["checked"] = false;
-        const stnPollutants = tempPollutants["pollutants"].find(
-          (s) => s["station_id"] === stn["station_id"]
-        );
-        stn["pollutants"] = stnPollutants["pollutants"];
+        try {
+          const stnPollutants = tempPollutants["pollutants"].find(
+            (s) => s["station_id"] === stn["station_id"]
+          );
+          stn["pollutants"] = stnPollutants["pollutants"];
+        } catch (e) {
+          if (e instanceof TypeError) {
+            stn["pollutants"] = [];
+          } else {
+            throw e;
+          }
+        }
       });
-      setTempStations(ttStations)
+      setTempStations(ttStations);
     };
-    getTempStationPollutants()
+    getTempStationPollutants();
   }, [tempTempStations]);
 
   useEffect(() => {
