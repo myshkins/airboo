@@ -2,7 +2,7 @@ const prod = {
   urls: {
     STATIONS_URL: "https://airboo.ak0.io/api/stations/all-nearby/?zipcode=",
     READINGS_URL: "https://airboo.ak0.io/api/air-readings/from-ids/",
-    POLLUTANTS_URL: "https://airboo.ak0.io/api/air-redings/pollutants/"
+    POLLUTANTS_URL: "https://airboo.ak0.io/api/air-readings/pollutants/"
   },
 };
 
