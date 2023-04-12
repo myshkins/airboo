@@ -88,15 +88,15 @@ def get_data(
                     .order_by(ReadingsAirnow.reading_datetime)
                 )
                 df = pd.read_sql_query(stmt, conn, parse_dates="reading_datetime")
+                if df.empty or len(df.columns) == 1:
+                    continue
                 df = (
                     df.resample(period.letter(), on="reading_datetime")
                     .mean(numeric_only=True)
                     .round(decimals=0)
                     .reset_index()
-                    .fillna(value=0)
+                    .fillna(method="ffill")
                 )
-                if df.empty or len(df.columns) == 1:
-                    continue
                 j = df.to_dict(orient="records")
                 response.append({"station_id": id, "pollutant": pol, "readings": j})
     return response
