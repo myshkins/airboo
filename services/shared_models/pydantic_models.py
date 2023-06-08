@@ -3,6 +3,7 @@ from datetime import timedelta
 from enum import Enum
 import os
 
+
 from pydantic import BaseModel, confloat
 from shared_models.readings_airnow import ReadingsAirnow
 
@@ -40,7 +41,7 @@ class TimeEnum(str, Enum):
 
     def start(self):
         time_zero = dt.now()
-        if os.environ["DEV_MODE"] == 1:
+        if os.environ["DEV_MODE"] == '1':
             time_zero = TESTING_START_DATE
         start_dict = {
             "twelve_hr": time_zero - timedelta(hours=13),

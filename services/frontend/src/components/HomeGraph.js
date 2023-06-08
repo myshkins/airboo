@@ -43,7 +43,7 @@ const HomeGraph = (props) => {
     scales: {
       y: {
         min: 0,
-        max: 80
+        max: 250
       }
     }
   };

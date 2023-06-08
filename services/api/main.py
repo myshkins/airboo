@@ -24,7 +24,6 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    # allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -34,7 +33,7 @@ app.include_router(router_stations.router)
 
 @app.get("/")
 def root():
-    return {"message": "ah poop"}
+    return {"message": "hewo world"}
 
 
 @app.get("/health-check")
