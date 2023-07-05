@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ $DO_MIGRATIONS == 1 ]];
+if [[ $DO_MIGRATIONS == '1' ]];
 then
     echo DO_MIGRATIONS = $DO_MIGRATIONS 
     echo performing alembic migrations
