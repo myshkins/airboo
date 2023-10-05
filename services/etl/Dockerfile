@@ -4,7 +4,7 @@ FROM ghcr.io/myshkins/airboo/shared-models:latest
 
 WORKDIR /
 
-FROM apache/airflow:2.5.1
+FROM apache/airflow:2.7.1
 
 WORKDIR /opt/airflow
 
